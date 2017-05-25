@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="Commands\CommandBase.cs" />
     <Compile Include="Commands\Package\ShowOptionPageCommand.cs" />
+    <Compile Include="Commands\Project\ReloadCommand.cs" />
     <Compile Include="Commands\Project\OpenOutputFolderCommand.cs" />
     <Compile Include="Commands\Shell\RestartElevatedCommand.cs" />
     <Compile Include="Commands\Environment\PathVariablesCommand.cs" />
@@ -91,9 +92,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\LICENSE">
-      <Link>Resources\LICENSE</Link>
-    </None>
     <None Include="app.config" />
     <None Include="Key.snk" />
     <None Include="packages.config" />
@@ -107,6 +105,10 @@
       <LastGenOutput>source.extension.resx</LastGenOutput>
     </None>
     <Content Include="Resources\Icon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="Resources\License.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>

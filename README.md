@@ -6,6 +6,8 @@ Prints out the current variables in %PATH%.
 ## Projects
 ### Open Ouput Folder
 Opens the output folders for all selected projects.
+### Reload Project
+Reloads the selected projects.
 ## Visual Studio
 ### Restart
 Restarts Visual Studio with normal privileges.

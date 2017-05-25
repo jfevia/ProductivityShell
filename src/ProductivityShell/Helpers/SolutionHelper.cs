@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using EnvDTE;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell.Interop;
 using ProductivityShell.Shell;
 
 namespace ProductivityShell.Helpers
@@ -65,6 +67,22 @@ namespace ProductivityShell.Helpers
             }
 
             return projectItems;
+        }
+
+        internal static int ReloadProject(IVsSolution solution, string projectName)
+        {
+            int hr;
+            if ((hr = solution.GetProjectOfUniqueName(projectName, out IVsHierarchy projectHierarchy)) != VSConstants.S_OK)
+            {
+                return hr;
+            }
+
+            if ((hr = solution.GetGuidOfProject(projectHierarchy, out Guid projectGuid)) != VSConstants.S_OK)
+            {
+                return hr;
+            }
+
+            return ReloadProject(solution, projectGuid);
         }
 
         /// <summary>
@@ -147,6 +165,70 @@ namespace ProductivityShell.Helpers
 
             // Otherwise return an empty array.
             return new object[0];
+        }
+
+        public static int GetGuidOfProject(IVsSolution solution, Project project, out Guid projectGuid)
+        {
+            projectGuid = default(Guid);
+
+            int hr;
+            if ((hr = solution.GetProjectOfUniqueName(project.UniqueName, out IVsHierarchy projectHierarchy)) != VSConstants.S_OK)
+            {
+                return hr;
+            }
+
+            return solution.GetGuidOfProject(projectHierarchy, out projectGuid);
+        }
+
+        public static int UnloadProject(IVsSolution solution, Project project)
+        {
+            int hr;
+            if ((hr = GetGuidOfProject(solution, project, out Guid projectGuid)) != VSConstants.S_OK)
+            {
+                return hr;
+            }
+
+            return UnloadProject((IVsSolution4) solution, projectGuid);
+        }
+
+        public static int ReloadProject(IVsSolution solution, Guid projectGuid)
+        {
+            var vsSolution4 = (IVsSolution4) solution;
+            UnloadProject(vsSolution4, projectGuid);
+
+            return LoadProject(vsSolution4, projectGuid);
+        }
+
+        public static int ReloadProject(IVsSolution solution, Project project)
+        {
+            int hr;
+            if ((hr = GetGuidOfProject(solution, project, out Guid projectGuid)) != VSConstants.S_OK)
+            {
+                return hr;
+            }
+
+            return ReloadProject(solution, projectGuid);
+        }
+
+        public static int LoadProject(IVsSolution solution, Project project)
+        {
+            int hr;
+            if ((hr = GetGuidOfProject(solution, project, out Guid projectGuid)) != VSConstants.S_OK)
+            {
+                return hr;
+            }
+
+            return LoadProject((IVsSolution4) solution, projectGuid);
+        }
+
+        public static int UnloadProject(IVsSolution4 solution, Guid projectGuid)
+        {
+            return solution.UnloadProject(ref projectGuid, (uint) _VSProjectUnloadStatus.UNLOADSTATUS_UnloadedByUser);
+        }
+
+        public static int LoadProject(IVsSolution4 solution, Guid projectGuid)
+        {
+            return solution.ReloadProject(ref projectGuid);
         }
     }
 }

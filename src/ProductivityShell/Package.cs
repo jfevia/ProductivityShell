@@ -44,6 +44,7 @@ namespace ProductivityShell
 
             // Project
             OpenOutputFolderCommand.Initialize(this);
+            ReloadCommand.Initialize(this);
 
             // Tools
             ReplaceGuidPlaceholdersCommand.Initialize(this);

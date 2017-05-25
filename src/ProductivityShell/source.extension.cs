@@ -7,12 +7,12 @@ namespace ProductivityShell
 {
     static class Vsix
     {
-        public const string Id = "ProductivityShell";
+        public const string Id = "b86685dd-7fdb-4ee5-bacc-647c4f42168d";
         public const string Name = "Productivity Shell";
         public const string Description = @"Productivity tools for Visual Studio.";
         public const string Language = "en-US";
-        public const string Version = "1.0";
+        public const string Version = "1.1";
         public const string Author = "jfevia";
-        public const string Tags = "Productivity, Command, Macros, Script, GUID, WiX, Tools, Build, Time Savers";
+        public const string Tags = "Productivity, Command, GUID, WiX, Tools, Build, Time Savers, jfevia";
     }
 }

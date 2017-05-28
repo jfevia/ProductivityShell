@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="Commands\CommandBase.cs" />
     <Compile Include="Commands\Package\ShowOptionPageCommand.cs" />
+    <Compile Include="Commands\Project\ProjecItemEqualityComparer.cs" />
     <Compile Include="Commands\Project\ReloadCommand.cs" />
     <Compile Include="Commands\Project\OpenOutputFolderCommand.cs" />
     <Compile Include="Commands\Shell\RestartElevatedCommand.cs" />

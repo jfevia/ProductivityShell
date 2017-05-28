@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Linq;
+using System.Windows.Forms;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
+using ProductivityShell.Commands.Project;
 using ProductivityShell.DialogPages;
 using ProductivityShell.Extensions;
 using ProductivityShell.Helpers;
@@ -26,15 +29,23 @@ namespace ProductivityShell.Commands.Tools
 
         protected override void OnExecute(OleMenuCommand command)
         {
-            ReplaceAllPlaceholdersInSolution();
+            ReplacePlaceholdersInSelectedItems();
         }
 
-        /// <summary>
-        ///     Replaces GUID placeholders in all project items.
-        /// </summary>
-        private void ReplaceAllPlaceholdersInSolution()
+        private void ReplacePlaceholdersInSelectedItems()
         {
-            var projectItems = SolutionHelper.GetAllItemsInSolution<ProjectItem>(Package.Dte.Solution);
+            var projectItems = SolutionHelper.GetSelectedProjectItemsRecursively(Package).Distinct(new ProjecItemEqualityComparer()).ToList();
+            if (projectItems.Count <= 0)
+            {
+                MessageBox.Show("No items were found", "GUID Placeholders");
+                return;
+            }
+
+            if (MessageBox.Show($"Do you wish to search and replace GUID placeholders in {projectItems.Count} items?", "GUID Placeholders", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+            {
+                return;
+            }
+
             foreach (var projectItem in projectItems)
             {
                 ReplaceGuidPlaceholders(projectItem);
@@ -61,15 +72,22 @@ namespace ProductivityShell.Commands.Tools
                 }
             }
 
-            if (projectItem.Document != null)
+            try
             {
-                ReplaceGuidPlaceholders(projectItem.Document);
-
-                // Close the document if it was opened for cleanup.
-                if (!wasOpen)
+                if (projectItem.Document != null)
                 {
-                    projectItem.Document.Close(vsSaveChanges.vsSaveChangesYes);
+                    ReplaceGuidPlaceholders(projectItem.Document);
+
+                    // Close the document if it was opened for cleanup.
+                    if (!wasOpen)
+                    {
+                        projectItem.Document.Close(vsSaveChanges.vsSaveChangesYes);
+                    }
                 }
+            }
+            catch (Exception)
+            {
+                // OK if file cannot be opened (ex: deleted from disk, non-text based type.)
             }
         }
 

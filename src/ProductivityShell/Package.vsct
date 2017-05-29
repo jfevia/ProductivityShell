@@ -218,7 +218,11 @@
     </CommandPlacement>
 
     <CommandPlacement guid="PackageCommandSet" id="OpenOutputFolderCommand">
-      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_START" />
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_BUILD" />
+    </CommandPlacement>
+
+    <CommandPlacement guid="PackageCommandSet" id="OpenOutputFolderCommand">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_MULTIPROJ_BUILD" />
     </CommandPlacement>
 
     <CommandPlacement guid="PackageCommandSet" id="ReloadProjectCommand">

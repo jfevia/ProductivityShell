@@ -160,6 +160,19 @@
         </Strings>
       </Button>
 
+      <!-- Project Item -->
+      <Button guid="PackageCommandSet" id="ShowInExplorerCommand" type="Button" priority="0x0001">
+        <Icon guid="ImageCatalogGuid" id="OpenFolder" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <Strings>
+          <CommandName>ShowItemInExplorer</CommandName>
+          <CanonicalName>ShowItemInExplorer</CanonicalName>
+          <LocCanonicalName>ShowItemInExplorer</LocCanonicalName>
+          <ButtonText>Show in File Explorer</ButtonText>
+        </Strings>
+      </Button>
+
       <!-- Tools -->
       <Button guid="PackageCommandSet" id="ReplaceGuidPlaceholdersCommand" type="Button" priority="0x0001">
         <Parent guid="PackageCommandSet" id="ToolsCommands" />
@@ -217,6 +230,10 @@
       <Parent guid="PackageCommandSet" id="ProjectCommands" />
     </CommandPlacement>
 
+    <CommandPlacement guid="PackageCommandSet" id="ShowInExplorerCommand">
+      <Parent guid="PackageCommandSet" id="ProjectItemCommands" />
+    </CommandPlacement>
+
     <CommandPlacement guid="PackageCommandSet" id="OpenOutputFolderCommand">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_BUILD" />
     </CommandPlacement>
@@ -227,6 +244,14 @@
 
     <CommandPlacement guid="PackageCommandSet" id="ReloadProjectCommand">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_UNLOADRELOAD" />
+    </CommandPlacement>
+
+    <CommandPlacement guid="PackageCommandSet" id="ShowInExplorerCommand">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_BUILD" />
+    </CommandPlacement>
+
+    <CommandPlacement guid="PackageCommandSet" id="ShowInExplorerCommand">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_ITEM_OPEN" />
     </CommandPlacement>
 
   </CommandPlacements>
@@ -258,6 +283,13 @@
 
       <IDSymbol name="OpenOutputFolderCommand" value="0x0303" />
       <IDSymbol name="ReloadProjectCommand" value="0x0304" />
+
+      <!-- Project Item -->
+      <IDSymbol name="ProjectItemGroup" value="0x0400" />
+      <IDSymbol name="ProjectItemDropDown" value="0x0401" />
+      <IDSymbol name="ProjectItemCommands" value="0x0402" />
+
+      <IDSymbol name="ShowInExplorerCommand" value="0x0403" />
 
       <!-- Tools -->
       <IDSymbol name="ToolsGroup" value="0x0900" />

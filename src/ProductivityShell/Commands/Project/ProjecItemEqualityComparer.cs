@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using EnvDTE;
 
 namespace ProductivityShell.Commands.Project
 {
-    internal class ProjecItemEqualityComparer : IEqualityComparer<ProjectItem>
+    internal class ProjecItemEqualityComparer : IEqualityComparer<EnvDTE.ProjectItem>
     {
-        public bool Equals(ProjectItem x, ProjectItem y)
+        public bool Equals(EnvDTE.ProjectItem x, EnvDTE.ProjectItem y)
         {
             return string.Equals(x.Properties.Item("FullPath")
                                   ?.ToString(), y.Properties.Item("FullPath")
                                                  ?.ToString(), StringComparison.OrdinalIgnoreCase);
         }
 
-        public int GetHashCode(ProjectItem projectItem)
+        public int GetHashCode(EnvDTE.ProjectItem projectItem)
         {
             return projectItem.Properties.Item("FullPath")
                               .GetHashCode();

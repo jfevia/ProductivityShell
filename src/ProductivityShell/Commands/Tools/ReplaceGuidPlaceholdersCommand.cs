@@ -56,7 +56,7 @@ namespace ProductivityShell.Commands.Tools
         ///     Replaces GUID placeholders in a project item.
         /// </summary>
         /// <param name="projectItem">The project item.</param>
-        private void ReplaceGuidPlaceholders(ProjectItem projectItem)
+        private void ReplaceGuidPlaceholders(EnvDTE.ProjectItem projectItem)
         {
             // Attempt to open the document if not already opened.
             var wasOpen = projectItem.IsOpen[Constants.vsViewKindTextView] || projectItem.IsOpen[Constants.vsViewKindCode];
@@ -145,20 +145,22 @@ namespace ProductivityShell.Commands.Tools
                 var content = startEditPoint.GetText(endEditPoint);
                 var isMatch = IsMatch(content, placeholder);
 
-                if (isMatch)
+                if (!isMatch)
                 {
-                    while (isMatch)
-                    {
-                        var comparisonType = GetComparisonType(toolsDialogPage.GuidMatchCase);
-                        var guidStringBuilder = GetGuidStringBuilder(toolsDialogPage);
-
-                        content = content.Replace(placeholder, guidStringBuilder, comparisonType, 1);
-                        isMatch = IsMatch(content, placeholder);
-                    }
-
-                    startEditPoint.Delete(endEditPoint);
-                    startEditPoint.Insert(content);
+                    continue;
                 }
+
+                while (isMatch)
+                {
+                    var comparisonType = GetComparisonType(toolsDialogPage.GuidMatchCase);
+                    var guidStringBuilder = GetGuidStringBuilder(toolsDialogPage);
+
+                    content = content.Replace(placeholder, guidStringBuilder, comparisonType, 1);
+                    isMatch = IsMatch(content, placeholder);
+                }
+
+                startEditPoint.Delete(endEditPoint);
+                startEditPoint.Insert(content);
             }
         }
 

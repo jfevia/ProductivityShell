@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using ProductivityShell.Commands.Environment;
 using ProductivityShell.Commands.Package;
 using ProductivityShell.Commands.Project;
+using ProductivityShell.Commands.ProjectItem;
 using ProductivityShell.Commands.Shell;
 using ProductivityShell.Commands.Tools;
 using ProductivityShell.DialogPages;
@@ -45,6 +46,9 @@ namespace ProductivityShell
             // Project
             OpenOutputFolderCommand.Initialize(this);
             ReloadCommand.Initialize(this);
+
+            // Project Item
+            ShowInExplorerCommand.Initialize(this);
 
             // Tools
             ReplaceGuidPlaceholdersCommand.Initialize(this);

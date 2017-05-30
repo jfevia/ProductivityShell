@@ -53,12 +53,14 @@
   <ItemGroup>
     <Compile Include="Commands\CommandBase.cs" />
     <Compile Include="Commands\Package\ShowOptionPageCommand.cs" />
+    <Compile Include="Commands\ProjectItem\ShowInExplorerCommand.cs" />
     <Compile Include="Commands\Project\ProjecItemEqualityComparer.cs" />
     <Compile Include="Commands\Project\ReloadCommand.cs" />
     <Compile Include="Commands\Project\OpenOutputFolderCommand.cs" />
     <Compile Include="Commands\Shell\RestartElevatedCommand.cs" />
     <Compile Include="Commands\Environment\PathVariablesCommand.cs" />
     <Compile Include="Extensions\ProjectExtensions.cs" />
+    <Compile Include="Helpers\WindowsExplorerHelper.cs" />
     <Compile Include="Shell\GuidStringBuilder.cs" />
     <Compile Include="DialogPages\ToolsDialogPage.cs">
       <SubType>Component</SubType>

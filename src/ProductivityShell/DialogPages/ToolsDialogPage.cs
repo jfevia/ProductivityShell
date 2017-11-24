@@ -29,5 +29,10 @@ namespace ProductivityShell.DialogPages
         [DisplayName("Letter Case")]
         [Description("Defines the letter case used to generated GUID values.")]
         public LetterCase GuidLetterCase { get; set; } = LetterCase.UpperCase;
+
+        [Category(PackageConstants.TextEditorCategory)]
+        [DisplayName("Show Margin")]
+        [Description("Defines whether the margin in the text editor should be displayed.")]
+        public bool ShowTextEditorMargin { get; set; } = true;
     }
 }

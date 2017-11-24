@@ -4,6 +4,8 @@ Productivity tools for Visual Studio
 ### Path Variables
 Prints out the current variables in %PATH%.
 ## Projects
+### Show File Ouput in File Explorer
+Shows the file output in File Explorer.
 ### Open Ouput Folder
 Opens the output folders for all selected projects.
 ### Reload Project

@@ -47,8 +47,7 @@ namespace ProductivityShell.Helpers
             var projectItems = new List<T>();
 
             // Include the parent item if it is of the desired type.
-            var desiredType = parentItem as T;
-            if (desiredType != null)
+            if (parentItem is T desiredType)
                 projectItems.Add(desiredType);
 
             // Get all children based on the type of parent item.
@@ -120,8 +119,7 @@ namespace ProductivityShell.Helpers
                 return project.ProjectItems.Cast<ProjectItem>().Cast<object>().ToList();
 
             // Next check if the item is a project item.
-            var projectItem = parentItem as ProjectItem;
-            if (projectItem != null)
+            if (parentItem is ProjectItem projectItem)
             {
                 // Standard projects.
                 if (projectItem.ProjectItems != null)

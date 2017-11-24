@@ -14,10 +14,8 @@ namespace ProductivityShell.Helpers
 
         private static IntPtr GetShellFolderChildrenRelativePidl(IShellFolder parentFolder, string displayName)
         {
-            uint pchEaten;
             uint pdwAttributes = 0;
-            IntPtr ppidl;
-            parentFolder.ParseDisplayName(IntPtr.Zero, null, displayName, out pchEaten, out ppidl, ref pdwAttributes);
+            parentFolder.ParseDisplayName(IntPtr.Zero, null, displayName, out _, out var ppidl, ref pdwAttributes);
 
             return ppidl;
         }
@@ -30,8 +28,7 @@ namespace ProductivityShell.Helpers
 
         private static IShellFolder PidlToShellFolder(IShellFolder parent, IntPtr pidl)
         {
-            IShellFolder folder;
-            var result = parent.BindToObject(pidl, null, ref _iidIShellFolder, out folder);
+            var result = parent.BindToObject(pidl, null, ref _iidIShellFolder, out var folder);
             Marshal.ThrowExceptionForHR(result);
             return folder;
         }
@@ -225,8 +222,7 @@ namespace ProductivityShell.Helpers
 
             public static IShellFolder SHGetDesktopFolder()
             {
-                IShellFolder result;
-                Marshal.ThrowExceptionForHR(SHGetDesktopFolder_(out result));
+                Marshal.ThrowExceptionForHR(SHGetDesktopFolder_(out var result));
                 return result;
             }
 

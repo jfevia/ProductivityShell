@@ -33,16 +33,13 @@ namespace ProductivityShell.Commands.ProjectItem
 
             foreach (var selectedItem in UIHierarchyHelper.GetSelectedUIHierarchyItems(Package))
             {
-                var projectItem = selectedItem.Object as EnvDTE.ProjectItem;
-                if (projectItem != null)
+                if (selectedItem.Object is EnvDTE.ProjectItem projectItem)
                     paths.Add(projectItem.Document?.FullName ?? projectItem.Properties?.Item("FullPath").Value.ToString());
 
-                var project = selectedItem.Object as EnvDTE.Project;
-                if (project != null)
+                if (selectedItem.Object is EnvDTE.Project project)
                     paths.Add(project.FullName);
 
-                var solution = selectedItem.Object as Solution;
-                if (solution != null)
+                if (selectedItem.Object is Solution solution)
                     paths.Add(solution.FullName);
             }
 

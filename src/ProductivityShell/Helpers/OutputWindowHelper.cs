@@ -57,8 +57,7 @@ namespace ProductivityShell.Helpers
         /// <returns>The ProductivityShell output window pane, otherwise null.</returns>
         private static IVsOutputWindowPane GetPackageOutputWindowPane()
         {
-            var outputWindow = Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
-            if (outputWindow == null)
+            if (!(Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(SVsOutputWindow)) is IVsOutputWindow outputWindow))
                 return null;
 
             var outputPaneGuid = new Guid(PackageGuids.OutputPaneString);

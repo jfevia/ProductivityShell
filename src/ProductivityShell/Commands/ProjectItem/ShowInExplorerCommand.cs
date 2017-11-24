@@ -14,7 +14,8 @@ namespace ProductivityShell.Commands.ProjectItem
         ///     Initializes a new instance of the <see cref="ShowInExplorerCommand" /> class.
         /// </summary>
         /// <param name="package">The package.</param>
-        private ShowInExplorerCommand(PackageBase package) : base(package, PackageIds.ProjectItemShowInExplorerCommand)
+        private ShowInExplorerCommand(PackageBase package)
+            : base(package, PackageIds.ProjectItemShowInExplorerCommand)
         {
         }
 
@@ -26,9 +27,7 @@ namespace ProductivityShell.Commands.ProjectItem
         protected override void OnExecute(OleMenuCommand command)
         {
             if (Package.Dte.SelectedItems.Count == 0)
-            {
                 return;
-            }
 
             var paths = new HashSet<string>();
 
@@ -36,29 +35,20 @@ namespace ProductivityShell.Commands.ProjectItem
             {
                 var projectItem = selectedItem.Object as EnvDTE.ProjectItem;
                 if (projectItem != null)
-                {
-                    paths.Add(projectItem.Document?.FullName ?? projectItem.Properties?.Item("FullPath")
-                                                                           .Value.ToString());
-                }
+                    paths.Add(projectItem.Document?.FullName ?? projectItem.Properties?.Item("FullPath").Value.ToString());
 
                 var project = selectedItem.Object as EnvDTE.Project;
                 if (project != null)
-                {
                     paths.Add(project.FullName);
-                }
 
                 var solution = selectedItem.Object as Solution;
                 if (solution != null)
-                {
                     paths.Add(solution.FullName);
-                }
             }
 
             var groupedPaths = paths.GroupBy(Path.GetDirectoryName);
             foreach (var path in groupedPaths)
-            {
                 WindowsExplorerHelper.FilesOrFolders(path);
-            }
         }
     }
 }

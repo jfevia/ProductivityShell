@@ -10,9 +10,10 @@ namespace ProductivityShell.Shell
 {
     public class PackageBase : Microsoft.VisualStudio.Shell.Package
     {
+        private readonly IVsShell3 _shell3 = GetGlobalService<SVsShell, IVsShell3>();
+        private readonly IVsShell4 _shell4 = GetGlobalService<SVsShell, IVsShell4>();
         private IMenuCommandService _commandService;
         private DTE2 _dte;
-        private IVsShell4 _shell;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="PackageBase" /> class.
@@ -67,15 +68,13 @@ namespace ProductivityShell.Shell
             }
         }
 
-        /// <summary>
-        ///     Gets the shell.
-        /// </summary>
-        /// <value>
-        ///     The shell.
-        /// </value>
-        protected IVsShell4 Shell
+        public bool IsRunningElevated
         {
-            get { return _shell ?? (_shell = GetGlobalService<SVsShell, IVsShell4>()); }
+            get
+            {
+                _shell3.IsRunningElevated(out var isElevated);
+                return isElevated;
+            }
         }
 
         public bool ActivateOutputWindow()
@@ -102,7 +101,8 @@ namespace ProductivityShell.Shell
         /// <typeparam name="TSource">The type of the source service.</typeparam>
         /// <typeparam name="TTarget">The type of the target service.</typeparam>
         /// <returns>An instance of the requested service, or null if the service could not be found.</returns>
-        public static TTarget GetGlobalService<TSource, TTarget>() where TTarget : class
+        public static TTarget GetGlobalService<TSource, TTarget>()
+            where TTarget : class
         {
             return GetGlobalService(typeof(TSource)) as TTarget;
         }
@@ -126,11 +126,14 @@ namespace ProductivityShell.Shell
         {
             var vsRestartMode = __VSRESTARTTYPE.RESTART_Normal;
             if (mode == RestartMode.Elevated)
-            {
                 vsRestartMode = __VSRESTARTTYPE.RESTART_Elevated;
-            }
 
-            return !ErrorHandler.Failed(Shell.Restart((uint) vsRestartMode));
+            return !ErrorHandler.Failed(Restart(vsRestartMode));
+        }
+
+        private int Restart(__VSRESTARTTYPE vsRestartMode)
+        {
+            return _shell4.Restart((uint) vsRestartMode);
         }
     }
 }

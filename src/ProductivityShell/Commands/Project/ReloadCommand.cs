@@ -12,7 +12,8 @@ namespace ProductivityShell.Commands.Project
         ///     Initializes a new instance of the <see cref="ReloadCommand" /> class.
         /// </summary>
         /// <param name="package">The package.</param>
-        private ReloadCommand(PackageBase package) : base(package, PackageIds.ProjectReloadCommand)
+        private ReloadCommand(PackageBase package)
+            : base(package, PackageIds.ProjectReloadCommand)
         {
         }
 
@@ -24,9 +25,7 @@ namespace ProductivityShell.Commands.Project
         protected override void OnExecute(OleMenuCommand command)
         {
             if (Package.Dte.SelectedItems.Count == 0)
-            {
                 return;
-            }
 
             var solution = PackageBase.GetGlobalService<SVsSolution, IVsSolution>();
 
@@ -42,10 +41,7 @@ namespace ProductivityShell.Commands.Project
                 {
                     var projectItem = selectedItem.ProjectItem;
                     if (projectItem?.ContainingProject == null)
-                    {
-                        // Project may be already unloaded
                         continue;
-                    }
 
                     OutputWindowHelper.DiagnosticWriteLine($"Reloading project: {projectItem.ContainingProject.Name}");
                     SolutionHelper.ReloadProject(solution, projectItem.ContainingProject);

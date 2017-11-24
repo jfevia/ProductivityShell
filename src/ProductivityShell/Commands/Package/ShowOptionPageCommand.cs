@@ -10,7 +10,8 @@ namespace ProductivityShell.Commands.Package
         ///     Initializes a new instance of the <see cref="ShowOptionPageCommand" /> class.
         /// </summary>
         /// <param name="package">The package.</param>
-        private ShowOptionPageCommand(PackageBase package) : base(package, PackageIds.PackageShowOptionPageCommand)
+        private ShowOptionPageCommand(PackageBase package)
+            : base(package, PackageIds.PackageShowOptionPageCommand)
         {
         }
 

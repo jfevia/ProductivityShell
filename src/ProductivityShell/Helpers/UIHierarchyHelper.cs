@@ -20,20 +20,14 @@ namespace ProductivityShell.Helpers
         internal static void CollapseRecursively(UIHierarchyItem parentItem)
         {
             if (parentItem == null)
-            {
                 throw new ArgumentNullException(nameof(parentItem));
-            }
 
             if (!parentItem.UIHierarchyItems.Expanded)
-            {
                 return;
-            }
 
             // Recurse to all children first.
             foreach (UIHierarchyItem childItem in parentItem.UIHierarchyItems)
-            {
                 CollapseRecursively(childItem);
-            }
 
             if (ShouldCollapseItem(parentItem))
             {
@@ -58,8 +52,7 @@ namespace ProductivityShell.Helpers
         {
             var solutionExplorer = GetSolutionExplorer(package);
 
-            return ((object[]) solutionExplorer.SelectedItems).Cast<UIHierarchyItem>()
-                                                              .ToList();
+            return ((object[]) solutionExplorer.SelectedItems).Cast<UIHierarchyItem>().ToList();
         }
 
         /// <summary>
@@ -81,9 +74,7 @@ namespace ProductivityShell.Helpers
         {
             var solutionExplorer = GetSolutionExplorer(package);
 
-            return solutionExplorer.UIHierarchyItems.Count > 0
-                ? solutionExplorer.UIHierarchyItems.Item(1)
-                : null;
+            return solutionExplorer.UIHierarchyItems.Count > 0 ? solutionExplorer.UIHierarchyItems.Item(1) : null;
         }
 
         /// <summary>
@@ -94,13 +85,9 @@ namespace ProductivityShell.Helpers
         internal static bool HasExpandedChildren(UIHierarchyItem parentItem)
         {
             if (parentItem == null)
-            {
                 throw new ArgumentNullException(nameof(parentItem));
-            }
 
-            return parentItem.UIHierarchyItems.Cast<UIHierarchyItem>()
-                             .Any(
-                                 childItem => childItem.UIHierarchyItems.Expanded || HasExpandedChildren(childItem));
+            return parentItem.UIHierarchyItems.Cast<UIHierarchyItem>().Any(childItem => childItem.UIHierarchyItems.Expanded || HasExpandedChildren(childItem));
         }
 
         /// <summary>
@@ -112,9 +99,7 @@ namespace ProductivityShell.Helpers
         {
             // Make sure not to collapse the solution, causes odd behavior.
             if (parentItem.Object is Solution)
-            {
                 return false;
-            }
 
             // Conditionally skip collapsing the only project in a solution.
             // Note: Visual Studio automatically creates a second invisible project called
@@ -123,11 +108,8 @@ namespace ProductivityShell.Helpers
             {
                 var solution = parentItem.DTE.Solution;
 
-                if (solution != null && solution.Projects.OfType<Project>()
-                                                .All(x => x == parentItem.Object || x.Name == "Miscellaneous Files"))
-                {
+                if (solution != null && solution.Projects.OfType<Project>().All(x => x == parentItem.Object || x.Name == "Miscellaneous Files"))
                     return false;
-                }
             }
 
             return true;

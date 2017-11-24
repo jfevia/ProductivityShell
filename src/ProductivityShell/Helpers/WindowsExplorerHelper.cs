@@ -49,9 +49,7 @@ namespace ProductivityShell.Helpers
         public static void FileOrFolder(string path, bool edit = false)
         {
             if (path == null)
-            {
                 throw new ArgumentNullException(nameof(path));
-            }
 
             var pidl = PathToAbsolutePidl(path);
             try
@@ -69,48 +67,31 @@ namespace ProductivityShell.Helpers
             foreach (var path in paths)
             {
                 var fixedPath = path;
-                if (fixedPath.EndsWith(Path.DirectorySeparatorChar.ToString())
-                    || fixedPath.EndsWith(Path.AltDirectorySeparatorChar.ToString()))
-                {
+                if (fixedPath.EndsWith(Path.DirectorySeparatorChar.ToString()) || fixedPath.EndsWith(Path.AltDirectorySeparatorChar.ToString()))
                     fixedPath = fixedPath.Remove(fixedPath.Length - 1);
-                }
 
                 if (Directory.Exists(fixedPath))
-                {
                     yield return new DirectoryInfo(fixedPath);
-                }
                 else if (File.Exists(fixedPath))
-                {
                     yield return new FileInfo(fixedPath);
-                }
                 else
-                {
-                    throw new FileNotFoundException
-                    ($"The specified file or folder doesn't exists : {fixedPath}",
-                        fixedPath);
-                }
+                    throw new FileNotFoundException($"The specified file or folder doesn't exists : {fixedPath}", fixedPath);
             }
         }
 
         public static void FilesOrFolders(string parentDirectory, ICollection<string> filenames)
         {
             if (filenames == null)
-            {
                 throw new ArgumentNullException(nameof(filenames));
-            }
 
             if (filenames.Count == 0)
-            {
                 return;
-            }
 
             var parentPidl = PathToAbsolutePidl(parentDirectory);
             try
             {
                 var parent = PidlToShellFolder(parentPidl);
-                var filesPidl = filenames
-                    .Select(filename => GetShellFolderChildrenRelativePidl(parent, filename))
-                    .ToArray();
+                var filesPidl = filenames.Select(filename => GetShellFolderChildrenRelativePidl(parent, filename)).ToArray();
 
                 try
                 {
@@ -119,9 +100,7 @@ namespace ProductivityShell.Helpers
                 finally
                 {
                     foreach (var pidl in filesPidl)
-                    {
                         NativeMethods.ILFree(pidl);
-                    }
                 }
             }
             finally
@@ -138,9 +117,7 @@ namespace ProductivityShell.Helpers
         public static void FilesOrFolders(IEnumerable<string> paths)
         {
             if (paths == null)
-            {
                 throw new ArgumentNullException(nameof(paths));
-            }
 
             FilesOrFolders(PathToFileSystemInfo(paths));
         }
@@ -148,24 +125,18 @@ namespace ProductivityShell.Helpers
         public static void FilesOrFolders(IEnumerable<FileSystemInfo> paths)
         {
             if (paths == null)
-            {
                 throw new ArgumentNullException(nameof(paths));
-            }
 
             var pathsArray = paths.ToArray();
             if (pathsArray.Length == 0)
-            {
                 return;
-            }
 
             var explorerWindows = pathsArray.GroupBy(p => Path.GetDirectoryName(p.FullName));
 
             foreach (var explorerWindowPaths in explorerWindows)
             {
-                var parentDirectory = Path.GetDirectoryName(explorerWindowPaths.First()
-                                                                               .FullName);
-                FilesOrFolders(parentDirectory, explorerWindowPaths.Select(fsi => fsi.Name)
-                                                                   .ToList());
+                var parentDirectory = Path.GetDirectoryName(explorerWindowPaths.First().FullName);
+                FilesOrFolders(parentDirectory, explorerWindowPaths.Select(fsi => fsi.Name).ToList());
             }
         }
 
@@ -249,8 +220,7 @@ namespace ProductivityShell.Helpers
 
         private static class NativeMethods
         {
-            [DllImport("shell32.dll", EntryPoint = "SHGetDesktopFolder", CharSet = CharSet.Unicode,
-                SetLastError = true)]
+            [DllImport("shell32.dll", EntryPoint = "SHGetDesktopFolder", CharSet = CharSet.Unicode, SetLastError = true)]
             private static extern int SHGetDesktopFolder_([MarshalAs(UnmanagedType.Interface)] out IShellFolder ppshf);
 
             public static IShellFolder SHGetDesktopFolder()
@@ -261,9 +231,7 @@ namespace ProductivityShell.Helpers
             }
 
             [DllImport("shell32.dll", EntryPoint = "SHOpenFolderAndSelectItems")]
-            private static extern int SHOpenFolderAndSelectItems_(
-                [In] IntPtr pidlFolder, uint cidl, [In] [Optional] [MarshalAs(UnmanagedType.LPArray)] IntPtr[] apidl,
-                int dwFlags);
+            private static extern int SHOpenFolderAndSelectItems_([In] IntPtr pidlFolder, uint cidl, [In] [Optional] [MarshalAs(UnmanagedType.LPArray)] IntPtr[] apidl, int dwFlags);
 
             public static void SHOpenFolderAndSelectItems(IntPtr pidlFolder, IntPtr[] apidl, int dwFlags)
             {

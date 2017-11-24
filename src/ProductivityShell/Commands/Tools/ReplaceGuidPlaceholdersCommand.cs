@@ -18,7 +18,8 @@ namespace ProductivityShell.Commands.Tools
         ///     Initializes a new instance of the <see cref="ReplaceGuidPlaceholdersCommand" /> class.
         /// </summary>
         /// <param name="package">The package.</param>
-        private ReplaceGuidPlaceholdersCommand(PackageBase package) : base(package, PackageIds.ToolsReplaceGuidReplaceholdersCommand)
+        private ReplaceGuidPlaceholdersCommand(PackageBase package)
+            : base(package, PackageIds.ToolsReplaceGuidReplaceholdersCommand)
         {
         }
 
@@ -42,14 +43,10 @@ namespace ProductivityShell.Commands.Tools
             }
 
             if (MessageBox.Show($"Do you wish to search and replace GUID placeholders in {projectItems.Count} items?", "GUID Placeholders", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
-            {
                 return;
-            }
 
             foreach (var projectItem in projectItems)
-            {
                 ReplaceGuidPlaceholders(projectItem);
-            }
         }
 
         /// <summary>
@@ -61,7 +58,6 @@ namespace ProductivityShell.Commands.Tools
             // Attempt to open the document if not already opened.
             var wasOpen = projectItem.IsOpen[Constants.vsViewKindTextView] || projectItem.IsOpen[Constants.vsViewKindCode];
             if (!wasOpen)
-            {
                 try
                 {
                     projectItem.Open(Constants.vsViewKindTextView);
@@ -70,7 +66,6 @@ namespace ProductivityShell.Commands.Tools
                 {
                     // OK if file cannot be opened (ex: deleted from disk, non-text based type.)
                 }
-            }
 
             try
             {
@@ -80,9 +75,7 @@ namespace ProductivityShell.Commands.Tools
 
                     // Close the document if it was opened for cleanup.
                     if (!wasOpen)
-                    {
                         projectItem.Document.Close(vsSaveChanges.vsSaveChangesYes);
-                    }
                 }
             }
             catch (Exception)
@@ -102,14 +95,10 @@ namespace ProductivityShell.Commands.Tools
 
             // Check for designer windows being active, which should not proceed with cleanup as the code isn't truly active.
             if (document.ActiveWindow.Caption.EndsWith(" [Design]"))
-            {
                 return;
-            }
 
             if (Package.Dte.ActiveDocument != document)
-            {
                 OutputWindowHelper.WarningWriteLine($"Activation was not completed before replacing began for '{document.Name}'");
-            }
 
             OutputWindowHelper.DiagnosticWriteLine($"ReplaceGuidPlaceholders started for '{document.FullName}'");
             Package.Dte.StatusBar.Text = $"Replacing GUID placeholders in '{document.Name}'...";
@@ -129,16 +118,12 @@ namespace ProductivityShell.Commands.Tools
         {
             var toolsDialogPage = Package.GetDialogPage<ToolsDialogPage>();
             if (string.IsNullOrWhiteSpace(toolsDialogPage.GuidPlaceholders))
-            {
                 return;
-            }
 
             foreach (var placeholder in toolsDialogPage.GuidPlaceholders.Split(Settings.Default.GuidPlaceholderSplitChar))
             {
                 if (string.IsNullOrWhiteSpace(placeholder))
-                {
                     continue;
-                }
 
                 var startEditPoint = textDocument.StartPoint.CreateEditPoint();
                 var endEditPoint = textDocument.EndPoint.CreateEditPoint();
@@ -146,9 +131,7 @@ namespace ProductivityShell.Commands.Tools
                 var isMatch = IsMatch(content, placeholder);
 
                 if (!isMatch)
-                {
                     continue;
-                }
 
                 while (isMatch)
                 {

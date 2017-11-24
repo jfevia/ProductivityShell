@@ -13,7 +13,8 @@ namespace ProductivityShell.Commands.Project
         ///     Initializes a new instance of the <see cref="OpenOutputFolderCommand" /> class.
         /// </summary>
         /// <param name="package">The package.</param>
-        private OpenOutputFolderCommand(PackageBase package) : base(package, PackageIds.ProjectOpenOutputFolderCommand)
+        private OpenOutputFolderCommand(PackageBase package)
+            : base(package, PackageIds.ProjectOpenOutputFolderCommand)
         {
         }
 
@@ -25,9 +26,7 @@ namespace ProductivityShell.Commands.Project
         protected override void OnExecute(OleMenuCommand command)
         {
             if (Package.Dte.SelectedItems.Count == 0)
-            {
                 return;
-            }
 
             var paths = new HashSet<string>();
 
@@ -42,18 +41,14 @@ namespace ProductivityShell.Commands.Project
                 {
                     var projectItem = selectedItem.ProjectItem;
                     if (projectItem?.ContainingProject == null)
-                    {
                         continue;
-                    }
 
                     paths.Add(projectItem.ContainingProject.GetOutputFolder());
                 }
             }
 
             foreach (var path in paths)
-            {
                 Process.Start(path);
-            }
         }
     }
 }

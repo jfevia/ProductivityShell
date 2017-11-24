@@ -9,7 +9,8 @@ namespace ProductivityShell.Commands.Shell
         ///     Initializes a new instance of the <see cref="RestartElevatedCommand" /> class.
         /// </summary>
         /// <param name="package">The package.</param>
-        private RestartElevatedCommand(PackageBase package) : base(package, PackageIds.ShellRestartElevatedCommand)
+        private RestartElevatedCommand(PackageBase package)
+            : base(package, PackageIds.ShellRestartElevatedCommand)
         {
         }
 

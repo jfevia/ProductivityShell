@@ -25,9 +25,7 @@ namespace ProductivityShell.Helpers
             var allProjects = new List<T>();
 
             if (solution != null)
-            {
                 allProjects.AddRange(GetItemsRecursively<T>(solution));
-            }
 
             return allProjects;
         }
@@ -43,9 +41,7 @@ namespace ProductivityShell.Helpers
             where T : class
         {
             if (parentItem == null)
-            {
                 throw new ArgumentNullException(nameof(parentItem));
-            }
 
             // Create a collection.
             var projectItems = new List<T>();
@@ -53,18 +49,14 @@ namespace ProductivityShell.Helpers
             // Include the parent item if it is of the desired type.
             var desiredType = parentItem as T;
             if (desiredType != null)
-            {
                 projectItems.Add(desiredType);
-            }
 
             // Get all children based on the type of parent item.
             var children = GetChildren(parentItem);
 
             // Then recurse through all children.
             foreach (var childItem in children)
-            {
                 projectItems.AddRange(GetItemsRecursively<T>(childItem));
-            }
 
             return projectItems;
         }
@@ -72,15 +64,11 @@ namespace ProductivityShell.Helpers
         internal static int ReloadProject(IVsSolution solution, string projectName)
         {
             int hr;
-            if ((hr = solution.GetProjectOfUniqueName(projectName, out IVsHierarchy projectHierarchy)) != VSConstants.S_OK)
-            {
+            if ((hr = solution.GetProjectOfUniqueName(projectName, out var projectHierarchy)) != VSConstants.S_OK)
                 return hr;
-            }
 
-            if ((hr = solution.GetGuidOfProject(projectHierarchy, out Guid projectGuid)) != VSConstants.S_OK)
-            {
+            if ((hr = solution.GetGuidOfProject(projectHierarchy, out var projectGuid)) != VSConstants.S_OK)
                 return hr;
-            }
 
             return ReloadProject(solution, projectGuid);
         }
@@ -96,9 +84,7 @@ namespace ProductivityShell.Helpers
             var selectedUiHierarchyItems = UIHierarchyHelper.GetSelectedUIHierarchyItems(package);
 
             foreach (var item in selectedUiHierarchyItems.Select(uiHierarchyItem => uiHierarchyItem.Object))
-            {
                 selectedProjectItems.AddRange(GetItemsRecursively<ProjectItem>(item));
-            }
 
             return selectedProjectItems;
         }
@@ -126,20 +112,12 @@ namespace ProductivityShell.Helpers
             // First check if the item is a solution.
             var solution = parentItem as Solution;
             if (solution?.Projects != null)
-            {
-                return solution.Projects.Cast<Project>()
-                               .Cast<object>()
-                               .ToList();
-            }
+                return solution.Projects.Cast<Project>().Cast<object>().ToList();
 
             // Next check if the item is a project.
             var project = parentItem as Project;
             if (project?.ProjectItems != null)
-            {
-                return project.ProjectItems.Cast<ProjectItem>()
-                              .Cast<object>()
-                              .ToList();
-            }
+                return project.ProjectItems.Cast<ProjectItem>().Cast<object>().ToList();
 
             // Next check if the item is a project item.
             var projectItem = parentItem as ProjectItem;
@@ -147,20 +125,11 @@ namespace ProductivityShell.Helpers
             {
                 // Standard projects.
                 if (projectItem.ProjectItems != null)
-                {
-                    return projectItem.ProjectItems.Cast<ProjectItem>()
-                                      .Cast<object>()
-                                      .ToList();
-                }
+                    return projectItem.ProjectItems.Cast<ProjectItem>().Cast<object>().ToList();
 
                 // Projects within a solution folder.
                 if (projectItem.SubProject != null)
-                {
-                    return new[]
-                    {
-                        projectItem.SubProject
-                    };
-                }
+                    return new[] {projectItem.SubProject};
             }
 
             // Otherwise return an empty array.
@@ -172,10 +141,8 @@ namespace ProductivityShell.Helpers
             projectGuid = default(Guid);
 
             int hr;
-            if ((hr = solution.GetProjectOfUniqueName(project.UniqueName, out IVsHierarchy projectHierarchy)) != VSConstants.S_OK)
-            {
+            if ((hr = solution.GetProjectOfUniqueName(project.UniqueName, out var projectHierarchy)) != VSConstants.S_OK)
                 return hr;
-            }
 
             return solution.GetGuidOfProject(projectHierarchy, out projectGuid);
         }
@@ -183,10 +150,8 @@ namespace ProductivityShell.Helpers
         public static int UnloadProject(IVsSolution solution, Project project)
         {
             int hr;
-            if ((hr = GetGuidOfProject(solution, project, out Guid projectGuid)) != VSConstants.S_OK)
-            {
+            if ((hr = GetGuidOfProject(solution, project, out var projectGuid)) != VSConstants.S_OK)
                 return hr;
-            }
 
             return UnloadProject((IVsSolution4) solution, projectGuid);
         }
@@ -202,10 +167,8 @@ namespace ProductivityShell.Helpers
         public static int ReloadProject(IVsSolution solution, Project project)
         {
             int hr;
-            if ((hr = GetGuidOfProject(solution, project, out Guid projectGuid)) != VSConstants.S_OK)
-            {
+            if ((hr = GetGuidOfProject(solution, project, out var projectGuid)) != VSConstants.S_OK)
                 return hr;
-            }
 
             return ReloadProject(solution, projectGuid);
         }
@@ -213,10 +176,8 @@ namespace ProductivityShell.Helpers
         public static int LoadProject(IVsSolution solution, Project project)
         {
             int hr;
-            if ((hr = GetGuidOfProject(solution, project, out Guid projectGuid)) != VSConstants.S_OK)
-            {
+            if ((hr = GetGuidOfProject(solution, project, out var projectGuid)) != VSConstants.S_OK)
                 return hr;
-            }
 
             return LoadProject((IVsSolution4) solution, projectGuid);
         }

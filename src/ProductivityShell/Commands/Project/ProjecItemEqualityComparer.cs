@@ -7,15 +7,12 @@ namespace ProductivityShell.Commands.Project
     {
         public bool Equals(EnvDTE.ProjectItem x, EnvDTE.ProjectItem y)
         {
-            return string.Equals(x.Properties.Item("FullPath")
-                                  ?.ToString(), y.Properties.Item("FullPath")
-                                                 ?.ToString(), StringComparison.OrdinalIgnoreCase);
+            return string.Equals(x.Properties.Item("FullPath")?.ToString(), y.Properties.Item("FullPath")?.ToString(), StringComparison.OrdinalIgnoreCase);
         }
 
         public int GetHashCode(EnvDTE.ProjectItem projectItem)
         {
-            return projectItem.Properties.Item("FullPath")
-                              .GetHashCode();
+            return projectItem.Properties.Item("FullPath").GetHashCode();
         }
     }
 }

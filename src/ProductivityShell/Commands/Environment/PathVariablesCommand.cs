@@ -9,7 +9,8 @@ namespace ProductivityShell.Commands.Environment
         ///     Initializes a new instance of the <see cref="PathVariablesCommand" /> class.
         /// </summary>
         /// <param name="package">The package.</param>
-        private PathVariablesCommand(PackageBase package) : base(package, PackageIds.EnvironmentPathVariablesCommand)
+        private PathVariablesCommand(PackageBase package)
+            : base(package, PackageIds.EnvironmentPathVariablesCommand)
         {
         }
 
@@ -22,9 +23,7 @@ namespace ProductivityShell.Commands.Environment
         {
             var pane = Package?.PackageOutputPane;
             if (pane == null || Package?.ActivateOutputWindow() == false)
-            {
                 return;
-            }
 
             const string semiColon = ";";
             var expanded = System.Environment.ExpandEnvironmentVariables("%path%");

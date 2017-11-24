@@ -57,12 +57,9 @@ namespace ProductivityShell.Extensions
             try
             {
                 if (projectItem.Collection == null || !projectItem.IsPhysicalFile())
-                {
                     return true;
-                }
 
-                return projectItem.Collection.OfType<ProjectItem>()
-                                  .All(x => x.Object != projectItem.Object);
+                return projectItem.Collection.OfType<ProjectItem>().All(x => x.Object != projectItem.Object);
             }
             catch (Exception ex)
             {

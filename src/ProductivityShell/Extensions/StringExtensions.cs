@@ -10,9 +10,7 @@ namespace ProductivityShell.Extensions
             {
                 var pos = text.IndexOf(search, comparisonType);
                 if (pos < 0)
-                {
                     return text;
-                }
 
                 text = $"{text.Substring(0, pos)}{replace}{text.Substring(pos + search.Length)}";
                 count--;

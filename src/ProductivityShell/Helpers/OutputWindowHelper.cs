@@ -11,8 +11,7 @@ namespace ProductivityShell.Helpers
     {
         private static IVsOutputWindowPane _packageOutputWindowPane;
 
-        private static IVsOutputWindowPane PackageOutputWindowPane =>
-            _packageOutputWindowPane ?? (_packageOutputWindowPane = GetPackageOutputWindowPane());
+        private static IVsOutputWindowPane PackageOutputWindowPane => _packageOutputWindowPane ?? (_packageOutputWindowPane = GetPackageOutputWindowPane());
 
         /// <summary>
         ///     Writes the specified diagnostic line to the ProductivityShell output pane, but only if diagnostics are enabled.
@@ -23,14 +22,10 @@ namespace ProductivityShell.Helpers
         {
             var generalOptionsPage = Package.Instance.GetDialogPage<GeneralDialogPage>();
             if (!generalOptionsPage.DiagnosticsMode)
-            {
                 return;
-            }
 
             if (ex != null)
-            {
                 message += $": {ex}";
-            }
 
             WriteLine("Diagnostic", message);
         }
@@ -64,14 +59,12 @@ namespace ProductivityShell.Helpers
         {
             var outputWindow = Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
             if (outputWindow == null)
-            {
                 return null;
-            }
 
             var outputPaneGuid = new Guid(PackageGuids.OutputPaneString);
 
             outputWindow.CreatePane(ref outputPaneGuid, PackageConstants.ProductName, 1, 1);
-            outputWindow.GetPane(ref outputPaneGuid, out IVsOutputWindowPane windowPane);
+            outputWindow.GetPane(ref outputPaneGuid, out var windowPane);
 
             return windowPane;
         }

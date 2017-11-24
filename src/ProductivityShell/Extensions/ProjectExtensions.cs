@@ -18,5 +18,15 @@ namespace ProductivityShell.Extensions
 
             return Path.Combine(directoryName, property.Value.ToString());
         }
+
+        public static string GetOutputFilePath(this Project project)
+        {
+            var outputFolder = GetOutputFolder(project);
+            var property = project.Properties.Item("OutputFileName");
+            if (string.IsNullOrWhiteSpace(property.Value?.ToString()))
+                throw new InvalidOperationException("OutputFileName property is null or empty");
+
+            return Path.Combine(outputFolder, property.Value.ToString());
+        }
     }
 }

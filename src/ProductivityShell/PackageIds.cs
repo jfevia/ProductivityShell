@@ -15,7 +15,8 @@
         public const int ProjectDropDown = 0x0301;
         public const int ProjectCommands = 0x0302;
         public const int ProjectOpenOutputFolderCommand = 0x0303;
-        public const int ProjectReloadCommand = 0x0304;
+        public const int ProjectShowOutputFileInExplorerCommand = 0x0304;
+        public const int ProjectReloadCommand = 0x0305;
         public const int ProjectItemGroup = 0x0400;
         public const int ProjectItemDropDown = 0x0401;
         public const int ProjectItemCommands = 0x0402;

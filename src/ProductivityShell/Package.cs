@@ -45,6 +45,7 @@ namespace ProductivityShell
 
             // Project
             OpenOutputFolderCommand.Initialize(this);
+            ShowOutputFileInExplorerCommand.Initialize(this);
             ReloadCommand.Initialize(this);
 
             // Project Item

@@ -15,18 +15,32 @@ namespace ProductivityShell.Commands
             Initialize();
         }
 
-        private void Initialize()
-        {
-            var menuCommandId = new CommandID(Package.CommandSet, Id);
-            var menuItem = new OleMenuCommand((s, e) => { ExecuteHandler(s); }, (s, e) => { ChangeHandler(s); }, menuCommandId);
-            Package.CommandService.AddCommand(menuItem);
-        }
-
         protected PackageBase Package { get; }
 
         protected int Id { get; }
 
         protected static T Instance { get; set; }
+
+        private void Initialize()
+        {
+            var menuCommandId = new CommandID(Package.CommandSet, Id);
+            var menuItem = new OleMenuCommand((s, e) => { ExecuteHandler(s); }, (s, e) => { ChangeHandler(s); }, menuCommandId);
+            menuItem.BeforeQueryStatus += (s, e) => { BeforeQueryStatusHandler(s); };
+
+            Package.CommandService.AddCommand(menuItem);
+        }
+
+        private void BeforeQueryStatusHandler(object sender)
+        {
+            if (!(sender is OleMenuCommand command))
+                return;
+
+            OnBeforeQueryStatus(command);
+        }
+
+        protected virtual void OnBeforeQueryStatus(OleMenuCommand command)
+        {
+        }
 
         protected virtual void OnExecute(OleMenuCommand command)
         {
@@ -38,22 +52,16 @@ namespace ProductivityShell.Commands
 
         private void ExecuteHandler(object sender)
         {
-            var command = sender as OleMenuCommand;
-            if (command == null)
-            {
+            if (!(sender is OleMenuCommand command))
                 return;
-            }
 
             OnExecute(command);
         }
 
         private void ChangeHandler(object sender)
         {
-            var command = sender as OleMenuCommand;
-            if (command == null)
-            {
+            if (!(sender is OleMenuCommand command))
                 return;
-            }
 
             OnChange(command);
         }

@@ -18,6 +18,11 @@ namespace ProductivityShell.Commands.Shell
             Instance = new RestartElevatedCommand(package);
         }
 
+        protected override void OnBeforeQueryStatus(OleMenuCommand command)
+        {
+            command.Visible = !Package.IsRunningElevated;
+        }
+
         protected override void OnExecute(OleMenuCommand command)
         {
             Package.Restart(RestartMode.Elevated);

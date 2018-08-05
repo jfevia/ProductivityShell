@@ -19,7 +19,7 @@
         </Strings>
       </Menu>
 
-      <!-- Shell Restart Dropdown -->
+      <!-- Shell Restart Drop Down -->
       <Menu guid="PackageCommandSet" id="ShellRestartDropDown" type="MenuController" priority="0x0000">
         <Parent guid="PackageCommandSet" id="ShellRestartGroup" />
         <Strings>
@@ -27,7 +27,7 @@
         </Strings>
       </Menu>
 
-      <!-- Environment Dropdown -->
+      <!-- Environment Drop Down -->
       <Menu guid="PackageCommandSet" id="EnvironmentDropDown" type="MenuController" priority="0x0000">
         <Parent guid="PackageCommandSet" id="EnvironmentGroup" />
         <Strings>
@@ -35,7 +35,7 @@
         </Strings>
       </Menu>
 
-      <!-- Project Dropdown -->
+      <!-- Project Drop Down -->
       <Menu guid="PackageCommandSet" id="ProjectDropDown" type="MenuController" priority="0x0000">
         <Parent guid="PackageCommandSet" id="ProjectGroup" />
         <Strings>
@@ -43,7 +43,15 @@
         </Strings>
       </Menu>
 
-      <!-- Tools Dropdown -->
+      <!-- Text Editor Drop Down -->
+      <Menu guid="PackageCommandSet" id="TextEditorDropDown" type="MenuController" priority="0x0000">
+        <Parent guid="PackageCommandSet" id="TextEditorGroup" />
+        <Strings>
+          <ButtonText>Text Editor Commands</ButtonText>
+        </Strings>
+      </Menu>
+
+      <!-- Tools Drop Down -->
       <Menu guid="PackageCommandSet" id="ToolsDropDown" type="MenuController" priority="0x0000">
         <Parent guid="PackageCommandSet" id="ToolsGroup" />
         <Strings>
@@ -51,7 +59,7 @@
         </Strings>
       </Menu>
 
-      <!-- Package Dropdown -->
+      <!-- Package Drop Down -->
       <Menu guid="PackageCommandSet" id="PackageDropDown" type="MenuController" priority="0x0000">
         <Parent guid="PackageCommandSet" id="PackageGroup" />
         <Strings>
@@ -78,6 +86,12 @@
       <Group guid="PackageCommandSet" id="ProjectGroup" priority="0x0000" />
       <Group guid="PackageCommandSet" id="ProjectCommands" priority="0x0000">
         <Parent guid="PackageCommandSet" id="ProjectDropDown" />
+      </Group>
+
+      <!-- Text Editor -->
+      <Group guid="PackageCommandSet" id="TextEditorGroup" priority="0x0000" />
+      <Group guid="PackageCommandSet" id="TextEditorCommands" priority="0x0000">
+        <Parent guid="PackageCommandSet" id="TextEditorDropDown" />
       </Group>
 
       <!-- Tools -->
@@ -184,6 +198,20 @@
         </Strings>
       </Button>
 
+      <!-- Text Editor -->
+      <Button guid="PackageCommandSet" id="MoveToSettingsCommand" type="Button" priority="0x0001">
+        <Parent guid="PackageCommandSet" id="TextEditorCommands" />
+        <Icon guid="ImageCatalogGuid" id="RightArrowAsterisk" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <Strings>
+          <CommandName>RefactorMoveToSettings</CommandName>
+          <CanonicalName>RefactorMoveToSettings</CanonicalName>
+          <LocCanonicalName>RefactorMoveToSettings</LocCanonicalName>
+          <ButtonText>Move to Settings</ButtonText>
+        </Strings>
+      </Button>
+
       <!-- Tools -->
       <Button guid="PackageCommandSet" id="ReplaceGuidPlaceholdersCommand" type="Button" priority="0x0001">
         <Parent guid="PackageCommandSet" id="ToolsCommands" />
@@ -224,6 +252,9 @@
       <Parent guid="PackageCommandSet" id="PackageMenu" />
     </CommandPlacement>
     <CommandPlacement guid="PackageCommandSet" id="ProjectCommands" priority="0x0300">
+      <Parent guid="PackageCommandSet" id="PackageMenu" />
+    </CommandPlacement>
+    <CommandPlacement guid="PackageCommandSet" id="TextEditorCommands" priority="0x400">
       <Parent guid="PackageCommandSet" id="PackageMenu" />
     </CommandPlacement>
     <CommandPlacement guid="PackageCommandSet" id="ToolsCommands" priority="0x1000">
@@ -310,6 +341,13 @@
       <IDSymbol name="ProjectItemCommands" value="0x0402" />
 
       <IDSymbol name="ShowInExplorerCommand" value="0x0403" />
+
+      <!-- Text Editor -->
+      <IDSymbol name="TextEditorGroup" value="0x0500" />
+      <IDSymbol name="TextEditorDropDown" value="0x0501" />
+      <IDSymbol name="TextEditorCommands" value="0x0502" />
+
+      <IDSymbol name="MoveToSettingsCommand" value="0x0503" />
 
       <!-- Tools -->
       <IDSymbol name="ToolsGroup" value="0x0900" />

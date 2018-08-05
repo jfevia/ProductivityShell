@@ -14,8 +14,9 @@ namespace ProductivityShell.Commands.Tools
 {
     internal sealed class ReplaceGuidPlaceholdersCommand : CommandBase<ReplaceGuidPlaceholdersCommand>
     {
+        /// <inheritdoc />
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ReplaceGuidPlaceholdersCommand" /> class.
+        ///     Initializes a new instance of the <see cref="T:ProductivityShell.Commands.Tools.ReplaceGuidPlaceholdersCommand" /> class.
         /// </summary>
         /// <param name="package">The package.</param>
         private ReplaceGuidPlaceholdersCommand(PackageBase package)
@@ -23,26 +24,40 @@ namespace ProductivityShell.Commands.Tools
         {
         }
 
+        /// <summary>
+        ///     Initializes the specified package.
+        /// </summary>
+        /// <param name="package">The package.</param>
         public static void Initialize(PackageBase package)
         {
             Instance = new ReplaceGuidPlaceholdersCommand(package);
         }
 
+        /// <inheritdoc />
+        /// <summary>
+        ///     Called when [execute].
+        /// </summary>
+        /// <param name="command">The command.</param>
         protected override void OnExecute(OleMenuCommand command)
         {
             ReplacePlaceholdersInSelectedItems();
         }
 
+        /// <summary>
+        ///     Replaces the placeholders in selected items.
+        /// </summary>
         private void ReplacePlaceholdersInSelectedItems()
         {
-            var projectItems = SolutionHelper.GetSelectedProjectItemsRecursively(Package).Distinct(new ProjecItemEqualityComparer()).ToList();
+            var projectItems = SolutionHelper.GetSelectedProjectItemsRecursively(Package)
+                .Distinct(new ProjecItemEqualityComparer()).ToList();
             if (projectItems.Count <= 0)
             {
                 MessageBox.Show("No items were found", "GUID Placeholders");
                 return;
             }
 
-            if (MessageBox.Show($"Do you wish to search and replace GUID placeholders in {projectItems.Count} items?", "GUID Placeholders", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+            if (MessageBox.Show($"Do you wish to search and replace GUID placeholders in {projectItems.Count} items?",
+                    "GUID Placeholders", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
                 return;
 
             foreach (var projectItem in projectItems)
@@ -56,7 +71,8 @@ namespace ProductivityShell.Commands.Tools
         private void ReplaceGuidPlaceholders(EnvDTE.ProjectItem projectItem)
         {
             // Attempt to open the document if not already opened.
-            var wasOpen = projectItem.IsOpen[Constants.vsViewKindTextView] || projectItem.IsOpen[Constants.vsViewKindCode];
+            var wasOpen = projectItem.IsOpen[Constants.vsViewKindTextView] ||
+                          projectItem.IsOpen[Constants.vsViewKindCode];
             if (!wasOpen)
                 try
                 {
@@ -64,7 +80,7 @@ namespace ProductivityShell.Commands.Tools
                 }
                 catch (Exception)
                 {
-                    // OK if file cannot be opened (ex: deleted from disk, non-text based type.)
+                    // File cannot be opened (e.g.: deleted from disk, non-text based type)
                 }
 
             try
@@ -80,7 +96,7 @@ namespace ProductivityShell.Commands.Tools
             }
             catch (Exception)
             {
-                // OK if file cannot be opened (ex: deleted from disk, non-text based type.)
+                // File cannot be opened (e.g.: deleted from disk, non-text based type)
             }
         }
 
@@ -98,7 +114,8 @@ namespace ProductivityShell.Commands.Tools
                 return;
 
             if (Package.Dte.ActiveDocument != document)
-                OutputWindowHelper.WarningWriteLine($"Activation was not completed before replacing began for '{document.Name}'");
+                OutputWindowHelper.WarningWriteLine(
+                    $"Activation was not completed before replacing began for '{document.Name}'");
 
             OutputWindowHelper.DiagnosticWriteLine($"ReplaceGuidPlaceholders started for '{document.FullName}'");
             Package.Dte.StatusBar.Text = $"Replacing GUID placeholders in '{document.Name}'...";
@@ -120,7 +137,8 @@ namespace ProductivityShell.Commands.Tools
             if (string.IsNullOrWhiteSpace(toolsDialogPage.GuidPlaceholders))
                 return;
 
-            foreach (var placeholder in toolsDialogPage.GuidPlaceholders.Split(Settings.Default.GuidPlaceholderSplitChar))
+            foreach (var placeholder in toolsDialogPage.GuidPlaceholders.Split(
+                Settings.Default.GuidPlaceholderSplitChar))
             {
                 if (string.IsNullOrWhiteSpace(placeholder))
                     continue;
@@ -147,6 +165,11 @@ namespace ProductivityShell.Commands.Tools
             }
         }
 
+        /// <summary>
+        /// Gets the unique identifier.
+        /// </summary>
+        /// <param name="toolsDialogPage">The tools dialog page.</param>
+        /// <returns>The unique identifier.</returns>
         private static string GetGuidStringBuilder(ToolsDialogPage toolsDialogPage)
         {
             var guidStringBuilder = new GuidStringBuilder();

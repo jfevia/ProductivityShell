@@ -6,6 +6,16 @@ namespace ProductivityShell.Extensions
 {
     internal static class ProjectExtensions
     {
+        /// <summary>
+        ///     Gets the output folder.
+        /// </summary>
+        /// <param name="project">The project.</param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException">
+        ///     Unable to find project directory
+        ///     or
+        ///     OutputPath property is null or empty
+        /// </exception>
         public static string GetOutputFolder(this Project project)
         {
             var directoryName = Path.GetDirectoryName(project.FullName);
@@ -19,6 +29,12 @@ namespace ProductivityShell.Extensions
             return Path.Combine(directoryName, property.Value.ToString());
         }
 
+        /// <summary>
+        ///     Gets the output file path.
+        /// </summary>
+        /// <param name="project">The project.</param>
+        /// <returns>The output file path.</returns>
+        /// <exception cref="InvalidOperationException">OutputFileName property is null or empty</exception>
         public static string GetOutputFilePath(this Project project)
         {
             var outputFolder = GetOutputFolder(project);

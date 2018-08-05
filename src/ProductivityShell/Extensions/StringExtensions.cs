@@ -4,7 +4,17 @@ namespace ProductivityShell.Extensions
 {
     internal static class StringExtensions
     {
-        public static string Replace(this string text, string search, string replace, StringComparison comparisonType, int count)
+        /// <summary>
+        ///     Replaces the specified string.
+        /// </summary>
+        /// <param name="text">The text.</param>
+        /// <param name="search">The search.</param>
+        /// <param name="replace">The replace.</param>
+        /// <param name="comparisonType">Type of the comparison.</param>
+        /// <param name="count">The count.</param>
+        /// <returns>The string with all instances replaced.</returns>
+        public static string Replace(this string text, string search, string replace, StringComparison comparisonType,
+            int count)
         {
             while (count > 0)
             {

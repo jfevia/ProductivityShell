@@ -21,6 +21,10 @@
         public const int ProjectItemDropDown = 0x0401;
         public const int ProjectItemCommands = 0x0402;
         public const int ProjectItemShowInExplorerCommand = 0x0403;
+        public const int TextEditorGroup = 0x0500;
+        public const int TextEditorDropDown = 0x0501;
+        public const int TextEditorCommands = 0x0502;
+        public const int TextEditorMoveToSettingsCommand = 0x0503;
         public const int ToolsGroup = 0x0900;
         public const int ToolsDropDown = 0x0901;
         public const int ToolsCommands = 0x0902;

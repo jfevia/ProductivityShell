@@ -12,6 +12,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductivityShell.Core", "ProductivityShell.Core\ProductivityShell.Core.csproj", "{B243850F-DE47-4233-8826-0D3D1B8765ED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductivityShell.Refactoring", "ProductivityShell.Refactoring\ProductivityShell.Refactoring.csproj", "{9991B1ED-C8DA-4213-A767-590454735BE1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,8 +26,19 @@ Global
 		{ABE46401-E9E9-4FE6-B1D2-A29C9D6EBA55}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ABE46401-E9E9-4FE6-B1D2-A29C9D6EBA55}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ABE46401-E9E9-4FE6-B1D2-A29C9D6EBA55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B243850F-DE47-4233-8826-0D3D1B8765ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B243850F-DE47-4233-8826-0D3D1B8765ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B243850F-DE47-4233-8826-0D3D1B8765ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B243850F-DE47-4233-8826-0D3D1B8765ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9991B1ED-C8DA-4213-A767-590454735BE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9991B1ED-C8DA-4213-A767-590454735BE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9991B1ED-C8DA-4213-A767-590454735BE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9991B1ED-C8DA-4213-A767-590454735BE1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {71EC29EF-F376-40C1-83A2-34A64A5194DC}
 	EndGlobalSection
 EndGlobal

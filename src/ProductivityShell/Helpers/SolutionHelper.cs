@@ -60,6 +60,16 @@ namespace ProductivityShell.Helpers
             return projectItems;
         }
 
+        /// <summary>
+        ///     Reloads the project.
+        /// </summary>
+        /// <param name="solution">The solution.</param>
+        /// <param name="projectName">Name of the project.</param>
+        /// <returns>
+        ///     If the method succeeds, it returns <see cref="F:Microsoft.VisualStudio.VSConstants.S_OK" />. If it fails, it
+        ///     returns an error code. If the project was not previously unloaded, then this method does nothing and returns
+        ///     <see cref="F:Microsoft.VisualStudio.VSConstants.S_FALSE" />.
+        /// </returns>
         internal static int ReloadProject(IVsSolution solution, string projectName)
         {
             int hr;
@@ -98,7 +108,9 @@ namespace ProductivityShell.Helpers
         {
             var allItems = GetAllItemsInSolution<ProjectItem>(package.Dte.Solution);
 
-            return allItems.Where(x => x.Name == projectItem.Name && x.Kind == projectItem.Kind && x.Document.FullName == projectItem.Document.FullName);
+            return allItems.Where(x =>
+                x.Name == projectItem.Name && x.Kind == projectItem.Kind &&
+                x.Document.FullName == projectItem.Document.FullName);
         }
 
         /// <summary>
@@ -139,7 +151,8 @@ namespace ProductivityShell.Helpers
             projectGuid = default(Guid);
 
             int hr;
-            if ((hr = solution.GetProjectOfUniqueName(project.UniqueName, out var projectHierarchy)) != VSConstants.S_OK)
+            if ((hr = solution.GetProjectOfUniqueName(project.UniqueName, out var projectHierarchy)) !=
+                VSConstants.S_OK)
                 return hr;
 
             return solution.GetGuidOfProject(projectHierarchy, out projectGuid);

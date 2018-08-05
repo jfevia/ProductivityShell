@@ -5,8 +5,9 @@ namespace ProductivityShell.Commands.Environment
 {
     internal sealed class PathVariablesCommand : CommandBase<PathVariablesCommand>
     {
+        /// <inheritdoc />
         /// <summary>
-        ///     Initializes a new instance of the <see cref="PathVariablesCommand" /> class.
+        ///     Initializes a new instance of the <see cref="T:ProductivityShell.Commands.Environment.PathVariablesCommand" /> class.
         /// </summary>
         /// <param name="package">The package.</param>
         private PathVariablesCommand(PackageBase package)
@@ -14,11 +15,20 @@ namespace ProductivityShell.Commands.Environment
         {
         }
 
+        /// <summary>
+        ///     Initializes the specified package.
+        /// </summary>
+        /// <param name="package">The package.</param>
         public static void Initialize(PackageBase package)
         {
             Instance = new PathVariablesCommand(package);
         }
 
+        /// <inheritdoc />
+        /// <summary>
+        ///     Called when [execute].
+        /// </summary>
+        /// <param name="command">The command.</param>
         protected override void OnExecute(OleMenuCommand command)
         {
             var pane = Package?.PackageOutputPane;

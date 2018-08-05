@@ -6,6 +6,7 @@ using ProductivityShell.Commands.Package;
 using ProductivityShell.Commands.Project;
 using ProductivityShell.Commands.ProjectItem;
 using ProductivityShell.Commands.Shell;
+using ProductivityShell.Commands.TextEditor;
 using ProductivityShell.Commands.Tools;
 using ProductivityShell.DialogPages;
 using ProductivityShell.Shell;
@@ -50,6 +51,9 @@ namespace ProductivityShell
 
             // Project Item
             ShowInExplorerCommand.Initialize(this);
+
+            // Text Editor
+            MoveToSettingsCommand.Initialize(this);
 
             // Tools
             ReplaceGuidPlaceholdersCommand.Initialize(this);

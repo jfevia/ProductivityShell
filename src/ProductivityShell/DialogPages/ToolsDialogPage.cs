@@ -17,7 +17,7 @@ namespace ProductivityShell.DialogPages
 
         [Category(PackageConstants.GuidCategory)]
         [DisplayName("Match Case")]
-        [Description("Defines whether placeholders should only match case-sensitive ocurrences.")]
+        [Description("Defines whether placeholders should only match case-sensitive occurrences.")]
         public bool GuidMatchCase { get; set; } = false;
 
         [Category(PackageConstants.GuidCategory)]

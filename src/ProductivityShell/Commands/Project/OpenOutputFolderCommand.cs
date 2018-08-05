@@ -9,8 +9,9 @@ namespace ProductivityShell.Commands.Project
 {
     internal sealed class OpenOutputFolderCommand : CommandBase<OpenOutputFolderCommand>
     {
+        /// <inheritdoc />
         /// <summary>
-        ///     Initializes a new instance of the <see cref="OpenOutputFolderCommand" /> class.
+        ///     Initializes a new instance of the <see cref="T:ProductivityShell.Commands.Project.OpenOutputFolderCommand" /> class.
         /// </summary>
         /// <param name="package">The package.</param>
         private OpenOutputFolderCommand(PackageBase package)
@@ -18,11 +19,20 @@ namespace ProductivityShell.Commands.Project
         {
         }
 
+        /// <summary>
+        ///     Initializes the specified package.
+        /// </summary>
+        /// <param name="package">The package.</param>
         public static void Initialize(PackageBase package)
         {
             Instance = new OpenOutputFolderCommand(package);
         }
 
+        /// <inheritdoc />
+        /// <summary>
+        ///     Called when [execute].
+        /// </summary>
+        /// <param name="command">The command.</param>
         protected override void OnExecute(OleMenuCommand command)
         {
             if (Package.Dte.SelectedItems.Count == 0)

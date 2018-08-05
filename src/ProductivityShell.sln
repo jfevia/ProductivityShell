@@ -14,7 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductivityShell.Core", "ProductivityShell.Core\ProductivityShell.Core.csproj", "{B243850F-DE47-4233-8826-0D3D1B8765ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductivityShell.Refactoring", "ProductivityShell.Refactoring\ProductivityShell.Refactoring.csproj", "{9991B1ED-C8DA-4213-A767-590454735BE1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductivityShell.Refactor", "ProductivityShell.Refactor\ProductivityShell.Refactor.csproj", "{E3996DA7-B966-40A4-88E9-5A491AEB7A80}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,10 +30,10 @@ Global
 		{B243850F-DE47-4233-8826-0D3D1B8765ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B243850F-DE47-4233-8826-0D3D1B8765ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B243850F-DE47-4233-8826-0D3D1B8765ED}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9991B1ED-C8DA-4213-A767-590454735BE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9991B1ED-C8DA-4213-A767-590454735BE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9991B1ED-C8DA-4213-A767-590454735BE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9991B1ED-C8DA-4213-A767-590454735BE1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3996DA7-B966-40A4-88E9-5A491AEB7A80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3996DA7-B966-40A4-88E9-5A491AEB7A80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3996DA7-B966-40A4-88E9-5A491AEB7A80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3996DA7-B966-40A4-88E9-5A491AEB7A80}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Reflection;
 
-namespace ProductivityShell.Core
+namespace ProductivityShell.Core.Settings
 {
     /// <summary>
     ///     Manages the decisions on if a type is valid as a setting type and/or is obsolete

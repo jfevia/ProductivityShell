@@ -1,4 +1,4 @@
-﻿namespace ProductivityShell.Core
+﻿namespace ProductivityShell.Core.Settings
 {
     public enum SettingScope
     {

@@ -61,6 +61,15 @@ namespace ProductivityShell.Core.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to File is already opened in an incompatible editor..
+        /// </summary>
+        internal static string AppConfigSerializer_IncompatibleBuffer {
+            get {
+                return ResourceManager.GetString("AppConfigSerializer_IncompatibleBuffer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Setting.
         /// </summary>
         internal static string SettingsContainer_DefaultSettingName {

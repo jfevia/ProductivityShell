@@ -126,4 +126,7 @@
   <data name="SettingsContainer_DefaultSettingName" xml:space="preserve">
     <value>Setting</value>
   </data>
+  <data name="AppConfigSerializer_IncompatibleBuffer" xml:space="preserve">
+    <value>File is already opened in an incompatible editor.</value>
+  </data>
 </root>

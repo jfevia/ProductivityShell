@@ -1,12 +1,12 @@
 ﻿using System;
 
-namespace ProductivityShell.Core
+namespace ProductivityShell.Core.Settings
 {
     public class SettingsSerializerException : ApplicationException
     {
         /// <inheritdoc />
         /// <summary>
-        ///     Initializes a new instance of the <see cref="T:ProductivityShell.Core.SettingsSerializerException" /> class.
+        ///     Initializes a new instance of the <see cref="T:ProductivityShell.Core.Settings.SettingsSerializerException" /> class.
         /// </summary>
         /// <param name="message">A message that describes the error.</param>
         public SettingsSerializerException(string message) : base(message)
@@ -15,7 +15,7 @@ namespace ProductivityShell.Core
 
         /// <inheritdoc />
         /// <summary>
-        ///     Initializes a new instance of the <see cref="T:ProductivityShell.Core.SettingsSerializerException" /> class.
+        ///     Initializes a new instance of the <see cref="T:ProductivityShell.Core.Settings.SettingsSerializerException" /> class.
         /// </summary>
         /// <param name="message">The message.</param>
         /// <param name="inner">The inner.</param>

@@ -6,10 +6,15 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Windows;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
+using ProductivityShell.Core.AppConfig;
+using ProductivityShell.Core.Settings;
 using ProductivityShell.Helpers;
 using ProductivityShell.Shell;
+using Point = System.Drawing.Point;
+using Size = System.Drawing.Size;
 
 namespace ProductivityShell.Commands.TextEditor
 {
@@ -185,24 +190,23 @@ namespace ProductivityShell.Commands.TextEditor
         /// <summary>
         /// Flushes the application configuration.
         /// </summary>
-        private void FlushAppConfig()
+        private void FlushAppConfig(SettingsContainer  settingsContainer)
         {
             if (!AttachAppConfigDocData(true))
                 return;
 
             try
             {
-                AppConfigSerializer.Serialize(RootComponent,
-                    (SettingsTypeCache) GetService(typeof(SettingsTypeCache)),
-                    (SettingsValueCache) GetService(typeof(SettingsValueCache)), GeneratedClassName,
+                var service = Package.QueryService<IVSMDCodeDomProvider>();
+                AppConfigSerializer.Serialize(settingsContainer,
+                    Package.GetService< SettingsTypeCache>(),
+                    Package.GetService< SettingsValueCache>(), GeneratedClassName,
                     GeneratedClassNamespace(true), _appConfigDocData, VsHierarchy, true);
             }
             catch
             {
                 // Failed to flush values to the app.config document
-                DesignerFramework.DesignUtil.ReportError(_serviceProvider,
-                    My.Resources.Microsoft_VisualStudio_Editors_Designer.SD_FailedToSaveAppConfigValues,
-                    HelpIDs.Err_SavingAppConfigFile);
+                MessageBox.Show("An error occurred while saving values to the app.config file. The file might be corrupted or contain invalid XML.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

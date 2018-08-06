@@ -2,9 +2,10 @@
 using System.ComponentModel;
 using System.Configuration;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using Microsoft.VisualStudio.Shell.Design.Serialization;
 
-namespace ProductivityShell.Core
+namespace ProductivityShell.Core.Settings
 {
     /// <summary>
     ///     Serialize object in the same way that the runtime will serialize them, with the additional twist that you can pass
@@ -139,6 +140,22 @@ namespace ProductivityShell.Core
                 // Failed to serialize, let's pretend nothing happened
                 return value.ToString();
             }
+        }
+
+        /// <summary>
+        ///     Normalizes the specified serialized value.
+        /// </summary>
+        /// <param name="serializedValue">The serialized value.</param>
+        /// <param name="type">The type.</param>
+        /// <returns>The normalized serialized value.</returns>
+        public string Normalize(string serializedValue, Type type)
+        {
+            if (!SettingTypeValidator.IsTypeObsolete(type))
+                return Serialize(
+                    RuntimeHelpers.GetObjectValue(Deserialize(serializedValue, type,
+                        CultureInfo.InvariantCulture)), CultureInfo.InvariantCulture);
+
+            return serializedValue;
         }
     }
 }

@@ -1,24 +1,26 @@
 ﻿using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Designer.Interfaces;
 using ProductivityShell.Core.Properties;
 
-namespace ProductivityShell.Core
+namespace ProductivityShell.Core.Settings
 {
-    public class SettingsContainer : Component
+    public class SettingsContainer
     {
+        private readonly IVSMDCodeDomProvider _codeDomProvider;
         private readonly HashSet<Setting> _settings;
 
+        /// <inheritdoc />
         /// <summary>
-        ///     Initializes a new instance of the <see cref="SettingsContainer" /> class.
+        ///     Initializes a new instance of the <see cref="T:ProductivityShell.Core.Settings.SettingsContainer" /> class.
         /// </summary>
-        public SettingsContainer()
+        public SettingsContainer(IVSMDCodeDomProvider codeDomProvider)
         {
+            _codeDomProvider = codeDomProvider;
             _settings = new HashSet<Setting>();
         }
 
@@ -48,21 +50,14 @@ namespace ProductivityShell.Core
         {
             get
             {
-                CodeDomProvider codeProviderInstance = null;
-
-                if (!(GetService(typeof(IVSMDCodeDomProvider)) is IVSMDCodeDomProvider codeDomProvider))
-                    return null;
-
                 try
                 {
-                    codeProviderInstance = codeDomProvider.CodeDomProvider as CodeDomProvider;
+                    return _codeDomProvider?.CodeDomProvider as CodeDomProvider;
                 }
                 catch (COMException)
                 {
-                    // Nothing
+                    return null;
                 }
-
-                return codeProviderInstance;
             }
         }
 

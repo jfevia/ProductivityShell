@@ -4,7 +4,7 @@ using System.Text;
 using System.Xml;
 using ProductivityShell.Core.Properties;
 
-namespace ProductivityShell.Core
+namespace ProductivityShell.Core.Settings
 {
     public sealed class SettingsSerializer
     {

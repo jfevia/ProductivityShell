@@ -30,10 +30,8 @@ namespace ProductivityShell.Shell
         /// <value>
         ///     The command service.
         /// </value>
-        internal IMenuCommandService CommandService
-        {
-            get { return _commandService ?? (_commandService = GetService<IMenuCommandService>()); }
-        }
+        internal IMenuCommandService CommandService =>
+            _commandService ?? (_commandService = GetService<IMenuCommandService>());
 
         /// <summary>
         ///     Gets the command set.
@@ -46,10 +44,7 @@ namespace ProductivityShell.Shell
         /// <summary>
         ///     Gets the top-level object in the Visual Studio object model.
         /// </summary>
-        public DTE2 Dte
-        {
-            get { return _dte ?? (_dte = GetGlobalService<_DTE, DTE2>()); }
-        }
+        public DTE2 Dte => _dte ?? (_dte = GetGlobalService<_DTE, DTE2>());
 
         public OutputWindowPane PackageOutputPane
         {
@@ -115,6 +110,16 @@ namespace ProductivityShell.Shell
         public T GetService<T>()
         {
             return (T) GetService(typeof(T));
+        }
+
+        /// <summary>
+        ///     Adds the service.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="serviceInstance">The service instance.</param>
+        public void AddService(Type type, object serviceInstance)
+        {
+            ((IServiceContainer) this).AddService(type, serviceInstance);
         }
 
         /// <summary>

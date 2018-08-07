@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.ComponentModel.Composition;
+using System.Configuration;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Windows;
 using EnvDTE;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
-using ProductivityShell.Core.AppConfig;
-using ProductivityShell.Core.Settings;
+using Microsoft.VisualStudio.Shell.Design.Serialization;
+using Microsoft.VisualStudio.Shell.Interop;
 using ProductivityShell.Helpers;
 using ProductivityShell.Shell;
 using Point = System.Drawing.Point;
@@ -20,13 +22,13 @@ namespace ProductivityShell.Commands.TextEditor
 {
     internal sealed class MoveToSettingsCommand : CommandBase<MoveToSettingsCommand>
     {
+        private const string SettingsFileExtension = ".settings";
         private readonly Dictionary<Type, int> _defaultTypes;
-        private readonly List<string> _scopes;
+        private readonly List<SettingScope> _scopes;
         private string _extension;
         private string _projectPath;
         private List<EnvDTE.ProjectItem> _settingsFiles;
         private TextSelection _textSelection;
-        private const string SettingsFileExtension = ".settings";
 
         /// <inheritdoc />
         /// <summary>
@@ -62,12 +64,13 @@ namespace ProductivityShell.Commands.TextEditor
                 {typeof(ulong), 0},
                 {typeof(ushort), 0}
             };
-            _scopes = new List<string>
+            _scopes = new List<SettingScope>
             {
-                "Application",
-                "User"
+                SettingScope.Application,
+                SettingScope.User
             };
         }
+
 
         /// <summary>
         ///     Initializes the specified package.
@@ -85,7 +88,7 @@ namespace ProductivityShell.Commands.TextEditor
         /// <param name="command">The command.</param>
         protected override void OnBeforeQueryStatus(OleMenuCommand command)
         {
-            command.Visible = false;
+            command.Enabled = false;
 
             _extension = null;
             _projectPath = null;
@@ -117,7 +120,7 @@ namespace ProductivityShell.Commands.TextEditor
             _settingsFiles = new List<EnvDTE.ProjectItem>(GetSettingsProjectItems(project));
             _extension = extension;
 
-            command.Visible = true;
+            command.Enabled = true;
         }
 
         /// <summary>
@@ -145,7 +148,7 @@ namespace ProductivityShell.Commands.TextEditor
             window.Types = new ObservableCollection<Type>(_defaultTypes.Keys);
             window.SelectedType = GetDetectedType(_textSelection.Text);
 
-            window.Scopes = new ObservableCollection<string>(_scopes);
+            window.Scopes = new ObservableCollection<SettingScope>(_scopes);
             window.SelectedScope = _scopes.FirstOrDefault();
 
             var settingsFiles = new List<SettingsFile>(GetDetectedSettingsFiles());
@@ -159,6 +162,35 @@ namespace ProductivityShell.Commands.TextEditor
                 window.SelectedScope);
         }
 
+        public static DocData GetAppConfigDocData(IServiceProvider serviceProvider, IVsHierarchy hierarchy,
+            bool createIfNotExists)
+        {
+            var projSpecialFiles = hierarchy as IVsProjectSpecialFiles;
+            DocData appConfigDocData = null;
+
+            if (projSpecialFiles != null)
+            {
+                var flags = createIfNotExists
+                    ? Convert.ToUInt32(__PSFFLAGS.PSFF_CreateIfNotExist | __PSFFLAGS.PSFF_FullPath)
+                    : Convert.ToUInt32(__PSFFLAGS.PSFF_FullPath);
+                projSpecialFiles.GetFile((int)__PSFFILEID.PSFFILEID_AppConfig, flags, out var appConfigItemId,
+                    out var appConfigFileName);
+
+                if (appConfigItemId != (uint)VSConstants.VSITEMID.Nil)
+                {
+                    appConfigDocData = new DocData(serviceProvider, appConfigFileName);
+                }
+            }
+
+            if (appConfigDocData == null || appConfigDocData.Buffer != null)
+                return appConfigDocData;
+
+            // The native DocData needs to implement the IVsTextBuffer so DocDataTextReaders/Writers can be used.
+            // If this is not possible, inform the user that things may be broken
+            appConfigDocData.Dispose();
+            throw new NotSupportedException("Incompatible buffer");
+        }
+
         /// <summary>
         ///     Applies the changes.
         /// </summary>
@@ -167,7 +199,8 @@ namespace ProductivityShell.Commands.TextEditor
         /// <param name="settingsFile">The settings file.</param>
         /// <param name="type">The type.</param>
         /// <param name="scope">The scope.</param>
-        private void ApplyChanges(string settingsName, string value, SettingsFile settingsFile, Type type, string scope)
+        private void ApplyChanges(string settingsName, string value, SettingsFile settingsFile, Type type,
+            SettingScope scope)
         {
             var replacementContent = GetReplacementContent(_extension, settingsName);
             if (replacementContent == null)
@@ -177,8 +210,57 @@ namespace ProductivityShell.Commands.TextEditor
             {
                 settingsSerializer.AddOrUpdate(settingsName, type.FullName, scope, value);
                 settingsSerializer.Save();
-                FlushAppConfig();
             }
+
+            var solution = PackageBase.GetGlobalService<SVsSolution, IVsSolution>();
+            solution.GetProjectOfUniqueName(Package.Dte.ActiveDocument.ProjectItem.ContainingProject.UniqueName,
+                out var vsHierarchy);
+
+            var appConfigDocData = GetAppConfigDocData(ProductivityShell.Package.Instance, vsHierarchy, false);
+
+            var exeConfigurationFileMap = new ExeConfigurationFileMap
+            {
+                ExeConfigFilename = appConfigDocData.Name
+            };
+
+            var defaultNamespace = Package.Dte.ActiveDocument.ProjectItem.ContainingProject.Properties
+                .Item("DefaultNamespace");
+            var sectionName = $"{defaultNamespace.Value}.Properties.Settings";
+
+            var configHelperService = new ConfigurationHelperService();
+            var settingsPropertyCollection = new SettingsPropertyCollection();
+            var settingsPropertyValueCollection = configHelperService.ReadSettings(exeConfigurationFileMap,
+                ConfigurationUserLevel.None, appConfigDocData, sectionName, scope == SettingScope.User,
+                settingsPropertyCollection);
+
+            var newSettingProperty = new SettingsProperty(settingsName);
+            var newSettingPropertyValue = new SettingsPropertyValue(newSettingProperty);
+            var exists = false;
+            foreach (SettingsPropertyValue settingPropertyValue in settingsPropertyValueCollection)
+            {
+                if (string.Equals(settingPropertyValue.Property.Name, newSettingProperty.Name, StringComparison.OrdinalIgnoreCase))
+                {
+                    newSettingProperty = settingPropertyValue.Property;
+                    newSettingPropertyValue = settingPropertyValue;
+                    exists = true;
+                    break;
+                }
+            }
+
+            // Update
+            newSettingProperty.DefaultValue = value;
+            newSettingPropertyValue.PropertyValue = value;
+
+            if (!exists)
+            {
+                newSettingProperty.PropertyType = type;
+                newSettingProperty.SerializeAs = SettingsSerializeAs.String;
+                settingsPropertyValueCollection.Add(newSettingPropertyValue);
+            }
+
+            configHelperService.WriteSettings(exeConfigurationFileMap, ConfigurationUserLevel.None, appConfigDocData,
+                sectionName,
+                scope == SettingScope.User, settingsPropertyValueCollection);
 
             var startEditPoint = _textSelection.TopPoint.CreateEditPoint();
             var endEditPoint = _textSelection.BottomPoint.CreateEditPoint();
@@ -188,44 +270,12 @@ namespace ProductivityShell.Commands.TextEditor
         }
 
         /// <summary>
-        /// Flushes the application configuration.
-        /// </summary>
-        private void FlushAppConfig(SettingsContainer  settingsContainer)
-        {
-            if (!AttachAppConfigDocData(true))
-                return;
-
-            try
-            {
-                var service = Package.QueryService<IVSMDCodeDomProvider>();
-                AppConfigSerializer.Serialize(settingsContainer,
-                    Package.GetService< SettingsTypeCache>(),
-                    Package.GetService< SettingsValueCache>(), GeneratedClassName,
-                    GeneratedClassNamespace(true), _appConfigDocData, VsHierarchy, true);
-            }
-            catch
-            {
-                // Failed to flush values to the app.config document
-                MessageBox.Show("An error occurred while saving values to the app.config file. The file might be corrupted or contain invalid XML.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private bool AttachAppConfigDocData(bool createIfNotExist)
-        {
-            var appConfigDocData = AppConfigSerializer.GetAppConfigDocData(VBPackage.Instance, VsHierarchy, createIfNotExist, false, DocDataService);
-            if (appConfigDocData != null)
-                appConfigDocData.DataChanged += ExternalChange;
-            return appConfigDocData != null;
-        }
-
-        /// <summary>
         ///     Gets the detected settings files.
         /// </summary>
         /// <returns>The detected settings files.</returns>
         private IEnumerable<SettingsFile> GetDetectedSettingsFiles()
         {
             foreach (var settingsFile in _settingsFiles)
-            {
                 for (short index = 0; index < settingsFile.FileCount; ++index)
                 {
                     var filePath = settingsFile.FileNames[index];
@@ -236,7 +286,6 @@ namespace ProductivityShell.Commands.TextEditor
                         RelativePath = relativePath
                     };
                 }
-            }
         }
 
         /// <summary>

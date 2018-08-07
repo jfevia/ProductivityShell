@@ -35,7 +35,7 @@ namespace ProductivityShell.Commands.TextEditor
         ///     The selected scope dependency property.
         /// </summary>
         public static readonly DependencyProperty SelectedScopeDependencyProperty = DependencyProperty.Register(
-            nameof(SelectedScope), typeof(string), typeof(MoveToSettingsWindow), new PropertyMetadata(null));
+            nameof(SelectedScope), typeof(SettingScope), typeof(MoveToSettingsWindow), new PropertyMetadata(default(SettingScope)));
 
         /// <summary>
         ///     The types dependency property.
@@ -55,8 +55,8 @@ namespace ProductivityShell.Commands.TextEditor
         ///     The scopes dependency property.
         /// </summary>
         public static readonly DependencyProperty ScopesDependencyProperty = DependencyProperty.Register(
-            nameof(Scopes), typeof(ObservableCollection<string>), typeof(MoveToSettingsWindow),
-            new PropertyMetadata(new ObservableCollection<string>()));
+            nameof(Scopes), typeof(ObservableCollection<SettingScope>), typeof(MoveToSettingsWindow),
+            new PropertyMetadata(new ObservableCollection<SettingScope>()));
 
 
         /// <summary>
@@ -121,9 +121,9 @@ namespace ProductivityShell.Commands.TextEditor
         /// <value>
         ///     The scopes.
         /// </value>
-        public ObservableCollection<string> Scopes
+        public ObservableCollection<SettingScope> Scopes
         {
-            get => (ObservableCollection<string>) GetValue(ScopesDependencyProperty);
+            get => (ObservableCollection<SettingScope>) GetValue(ScopesDependencyProperty);
             set => SetValue(ScopesDependencyProperty, value);
         }
 
@@ -133,9 +133,9 @@ namespace ProductivityShell.Commands.TextEditor
         /// <value>
         ///     The selected scope.
         /// </value>
-        public string SelectedScope
+        public SettingScope SelectedScope
         {
-            get => (string) GetValue(SelectedScopeDependencyProperty);
+            get => (SettingScope) GetValue(SelectedScopeDependencyProperty);
             set => SetValue(SelectedScopeDependencyProperty, value);
         }
 

@@ -51,7 +51,7 @@ namespace ProductivityShell.Commands.TextEditor
         /// <param name="scope">The scope.</param>
         /// <param name="value">The value.</param>
         /// <param name="profile">The profile.</param>
-        public void AddOrUpdate(string name, string typeFullName, string scope, string value, string profile = "(Default)")
+        public void AddOrUpdate(string name, string typeFullName, SettingScope scope, string value, string profile = "(Default)")
         {
             var entry = GetExistingEntry(name);
             if (entry == null)
@@ -90,7 +90,7 @@ namespace ProductivityShell.Commands.TextEditor
         /// <param name="scope">The scope.</param>
         /// <param name="value">The value.</param>
         /// <param name="profile">The profile.</param>
-        private void WriteEntry(string name, string typeFullName, string scope, string value, string profile)
+        private void WriteEntry(string name, string typeFullName, SettingScope scope, string value, string profile)
         {
             var entry = new XElement(_singleSettingName);
             entry.Add(new XAttribute("Name", name));

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.ComponentModel.Composition;
 using System.Configuration;
 using System.Drawing;
 using System.IO;
@@ -13,10 +12,11 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Design.Serialization;
 using Microsoft.VisualStudio.Shell.Interop;
+using ProductivityShell.AppConfig;
 using ProductivityShell.Helpers;
+using ProductivityShell.Settings;
 using ProductivityShell.Shell;
-using Point = System.Drawing.Point;
-using Size = System.Drawing.Size;
+using SettingScope = ProductivityShell.Settings.SettingScope;
 
 namespace ProductivityShell.Commands.TextEditor
 {
@@ -24,6 +24,8 @@ namespace ProductivityShell.Commands.TextEditor
     {
         private const string SettingsFileExtension = ".settings";
         private readonly Dictionary<Type, int> _defaultTypes;
+
+        private readonly Dictionary<string, Func<string, string>> _replacementActionByExtension;
         private readonly List<SettingScope> _scopes;
         private string _extension;
         private string _projectPath;
@@ -69,8 +71,12 @@ namespace ProductivityShell.Commands.TextEditor
                 SettingScope.Application,
                 SettingScope.User
             };
+            _replacementActionByExtension = new Dictionary<string, Func<string, string>>
+            {
+                {".xaml", settingName => $"{{Binding Path={settingName}, Source={{x:Static properties:Settings.Default}}}}"},
+                {".cs", settingName => $"Settings.Default.{settingName}"}
+            };
         }
-
 
         /// <summary>
         ///     Initializes the specified package.
@@ -158,109 +164,41 @@ namespace ProductivityShell.Commands.TextEditor
             if (window.ShowModal() != true)
                 return;
 
-            ApplyChanges(window.SettingsName, window.Value, window.SelectedSettings, window.SelectedType,
-                window.SelectedScope);
-        }
+            var setting = new Setting();
+            setting.Name = window.SettingsName;
+            setting.Scope = window.SelectedScope;
+            setting.Type = window.SelectedType;
+            setting.Value = window.Value;
+            setting.DefaultValue = window.Value;
+            //setting.Profile = window.Profile;
 
-        public static DocData GetAppConfigDocData(IServiceProvider serviceProvider, IVsHierarchy hierarchy,
-            bool createIfNotExists)
-        {
-            var projSpecialFiles = hierarchy as IVsProjectSpecialFiles;
-            DocData appConfigDocData = null;
-
-            if (projSpecialFiles != null)
-            {
-                var flags = createIfNotExists
-                    ? Convert.ToUInt32(__PSFFLAGS.PSFF_CreateIfNotExist | __PSFFLAGS.PSFF_FullPath)
-                    : Convert.ToUInt32(__PSFFLAGS.PSFF_FullPath);
-                projSpecialFiles.GetFile((int)__PSFFILEID.PSFFILEID_AppConfig, flags, out var appConfigItemId,
-                    out var appConfigFileName);
-
-                if (appConfigItemId != (uint)VSConstants.VSITEMID.Nil)
-                {
-                    appConfigDocData = new DocData(serviceProvider, appConfigFileName);
-                }
-            }
-
-            if (appConfigDocData == null || appConfigDocData.Buffer != null)
-                return appConfigDocData;
-
-            // The native DocData needs to implement the IVsTextBuffer so DocDataTextReaders/Writers can be used.
-            // If this is not possible, inform the user that things may be broken
-            appConfigDocData.Dispose();
-            throw new NotSupportedException("Incompatible buffer");
+            AddOrUpdate(window.SelectedSettings, setting);
         }
 
         /// <summary>
-        ///     Applies the changes.
+        ///     Adds or updates the specified setting.
         /// </summary>
-        /// <param name="settingsName">Name of the settings.</param>
-        /// <param name="value">The value.</param>
-        /// <param name="settingsFile">The settings file.</param>
-        /// <param name="type">The type.</param>
-        /// <param name="scope">The scope.</param>
-        private void ApplyChanges(string settingsName, string value, SettingsFile settingsFile, Type type,
-            SettingScope scope)
+        /// <param name="file">The file.</param>
+        /// <param name="setting">The setting.</param>
+        private void AddOrUpdate(SettingsFile file, Setting setting)
         {
-            var replacementContent = GetReplacementContent(_extension, settingsName);
+            var replacementContent = GetReplacementContent(_extension, setting.Name);
             if (replacementContent == null)
                 return;
 
-            using (var settingsSerializer = new SettingsSerializer(settingsFile.FullPath))
-            {
-                settingsSerializer.AddOrUpdate(settingsName, type.FullName, scope, value);
-                settingsSerializer.Save();
-            }
+            // Read the settings
+            var serializedContainer = File.ReadAllText(file.FullPath);
+            var settingsContainer = SettingsSerializer.Deserialize(serializedContainer);
 
-            var solution = PackageBase.GetGlobalService<SVsSolution, IVsSolution>();
-            solution.GetProjectOfUniqueName(Package.Dte.ActiveDocument.ProjectItem.ContainingProject.UniqueName,
-                out var vsHierarchy);
+            // Let's add the new entry
+            settingsContainer.AddOrUpdate(setting);
 
-            var appConfigDocData = GetAppConfigDocData(ProductivityShell.Package.Instance, vsHierarchy, false);
+            // ... and write the settings again
+            serializedContainer = SettingsSerializer.Serialize(settingsContainer);
+            File.WriteAllText(file.FullPath, serializedContainer);
 
-            var exeConfigurationFileMap = new ExeConfigurationFileMap
-            {
-                ExeConfigFilename = appConfigDocData.Name
-            };
-
-            var defaultNamespace = Package.Dte.ActiveDocument.ProjectItem.ContainingProject.Properties
-                .Item("DefaultNamespace");
-            var sectionName = $"{defaultNamespace.Value}.Properties.Settings";
-
-            var configHelperService = new ConfigurationHelperService();
-            var settingsPropertyCollection = new SettingsPropertyCollection();
-            var settingsPropertyValueCollection = configHelperService.ReadSettings(exeConfigurationFileMap,
-                ConfigurationUserLevel.None, appConfigDocData, sectionName, scope == SettingScope.User,
-                settingsPropertyCollection);
-
-            var newSettingProperty = new SettingsProperty(settingsName);
-            var newSettingPropertyValue = new SettingsPropertyValue(newSettingProperty);
-            var exists = false;
-            foreach (SettingsPropertyValue settingPropertyValue in settingsPropertyValueCollection)
-            {
-                if (string.Equals(settingPropertyValue.Property.Name, newSettingProperty.Name, StringComparison.OrdinalIgnoreCase))
-                {
-                    newSettingProperty = settingPropertyValue.Property;
-                    newSettingPropertyValue = settingPropertyValue;
-                    exists = true;
-                    break;
-                }
-            }
-
-            // Update
-            newSettingProperty.DefaultValue = value;
-            newSettingPropertyValue.PropertyValue = value;
-
-            if (!exists)
-            {
-                newSettingProperty.PropertyType = type;
-                newSettingProperty.SerializeAs = SettingsSerializeAs.String;
-                settingsPropertyValueCollection.Add(newSettingPropertyValue);
-            }
-
-            configHelperService.WriteSettings(exeConfigurationFileMap, ConfigurationUserLevel.None, appConfigDocData,
-                sectionName,
-                scope == SettingScope.User, settingsPropertyValueCollection);
+            SettingsFileGenerator.Write(file.DesignerFilePath, settingsContainer);
+            AppConfigFileGenerator.Write(settingsContainer);
 
             var startEditPoint = _textSelection.TopPoint.CreateEditPoint();
             var endEditPoint = _textSelection.BottomPoint.CreateEditPoint();
@@ -280,10 +218,19 @@ namespace ProductivityShell.Commands.TextEditor
                 {
                     var filePath = settingsFile.FileNames[index];
                     var relativePath = filePath.Replace(_projectPath, $"<{settingsFile.ContainingProject.Name}>");
+                    var directoryName = Path.GetDirectoryName(filePath);
+                    var fileName = Path.GetFileNameWithoutExtension(filePath);
+                    var designerFileName = $"{fileName}.Designer.cs";
+                    var designerFilePath = Path.Combine(directoryName, designerFileName);
+
                     yield return new SettingsFile
                     {
                         FullPath = filePath,
-                        RelativePath = relativePath
+                        RelativePath = relativePath,
+                        DirectoryName = directoryName,
+                        FileName = fileName,
+                        DesignerFileName = designerFileName,
+                        DesignerFilePath = designerFilePath
                     };
                 }
         }
@@ -323,19 +270,10 @@ namespace ProductivityShell.Commands.TextEditor
         /// <param name="entryName">Name of the entry.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentOutOfRangeException">extension</exception>
-        private static string GetReplacementContent(string extension, string entryName)
+        private string GetReplacementContent(string extension, string entryName)
         {
             extension = extension.ToLower();
-            switch (extension)
-            {
-                case ".xaml":
-                    return $"{{Binding Path={entryName}, Source={{x:Static properties:Settings.Default}}}}";
-                case ".cs":
-                case ".vb":
-                    return $"Settings.Default.{entryName}";
-                default:
-                    return null;
-            }
+            return _replacementActionByExtension[extension](entryName);
         }
 
         /// <summary>
@@ -345,17 +283,10 @@ namespace ProductivityShell.Commands.TextEditor
         /// <returns>
         ///     <c>true</c> if this instance can move the selection; otherwise, <c>false</c>.
         /// </returns>
-        private static bool CanMove(string extension)
+        private bool CanMove(string extension)
         {
-            switch (extension)
-            {
-                case ".xaml":
-                case ".cs":
-                case ".vb":
-                    return true;
-                default:
-                    return false;
-            }
+            extension = extension.ToLower();
+            return _replacementActionByExtension.ContainsKey(extension);
         }
     }
 }

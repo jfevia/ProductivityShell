@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Windows;
 using Microsoft.VisualStudio.PlatformUI;
+using ProductivityShell.Settings;
 
 namespace ProductivityShell.Commands.TextEditor
 {

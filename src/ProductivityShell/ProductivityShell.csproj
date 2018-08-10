@@ -51,6 +51,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AppConfig\AppConfigFileGenerator.cs" />
     <Compile Include="Commands\CommandBase.cs" />
     <Compile Include="Commands\Package\ShowOptionPageCommand.cs" />
     <Compile Include="Commands\TextEditor\MoveToSettingsCommand.cs" />
@@ -61,9 +62,13 @@
     <Compile Include="Commands\Project\OpenOutputFolderCommand.cs" />
     <Compile Include="Commands\Shell\RestartElevatedCommand.cs" />
     <Compile Include="Commands\Environment\PathVariablesCommand.cs" />
-    <Compile Include="Commands\TextEditor\SettingScope.cs" />
-    <Compile Include="Commands\TextEditor\SettingsFile.cs" />
-    <Compile Include="Commands\TextEditor\SettingsSerializer.cs" />
+    <Compile Include="Settings\AccessModifier.cs" />
+    <Compile Include="Settings\Setting.cs" />
+    <Compile Include="Settings\SettingsContainer.cs" />
+    <Compile Include="Settings\SettingScope.cs" />
+    <Compile Include="Settings\SettingsFile.cs" />
+    <Compile Include="Settings\SettingsFileGenerator.cs" />
+    <Compile Include="Settings\SettingsSerializer.cs" />
     <Compile Include="EditorMargin\BottomMargin.cs" />
     <Compile Include="EditorMargin\BottomMarginFactory.cs" />
     <Compile Include="EditorMargin\InteractiveTextControl.cs" />
@@ -113,7 +118,7 @@
     <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <None Include="source.extension.vsixmanifest">

@@ -1,4 +1,4 @@
-﻿namespace ProductivityShell.Commands.TextEditor
+﻿namespace ProductivityShell.Settings
 {
     public enum SettingScope
     {

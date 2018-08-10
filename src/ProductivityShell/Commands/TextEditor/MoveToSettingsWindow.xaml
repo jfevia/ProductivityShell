@@ -5,7 +5,7 @@
                          x:Name="MoveToSettings"
                          Title="Move to Settings - Productivity Shell"
                          Width="640"
-                         Height="435"
+                         Height="445"
                          HasHelpButton="True"
                          HasMaximizeButton="False"
                          HasMinimizeButton="False"
@@ -62,8 +62,7 @@
                          Margin="4,4,8,4"
                          VerticalAlignment="Center"
                          VerticalContentAlignment="Center"
-                         Text="{Binding Path=SettingsName,
-                                        ElementName=MoveToSettings}" />
+                         Text="{Binding Path=SettingsName, ElementName=MoveToSettings}" />
                 <TextBlock Grid.Row="1"
                            Grid.Column="0"
                            Margin="12,4,4,4"
@@ -75,10 +74,8 @@
                           VerticalAlignment="Center"
                           VerticalContentAlignment="Center"
                           DisplayMemberPath="RelativePath"
-                          ItemsSource="{Binding Path=Settings,
-                                                ElementName=MoveToSettings}"
-                          SelectedItem="{Binding Path=SelectedSettings,
-                                                 ElementName=MoveToSettings}" />
+                          ItemsSource="{Binding Path=Settings, ElementName=MoveToSettings}"
+                          SelectedItem="{Binding Path=SelectedSettings, ElementName=MoveToSettings}" />
                 <TextBlock Grid.Row="2"
                            Grid.Column="0"
                            Margin="12,4,4,4"
@@ -89,10 +86,8 @@
                           Margin="4,4,8,4"
                           VerticalAlignment="Center"
                           VerticalContentAlignment="Center"
-                          ItemsSource="{Binding Path=Scopes,
-                                                ElementName=MoveToSettings}"
-                          SelectedItem="{Binding Path=SelectedScope,
-                                                 ElementName=MoveToSettings}" />
+                          ItemsSource="{Binding Path=Scopes, ElementName=MoveToSettings}"
+                          SelectedItem="{Binding Path=SelectedScope, ElementName=MoveToSettings}" />
                 <TextBlock Grid.Row="3"
                            Grid.Column="0"
                            Margin="12,4,4,4"
@@ -112,10 +107,8 @@
                               Grid.Column="0"
                               VerticalAlignment="Center"
                               VerticalContentAlignment="Center"
-                              ItemsSource="{Binding Path=Types,
-                                                    ElementName=MoveToSettings}"
-                              SelectedItem="{Binding Path=SelectedType,
-                                                     ElementName=MoveToSettings}" />
+                              ItemsSource="{Binding Path=Types, ElementName=MoveToSettings}"
+                              SelectedItem="{Binding Path=SelectedType, ElementName=MoveToSettings}" />
                     <Button Grid.Row="0"
                             Grid.Column="1"
                             MinWidth="70"
@@ -132,8 +125,7 @@
                     <TextBox Margin="3,2"
                              VerticalContentAlignment="Top"
                              AcceptsReturn="True"
-                             Text="{Binding Path=Value,
-                                            ElementName=MoveToSettings}" />
+                             Text="{Binding Path=Value, ElementName=MoveToSettings}" />
                 </GroupBox>
                 <StackPanel Grid.Row="5"
                             Grid.Column="0"
@@ -144,7 +136,8 @@
                               Content="Find identical items in file" />
                     <TextBlock Margin="3,0,0,0"
                                VerticalAlignment="Center"
-                               Foreground="DarkBlue"
+                               Cursor="Hand"
+                               Foreground="Blue"
                                Text="&lt;SolutionName&gt;\&lt;ProjectName&gt;\MainWindow.xaml"
                                TextDecorations="Underline" />
                 </StackPanel>

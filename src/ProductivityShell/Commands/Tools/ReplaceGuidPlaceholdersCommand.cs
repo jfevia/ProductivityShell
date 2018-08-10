@@ -7,7 +7,6 @@ using ProductivityShell.Commands.Project;
 using ProductivityShell.DialogPages;
 using ProductivityShell.Extensions;
 using ProductivityShell.Helpers;
-using ProductivityShell.Properties;
 using ProductivityShell.Shell;
 
 namespace ProductivityShell.Commands.Tools
@@ -16,7 +15,8 @@ namespace ProductivityShell.Commands.Tools
     {
         /// <inheritdoc />
         /// <summary>
-        ///     Initializes a new instance of the <see cref="T:ProductivityShell.Commands.Tools.ReplaceGuidPlaceholdersCommand" /> class.
+        ///     Initializes a new instance of the <see cref="T:ProductivityShell.Commands.Tools.ReplaceGuidPlaceholdersCommand" />
+        ///     class.
         /// </summary>
         /// <param name="package">The package.</param>
         private ReplaceGuidPlaceholdersCommand(PackageBase package)
@@ -138,7 +138,7 @@ namespace ProductivityShell.Commands.Tools
                 return;
 
             foreach (var placeholder in toolsDialogPage.GuidPlaceholders.Split(
-                Settings.Default.GuidPlaceholderSplitChar))
+                Properties.Settings.Default.GuidPlaceholderSplitChar))
             {
                 if (string.IsNullOrWhiteSpace(placeholder))
                     continue;
@@ -166,7 +166,7 @@ namespace ProductivityShell.Commands.Tools
         }
 
         /// <summary>
-        /// Gets the unique identifier.
+        ///     Gets the unique identifier.
         /// </summary>
         /// <param name="toolsDialogPage">The tools dialog page.</param>
         /// <returns>The unique identifier.</returns>

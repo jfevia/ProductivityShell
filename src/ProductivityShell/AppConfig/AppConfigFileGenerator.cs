@@ -22,6 +22,9 @@ namespace ProductivityShell.AppConfig
                 out var vsHierarchy);
 
             var appConfigDocData = GetAppConfigDocData(Package.Instance, vsHierarchy, false);
+            if (appConfigDocData == null)
+                return;
+
             var exeConfigurationFileMap = new ExeConfigurationFileMap();
             exeConfigurationFileMap.ExeConfigFilename = appConfigDocData.Name;
 
@@ -39,30 +42,29 @@ namespace ProductivityShell.AppConfig
 
             foreach (var setting in settingsContainer.Settings)
             {
-                var newSettingProperty = new SettingsProperty(setting.Name);
-                var newSettingPropertyValue = new SettingsPropertyValue(newSettingProperty);
+                var newSettingPropertyValue = new SettingsPropertyValue(new SettingsProperty(setting.Name));
                 var exists = false;
                 var settingsPropertyValueCollection = setting.Scope == SettingScope.Application ? appScopedSettingsPropertyValueCollection : userScopedSettingsPropertyValueCollection;
 
                 foreach (SettingsPropertyValue settingPropertyValue in settingsPropertyValueCollection)
-                    if (string.Equals(settingPropertyValue.Property.Name, newSettingProperty.Name, StringComparison.OrdinalIgnoreCase))
-                    {
-                        newSettingProperty = settingPropertyValue.Property;
-                        newSettingPropertyValue = settingPropertyValue;
-                        exists = true;
-                        break;
-                    }
+                {
+                    if (!string.Equals(settingPropertyValue.Property.Name, newSettingPropertyValue.Property.Name, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    newSettingPropertyValue = settingPropertyValue;
+                    exists = true;
+                    break;
+                }
+
+                if (!exists)
+                    settingsPropertyValueCollection.Add(newSettingPropertyValue);
 
                 // Update
-                newSettingProperty.DefaultValue = setting.DefaultValue;
-                newSettingPropertyValue.PropertyValue = setting.Name;
-
-                if (exists)
-                    continue;
-
-                newSettingProperty.PropertyType = setting.Type;
-                newSettingProperty.SerializeAs = SettingsSerializeAs.String;
-                settingsPropertyValueCollection.Add(newSettingPropertyValue);
+                newSettingPropertyValue.Property.DefaultValue = setting.DefaultValue;
+                newSettingPropertyValue.PropertyValue = setting.Value;
+                newSettingPropertyValue.SerializedValue = setting.Value;
+                newSettingPropertyValue.Property.PropertyType = setting.Type;
+                newSettingPropertyValue.Property.SerializeAs = SettingsSerializeAs.String;
             }
 
             configHelperService.WriteSettings(exeConfigurationFileMap, ConfigurationUserLevel.None, appConfigDocData,
@@ -72,6 +74,7 @@ namespace ProductivityShell.AppConfig
             configHelperService.WriteSettings(exeConfigurationFileMap, ConfigurationUserLevel.None, appConfigDocData,
                 sectionName,
                 true, userScopedSettingsPropertyValueCollection);
+            appConfigDocData.CheckoutFile(Package.Instance);
         }
 
         /// <summary>

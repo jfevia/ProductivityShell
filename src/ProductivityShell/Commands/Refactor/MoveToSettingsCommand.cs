@@ -3,22 +3,18 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Configuration;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using EnvDTE;
-using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Design.Serialization;
-using Microsoft.VisualStudio.Shell.Interop;
 using ProductivityShell.AppConfig;
 using ProductivityShell.Helpers;
 using ProductivityShell.Settings;
 using ProductivityShell.Shell;
 using SettingScope = ProductivityShell.Settings.SettingScope;
 
-namespace ProductivityShell.Commands.TextEditor
+namespace ProductivityShell.Commands.Refactor
 {
     internal sealed class MoveToSettingsCommand : CommandBase<MoveToSettingsCommand>
     {
@@ -35,11 +31,11 @@ namespace ProductivityShell.Commands.TextEditor
         /// <inheritdoc />
         /// <summary>
         ///     Initializes a new instance of the
-        ///     <see cref="T:ProductivityShell.Commands.TextEditor.MoveToSettingsCommand" /> class.
+        ///     <see cref="T:ProductivityShell.Commands.Refactor.MoveToSettingsCommand" /> class.
         /// </summary>
         /// <param name="package">The package.</param>
         private MoveToSettingsCommand(PackageBase package)
-            : base(package, PackageIds.TextEditorMoveToSettingsCommand)
+            : base(package, PackageIds.RefactorMoveToSettingsCommand)
         {
             _settingsFiles = new List<EnvDTE.ProjectItem>();
             _defaultTypes = new Dictionary<Type, int>

@@ -43,11 +43,11 @@
         </Strings>
       </Menu>
 
-      <!-- Text Editor Drop Down -->
-      <Menu guid="PackageCommandSet" id="TextEditorDropDown" type="MenuController" priority="0x0000">
-        <Parent guid="PackageCommandSet" id="TextEditorGroup" />
+      <!-- Refactor Drop Down -->
+      <Menu guid="PackageCommandSet" id="RefactorDropDown" type="MenuController" priority="0x0000">
+        <Parent guid="PackageCommandSet" id="RefactorGroup" />
         <Strings>
-          <ButtonText>Text Editor Commands</ButtonText>
+          <ButtonText>Refactor Commands</ButtonText>
         </Strings>
       </Menu>
 
@@ -88,10 +88,10 @@
         <Parent guid="PackageCommandSet" id="ProjectDropDown" />
       </Group>
 
-      <!-- Text Editor -->
-      <Group guid="PackageCommandSet" id="TextEditorGroup" priority="0x0000" />
-      <Group guid="PackageCommandSet" id="TextEditorCommands" priority="0x0000">
-        <Parent guid="PackageCommandSet" id="TextEditorDropDown" />
+      <!-- Refactor -->
+      <Group guid="PackageCommandSet" id="RefactorGroup" priority="0x0000" />
+      <Group guid="PackageCommandSet" id="RefactorCommands" priority="0x0000">
+        <Parent guid="PackageCommandSet" id="RefactorDropDown" />
       </Group>
 
       <!-- Tools -->
@@ -198,9 +198,9 @@
         </Strings>
       </Button>
 
-      <!-- Text Editor -->
+      <!-- Refactor -->
       <Button guid="PackageCommandSet" id="MoveToSettingsCommand" type="Button" priority="0x0001">
-        <Parent guid="PackageCommandSet" id="TextEditorCommands" />
+        <Parent guid="PackageCommandSet" id="RefactorCommands" />
         <Icon guid="ImageCatalogGuid" id="RightArrowAsterisk" />
         <CommandFlag>IconIsMoniker</CommandFlag>
         <CommandFlag>DynamicVisibility</CommandFlag>
@@ -242,6 +242,10 @@
 
     </Buttons>
   </Commands>
+  <KeyBindings>
+    <KeyBinding guid="PackageCommandSet" id="MoveToSettingsCommand"
+                key1="R" mod1="CONTROL" key2="S" mod2="CONTROL" editor="guidVSStd97" />
+  </KeyBindings>
   <CommandPlacements>
 
     <!-- PackageMenu -->
@@ -254,7 +258,7 @@
     <CommandPlacement guid="PackageCommandSet" id="ProjectCommands" priority="0x0300">
       <Parent guid="PackageCommandSet" id="PackageMenu" />
     </CommandPlacement>
-    <CommandPlacement guid="PackageCommandSet" id="TextEditorCommands" priority="0x400">
+    <CommandPlacement guid="PackageCommandSet" id="RefactorCommands" priority="0x400">
       <Parent guid="PackageCommandSet" id="PackageMenu" />
     </CommandPlacement>
     <CommandPlacement guid="PackageCommandSet" id="ToolsCommands" priority="0x1000">
@@ -342,10 +346,10 @@
 
       <IDSymbol name="ShowInExplorerCommand" value="0x0403" />
 
-      <!-- Text Editor -->
-      <IDSymbol name="TextEditorGroup" value="0x0500" />
-      <IDSymbol name="TextEditorDropDown" value="0x0501" />
-      <IDSymbol name="TextEditorCommands" value="0x0502" />
+      <!-- Refactor -->
+      <IDSymbol name="RefactorGroup" value="0x0500" />
+      <IDSymbol name="RefactorDropDown" value="0x0501" />
+      <IDSymbol name="RefactorCommands" value="0x0502" />
 
       <IDSymbol name="MoveToSettingsCommand" value="0x0503" />
 

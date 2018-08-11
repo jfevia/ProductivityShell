@@ -4,7 +4,7 @@ using System.Windows;
 using Microsoft.VisualStudio.PlatformUI;
 using ProductivityShell.Settings;
 
-namespace ProductivityShell.Commands.TextEditor
+namespace ProductivityShell.Commands.Refactor
 {
     public partial class MoveToSettingsWindow : DialogWindow
     {
@@ -60,8 +60,9 @@ namespace ProductivityShell.Commands.TextEditor
             new PropertyMetadata(new ObservableCollection<SettingScope>()));
 
 
+        /// <inheritdoc />
         /// <summary>
-        ///     Initializes a new instance of the <see cref="MoveToSettingsWindow" /> class.
+        ///     Initializes a new instance of the <see cref="T:ProductivityShell.Commands.Refactor.MoveToSettingsWindow" /> class.
         /// </summary>
         public MoveToSettingsWindow()
         {

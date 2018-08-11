@@ -54,7 +54,7 @@
     <Compile Include="AppConfig\AppConfigFileGenerator.cs" />
     <Compile Include="Commands\CommandBase.cs" />
     <Compile Include="Commands\Package\ShowOptionPageCommand.cs" />
-    <Compile Include="Commands\TextEditor\MoveToSettingsCommand.cs" />
+    <Compile Include="Commands\Refactor\MoveToSettingsCommand.cs" />
     <Compile Include="Commands\ProjectItem\ShowInExplorerCommand.cs" />
     <Compile Include="Commands\Project\ShowOutputFileInExplorerCommand.cs" />
     <Compile Include="Commands\Project\ProjecItemEqualityComparer.cs" />
@@ -107,7 +107,7 @@
     <Compile Include="source.extension.cs">
       <DependentUpon>source.extension.vsixmanifest</DependentUpon>
     </Compile>
-    <Compile Include="Commands\TextEditor\MoveToSettingsWindow.xaml.cs">
+    <Compile Include="Commands\Refactor\MoveToSettingsWindow.xaml.cs">
       <DependentUpon>MoveToSettingsWindow.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
@@ -292,7 +292,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Commands\TextEditor\MoveToSettingsWindow.xaml">
+    <Page Include="Commands\Refactor\MoveToSettingsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

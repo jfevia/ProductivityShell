@@ -1,8 +1,10 @@
 ﻿using System;
 using System.ComponentModel.Design;
+using System.Diagnostics;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.CommandBars;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
@@ -70,6 +72,48 @@ namespace ProductivityShell.Shell
                 _shell3.IsRunningElevated(out var isElevated);
                 return isElevated;
             }
+        }
+
+        /// <summary>
+        ///     Adds the or update command bar.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="displayName">The display name.</param>
+        /// <param name="barName">Name of the bar.</param>
+        /// <param name="type">The type.</param>
+        public void AddOrUpdateCommandBar(string name, string displayName, string barName, vsCommandBarType type)
+        {
+            if (!(Dte.Application.CommandBars is CommandBars commandBars))
+                return;
+
+            CommandBar commandBar = null;
+            for (var commandBarIndex = 0; commandBarIndex < commandBars.Count; commandBarIndex++)
+            {
+                var tempCommandBar = commandBars[commandBarIndex + 1];
+                Debug.WriteLine($"Name (Local): {tempCommandBar.NameLocal}, Name: {tempCommandBar.Name}");
+                Debug.WriteLine("\tBegin Controls");
+                var controls = tempCommandBar.Controls;
+
+                foreach (CommandBarControl item in controls)
+                    Debug.WriteLine($"\t\tDesc: {item.DescriptionText}, {item.Type}");
+
+                Debug.WriteLine("\tEnd Controls");
+
+                if (!string.Equals(barName, tempCommandBar.Name, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                commandBar = tempCommandBar;
+                break;
+            }
+
+            if (commandBar == null)
+                commandBar = (CommandBar)Dte.Commands.AddCommandBar(barName, type);
+
+            Debug.WriteLine(commandBar);
+
+            //var commandItem = commandBar.AddControl(barName);
+            //commandItem.Caption = displayName;
+            //Debug.WriteLine(commandItem);
         }
 
         public bool ActivateOutputWindow()

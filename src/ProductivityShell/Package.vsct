@@ -19,7 +19,7 @@
         </Strings>
       </Menu>
 
-      <!-- Shell Restart Drop Down -->
+      <!-- Shell: Restart -->
       <Menu guid="PackageCommandSet" id="ShellRestartDropDown" type="MenuController" priority="0x0000">
         <Parent guid="PackageCommandSet" id="ShellRestartGroup" />
         <Strings>
@@ -27,7 +27,15 @@
         </Strings>
       </Menu>
 
-      <!-- Environment Drop Down -->
+      <!-- Shell: Tools -->
+      <Menu guid="PackageCommandSet" id="ShellToolsDropDown" type="MenuController" priority="0x0000">
+        <Parent guid="PackageCommandSet" id="ShellToolsGroup" />
+        <Strings>
+          <ButtonText>Shell Tools Commands</ButtonText>
+        </Strings>
+      </Menu>
+
+      <!-- Environment -->
       <Menu guid="PackageCommandSet" id="EnvironmentDropDown" type="MenuController" priority="0x0000">
         <Parent guid="PackageCommandSet" id="EnvironmentGroup" />
         <Strings>
@@ -35,7 +43,7 @@
         </Strings>
       </Menu>
 
-      <!-- Project Drop Down -->
+      <!-- Project -->
       <Menu guid="PackageCommandSet" id="ProjectDropDown" type="MenuController" priority="0x0000">
         <Parent guid="PackageCommandSet" id="ProjectGroup" />
         <Strings>
@@ -43,7 +51,7 @@
         </Strings>
       </Menu>
 
-      <!-- Refactor Drop Down -->
+      <!-- Refactor -->
       <Menu guid="PackageCommandSet" id="RefactorDropDown" type="MenuController" priority="0x0000">
         <Parent guid="PackageCommandSet" id="RefactorGroup" />
         <Strings>
@@ -51,7 +59,7 @@
         </Strings>
       </Menu>
 
-      <!-- Tools Drop Down -->
+      <!-- Tools -->
       <Menu guid="PackageCommandSet" id="ToolsDropDown" type="MenuController" priority="0x0000">
         <Parent guid="PackageCommandSet" id="ToolsGroup" />
         <Strings>
@@ -59,7 +67,7 @@
         </Strings>
       </Menu>
 
-      <!-- Package Drop Down -->
+      <!-- Package -->
       <Menu guid="PackageCommandSet" id="PackageDropDown" type="MenuController" priority="0x0000">
         <Parent guid="PackageCommandSet" id="PackageGroup" />
         <Strings>
@@ -70,10 +78,16 @@
     </Menus>
     <Groups>
 
-      <!-- Shell Restart -->
+      <!-- Shell: Restart -->
       <Group guid="PackageCommandSet" id="ShellRestartGroup" priority="0x0000" />
       <Group guid="PackageCommandSet" id="ShellRestartCommands" priority="0x0000">
         <Parent guid="PackageCommandSet" id="ShellRestartDropDown" />
+      </Group>
+
+      <!-- Shell: Tools -->
+      <Group guid="PackageCommandSet" id="ShellToolsGroup" priority="0x0000" />
+      <Group guid="PackageCommandSet" id="ShellToolsCommands" priority="0x0000">
+        <Parent guid="PackageCommandSet" id="ShellToolsDropDown" />
       </Group>
 
       <!-- Environment -->
@@ -109,7 +123,7 @@
     </Groups>
     <Buttons>
 
-      <!-- Restart -->
+      <!-- Shell: Restart -->
       <Button guid="PackageCommandSet" id="RestartNormalCommand" type="Button" priority="0x0001">
         <Parent guid="PackageCommandSet" id="ShellRestartCommands" />
         <Icon guid="ImageCatalogGuid" id="VisualStudio" />
@@ -122,8 +136,7 @@
           <ButtonText>Restart Visual Studio</ButtonText>
         </Strings>
       </Button>
-
-      <Button guid="PackageCommandSet" id="RestartElevatedCommand" type="Button" priority="0x0001">
+      <Button guid="PackageCommandSet" id="RestartElevatedCommand" type="Button" priority="0x0002">
         <Parent guid="PackageCommandSet" id="ShellRestartCommands" />
         <Icon guid="ImageCatalogGuid" id="VisualStudioExpressWindowsPhone" />
         <CommandFlag>IconIsMoniker</CommandFlag>
@@ -133,6 +146,20 @@
           <CanonicalName>RestartVisualStudioAsAdministrator</CanonicalName>
           <LocCanonicalName>RestartVisualStudioAsAdministrator</LocCanonicalName>
           <ButtonText>Restart Visual Studio as Administrator</ButtonText>
+        </Strings>
+      </Button>
+
+      <!-- Shell: Tools -->
+      <Button guid="PackageCommandSet" id="AddItemToContainerCommand" type="Button" priority="0x0001">
+        <Parent guid="PackageCommandSet" id="ShellToolsCommands" />
+        <Icon guid="ImageCatalogGuid" id="ContextMenu" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <Strings>
+          <CommandName>AddItemToContainer</CommandName>
+          <CanonicalName>AddItemToContainer</CanonicalName>
+          <LocCanonicalName>AddItemToContainer</LocCanonicalName>
+          <ButtonText>Add Item to Container</ButtonText>
         </Strings>
       </Button>
 
@@ -252,6 +279,9 @@
     <CommandPlacement guid="PackageCommandSet" id="ShellRestartCommands" priority="0x0100">
       <Parent guid="PackageCommandSet" id="PackageMenu" />
     </CommandPlacement>
+    <CommandPlacement guid="PackageCommandSet" id="ShellToolsCommands" priority="0x0110">
+      <Parent guid="PackageCommandSet" id="PackageMenu" />
+    </CommandPlacement>
     <CommandPlacement guid="PackageCommandSet" id="EnvironmentCommands" priority="0x0200">
       <Parent guid="PackageCommandSet" id="PackageMenu" />
     </CommandPlacement>
@@ -315,13 +345,20 @@
     <GuidSymbol name="PackageCommandSet" value="{A2D0A697-8809-450C-9F66-88A95C9B09F4}">
       <IDSymbol name="PackageMenu" value="0xA001" />
 
-      <!-- Shell -->
+      <!-- Shell: Restart -->
       <IDSymbol name="ShellRestartGroup" value="0x0100" />
       <IDSymbol name="ShellRestartDropDown" value="0x0101" />
       <IDSymbol name="ShellRestartCommands" value="0x0102" />
 
       <IDSymbol name="RestartNormalCommand" value="0x0103" />
       <IDSymbol name="RestartElevatedCommand" value="0x0104" />
+
+      <!-- Shell: Tools -->
+      <IDSymbol name="ShellToolsGroup" value="0x0110" />
+      <IDSymbol name="ShellToolsDropDown" value="0x0111" />
+      <IDSymbol name="ShellToolsCommands" value="0x0112" />
+
+      <IDSymbol name="AddItemToContainerCommand" value="0x0113" />
 
       <!-- Environment -->
       <IDSymbol name="EnvironmentGroup" value="0x0200" />

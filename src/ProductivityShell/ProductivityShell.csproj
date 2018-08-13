@@ -60,8 +60,13 @@
     <Compile Include="Commands\Project\ProjecItemEqualityComparer.cs" />
     <Compile Include="Commands\Project\ReloadCommand.cs" />
     <Compile Include="Commands\Project\OpenOutputFolderCommand.cs" />
+    <Compile Include="Commands\Shell\AddItemToContainerWindow.xaml.cs">
+      <DependentUpon>AddItemToContainerWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Commands\Shell\RestartElevatedCommand.cs" />
     <Compile Include="Commands\Environment\PathVariablesCommand.cs" />
+    <Compile Include="Commands\Shell\AddItemToContainerCommand.cs" />
+    <Compile Include="Helpers\FocusHelpers.cs" />
     <Compile Include="Settings\AccessModifier.cs" />
     <Compile Include="Settings\Setting.cs" />
     <Compile Include="Settings\SettingsContainer.cs" />
@@ -296,10 +301,12 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Commands\Shell\AddItemToContainerWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Analyzer Include="..\packages\Microsoft.VisualStudio.Threading.Analyzers.15.6.31\analyzers\cs\Microsoft.VisualStudio.Threading.Analyzers.dll" />
   </ItemGroup>

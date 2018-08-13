@@ -49,6 +49,7 @@ namespace ProductivityShell
             // Shell
             RestartNormalCommand.Initialize(this);
             RestartElevatedCommand.Initialize(this);
+            AddItemToCommandBarCommand.Initialize(this);
 
             // Environment
             PathVariablesCommand.Initialize(this);

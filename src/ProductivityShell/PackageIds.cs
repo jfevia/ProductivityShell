@@ -7,6 +7,10 @@
         public const int ShellRestartCommands = 0x0102;
         public const int ShellRestartNormalCommand = 0x0103;
         public const int ShellRestartElevatedCommand = 0x0104;
+        public const int ShellToolsGroup = 0x0110;
+        public const int ShellToolsDropDown = 0x0111;
+        public const int ShellToolsCommands = 0x0112;
+        public const int ShellAddItemToContainerCommand = 0x0113;
         public const int EnvironmentGroup = 0x0200;
         public const int EnvironmentDropDown = 0x0201;
         public const int EnvironmentCommands = 0x0202;

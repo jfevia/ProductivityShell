@@ -1,0 +1,319 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable"
+              xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <Extern href="stdidcmd.h" />
+  <Extern href="vsshlids.h" />
+  <Extern href="VSDbgCmd.h"/>
+  <Extern href="VsDebugGuids.h"/>
+  <Include href="KnownImageIds.vsct" />
+
+  <Commands package="Package">
+    <Menus>
+      <Menu guid="PackageCommandSet" id="PackageMenu" type="Menu" priority="0x4000">
+        <Parent guid="guidSHLMainMenu" id="IDG_VS_MM_TOOLSADDINS" />
+        <CommandFlag>AlwaysCreate</CommandFlag>
+        <Strings>
+          <ButtonText>Productivity Shell</ButtonText>
+        </Strings>
+      </Menu>
+      <Menu guid="PackageCommandSet" id="ShellRestartDropDown" type="MenuController" priority="0x0000">
+        <Parent guid="PackageCommandSet" id="ShellRestartGroup" />
+        <Strings>
+          <ButtonText>Shell Restart Commands</ButtonText>
+        </Strings>
+      </Menu>
+      <Menu guid="PackageCommandSet" id="EnvironmentDropDown" type="MenuController" priority="0x0000">
+        <Parent guid="PackageCommandSet" id="EnvironmentGroup" />
+        <Strings>
+          <ButtonText>Environment Commands</ButtonText>
+        </Strings>
+      </Menu>
+      <Menu guid="PackageCommandSet" id="ProjectDropDown" type="MenuController" priority="0x0000">
+        <Parent guid="PackageCommandSet" id="ProjectGroup" />
+        <Strings>
+          <ButtonText>Project Commands</ButtonText>
+        </Strings>
+      </Menu>
+      <Menu guid="PackageCommandSet" id="RefactorDropDown" type="MenuController" priority="0x0000">
+        <Parent guid="PackageCommandSet" id="RefactorGroup" />
+        <Strings>
+          <ButtonText>Refactor Commands</ButtonText>
+        </Strings>
+      </Menu>
+      <Menu guid="PackageCommandSet" id="ToolsDropDown" type="MenuController" priority="0x0000">
+        <Parent guid="PackageCommandSet" id="ToolsGroup" />
+        <Strings>
+          <ButtonText>Tools Commands</ButtonText>
+        </Strings>
+      </Menu>
+      <Menu guid="PackageCommandSet" id="PackageDropDown" type="MenuController" priority="0x0000">
+        <Parent guid="PackageCommandSet" id="PackageGroup" />
+        <Strings>
+          <ButtonText>Package Commands</ButtonText>
+        </Strings>
+      </Menu>
+    </Menus>
+    <Groups>
+      <Group guid="PackageCommandSet" id="ShellRestartGroup" priority="0x0000" />
+      <Group guid="PackageCommandSet" id="ShellRestartCommands" priority="0x0000">
+        <Parent guid="PackageCommandSet" id="ShellRestartDropDown" />
+      </Group>
+      <Group guid="PackageCommandSet" id="EnvironmentGroup" priority="0x0000" />
+      <Group guid="PackageCommandSet" id="EnvironmentCommands" priority="0x0000">
+        <Parent guid="PackageCommandSet" id="EnvironmentDropDown" />
+      </Group>
+      <Group guid="PackageCommandSet" id="StartupProjectsToolbarGroup" priority="0xFF45">
+        <Parent guid="guidVSDebugGroup" id="IDM_DEBUG_MENU"/>
+      </Group>
+      <Group guid="PackageCommandSet" id="ProjectGroup" priority="0x0000" />
+      <Group guid="PackageCommandSet" id="ProjectCommands" priority="0x0000">
+        <Parent guid="PackageCommandSet" id="ProjectDropDown" />
+      </Group>
+      <Group guid="PackageCommandSet" id="RefactorGroup" priority="0x0000" />
+      <Group guid="PackageCommandSet" id="RefactorCommands" priority="0x0000">
+        <Parent guid="PackageCommandSet" id="RefactorDropDown" />
+      </Group>
+      <Group guid="PackageCommandSet" id="ToolsGroup" priority="0x0000" />
+      <Group guid="PackageCommandSet" id="ToolsCommands" priority="0x0000">
+        <Parent guid="PackageCommandSet" id="ToolsDropDown" />
+      </Group>
+      <Group guid="PackageCommandSet" id="PackageGroup" priority="0x0000" />
+      <Group guid="PackageCommandSet" id="PackageCommands" priority="0x0000">
+        <Parent guid="PackageCommandSet" id="PackageDropDown" />
+      </Group>
+    </Groups>
+    <Buttons>
+      <Button guid="PackageCommandSet" id="RestartNormalCommand" type="Button" priority="0x0001">
+        <Parent guid="PackageCommandSet" id="ShellRestartCommands" />
+        <Icon guid="ImageCatalogGuid" id="VisualStudio" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>FixMenuController</CommandFlag>
+        <Strings>
+          <CommandName>RestartVisualStudio</CommandName>
+          <CanonicalName>RestartVisualStudio</CanonicalName>
+          <ButtonText>Restart Visual Studio</ButtonText>
+        </Strings>
+      </Button>
+      <Button guid="PackageCommandSet" id="RestartElevatedCommand" type="Button" priority="0x0001">
+        <Parent guid="PackageCommandSet" id="ShellRestartCommands" />
+        <Icon guid="ImageCatalogGuid" id="VisualStudioExpressWindowsPhone" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <Strings>
+          <CommandName>RestartVisualStudioAsAdministrator</CommandName>
+          <CanonicalName>RestartVisualStudioAsAdministrator</CanonicalName>
+          <LocCanonicalName>RestartVisualStudioAsAdministrator</LocCanonicalName>
+          <ButtonText>Restart Visual Studio as Administrator</ButtonText>
+        </Strings>
+      </Button>
+      <Button guid="PackageCommandSet" id="PathVariablesCommand" type="Button" priority="0x0001">
+        <Parent guid="PackageCommandSet" id="EnvironmentCommands" />
+        <Icon guid="ImageCatalogGuid" id="DataList" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <Strings>
+          <CommandName>PathVariables</CommandName>
+          <CanonicalName>PathVariables</CanonicalName>
+          <LocCanonicalName>PathVariables</LocCanonicalName>
+          <ButtonText>Path Variables</ButtonText>
+        </Strings>
+      </Button>
+      <Button guid="PackageCommandSet" id="OpenOutputFolderCommand" type="Button" priority="0x0001">
+        <Icon guid="ImageCatalogGuid" id="FolderOpened" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <Strings>
+          <CommandName>OpenOutputFolder</CommandName>
+          <CanonicalName>OpenOutputFolder</CanonicalName>
+          <LocCanonicalName>OpenOutputFolder</LocCanonicalName>
+          <ButtonText>Open Output Folder</ButtonText>
+        </Strings>
+      </Button>
+      <Button guid="PackageCommandSet" id="ShowOutputFileInExplorerCommand" type="Button" priority="0x0001">
+        <Icon guid="ImageCatalogGuid" id="FileDestination" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <Strings>
+          <CommandName>ShowOutputFileInExplorer</CommandName>
+          <CanonicalName>ShowOutputFileInExplorer</CanonicalName>
+          <LocCanonicalName>ShowOutputFileInExplorer</LocCanonicalName>
+          <ButtonText>Show Output File in File Explorer</ButtonText>
+        </Strings>
+      </Button>
+      <Button guid="PackageCommandSet" id="ReloadProjectCommand" type="Button" priority="0x0001">
+        <Icon guid="ImageCatalogGuid" id="Refresh" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <Strings>
+          <CommandName>ReloadProject</CommandName>
+          <CanonicalName>ReloadProject</CanonicalName>
+          <LocCanonicalName>ReloadProject</LocCanonicalName>
+          <ButtonText>Reload Project</ButtonText>
+        </Strings>
+      </Button>
+      <Button guid="PackageCommandSet" id="ShowInExplorerCommand" type="Button" priority="0x0001">
+        <Icon guid="ImageCatalogGuid" id="OpenFolder" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <Strings>
+          <CommandName>ShowItemInExplorer</CommandName>
+          <CanonicalName>ShowItemInExplorer</CanonicalName>
+          <LocCanonicalName>ShowItemInExplorer</LocCanonicalName>
+          <ButtonText>Show in File Explorer</ButtonText>
+        </Strings>
+      </Button>
+      <Button guid="PackageCommandSet" id="MoveToSettingsCommand" type="Button" priority="0x0001">
+        <Parent guid="PackageCommandSet" id="RefactorCommands" />
+        <Icon guid="ImageCatalogGuid" id="RightArrowAsterisk" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <Strings>
+          <CommandName>RefactorMoveToSettings</CommandName>
+          <CanonicalName>RefactorMoveToSettings</CanonicalName>
+          <LocCanonicalName>RefactorMoveToSettings</LocCanonicalName>
+          <ButtonText>Move to Settings</ButtonText>
+        </Strings>
+      </Button>
+      <Button guid="PackageCommandSet" id="ReplaceGuidPlaceholdersCommand" type="Button" priority="0x0001">
+        <Parent guid="PackageCommandSet" id="ToolsCommands" />
+        <Icon guid="ImageCatalogGuid" id="InsertSpan" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <Strings>
+          <CommandName>ReplaceGuidPlaceholders</CommandName>
+          <CanonicalName>ReplaceGuidPlaceholders</CanonicalName>
+          <LocCanonicalName>ReplaceGuidPlaceholders</LocCanonicalName>
+          <ButtonText>Replace Placeholders</ButtonText>
+        </Strings>
+      </Button>
+      <Button guid="PackageCommandSet" id="ShowOptionPageCommand" type="Button" priority="0x0001">
+        <Parent guid="PackageCommandSet" id="PackageCommands" />
+        <Icon guid="ImageCatalogGuid" id="Settings" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <Strings>
+          <CommandName>ShowOptionPage</CommandName>
+          <CanonicalName>ShowOptionPage</CanonicalName>
+          <LocCanonicalName>ShowOptionPage</LocCanonicalName>
+          <ButtonText>Options</ButtonText>
+        </Strings>
+      </Button>
+    </Buttons>
+    <Combos>
+      <Combo guid="PackageCommandSet" id="StartupProjectsComboBoxCommand" type="IndexCombo" defaultWidth="200" idCommandList="StartupProjectsComboBoxItemsCommand">
+        <CommandFlag>CommandWellOnly</CommandFlag>
+        <Strings>
+          <ButtonText>Startup Projects</ButtonText>
+          <ToolTipText>Startup Projects</ToolTipText>
+          <CommandName>Startup Projects</CommandName>
+          <CanonicalName>Startup Projects Combo Box</CanonicalName>
+          <LocCanonicalName>Startup Projects Combo Box</LocCanonicalName>
+        </Strings>
+      </Combo>
+    </Combos>
+  </Commands>
+  <KeyBindings>
+    <KeyBinding guid="PackageCommandSet" id="MoveToSettingsCommand"
+                key1="R" mod1="CONTROL" key2="S" mod2="CONTROL" editor="guidVSStd97" />
+  </KeyBindings>
+  <CommandPlacements>
+    <CommandPlacement guid="PackageCommandSet" id="ShellRestartCommands" priority="0x0100">
+      <Parent guid="PackageCommandSet" id="PackageMenu" />
+    </CommandPlacement>
+    <CommandPlacement guid="PackageCommandSet" id="EnvironmentCommands" priority="0x0200">
+      <Parent guid="PackageCommandSet" id="PackageMenu" />
+    </CommandPlacement>
+    <CommandPlacement guid="PackageCommandSet" id="ProjectCommands" priority="0x0300">
+      <Parent guid="PackageCommandSet" id="PackageMenu" />
+    </CommandPlacement>
+    <CommandPlacement guid="PackageCommandSet" id="RefactorCommands" priority="0x400">
+      <Parent guid="PackageCommandSet" id="PackageMenu" />
+    </CommandPlacement>
+    <CommandPlacement guid="PackageCommandSet" id="ToolsCommands" priority="0x1000">
+      <Parent guid="PackageCommandSet" id="PackageMenu" />
+    </CommandPlacement>
+    <CommandPlacement guid="PackageCommandSet" id="PackageCommands" priority="0x1000">
+      <Parent guid="PackageCommandSet" id="PackageMenu" />
+    </CommandPlacement>
+    <CommandPlacement guid="PackageCommandSet" id="OpenOutputFolderCommand">
+      <Parent guid="PackageCommandSet" id="ProjectCommands" />
+    </CommandPlacement>
+    <CommandPlacement guid="PackageCommandSet" id="ReloadProjectCommand">
+      <Parent guid="PackageCommandSet" id="ProjectCommands" />
+    </CommandPlacement>
+    <CommandPlacement guid="PackageCommandSet" id="ShowInExplorerCommand">
+      <Parent guid="PackageCommandSet" id="ProjectItemCommands" />
+    </CommandPlacement>
+    <CommandPlacement guid="PackageCommandSet" id="OpenOutputFolderCommand">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_BUILD" />
+    </CommandPlacement>
+    <CommandPlacement guid="PackageCommandSet" id="OpenOutputFolderCommand">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_MULTIPROJ_BUILD" />
+    </CommandPlacement>
+    <CommandPlacement guid="PackageCommandSet" id="ShowOutputFileInExplorerCommand">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_BUILD" />
+    </CommandPlacement>
+    <CommandPlacement guid="PackageCommandSet" id="ShowOutputFileInExplorerCommand">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_MULTIPROJ_BUILD" />
+    </CommandPlacement>
+    <CommandPlacement guid="PackageCommandSet" id="ReloadProjectCommand">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_UNLOADRELOAD" />
+    </CommandPlacement>
+    <CommandPlacement guid="PackageCommandSet" id="ShowInExplorerCommand">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_BUILD" />
+    </CommandPlacement>
+    <CommandPlacement guid="PackageCommandSet" id="ShowInExplorerCommand">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_ITEM_OPEN" />
+    </CommandPlacement>
+    <CommandPlacement guid="PackageCommandSet" id="StartupProjectsComboBoxCommand" priority="0x0150">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_TOOLSB_RUNBUILD" />
+    </CommandPlacement>
+    <CommandPlacement guid="PackageCommandSet" id="StartupProjectsComboBoxCommand" priority="0">
+      <Parent guid="PackageCommandSet" id="StartupProjectsToolbarGroup" />
+    </CommandPlacement>
+  </CommandPlacements>
+  <Symbols>
+    <GuidSymbol name="Package" value="{F80CCF45-FA6A-4636-9361-DFCA27E2313E}" />
+    <GuidSymbol name="PackageCommandSet" value="{A2D0A697-8809-450C-9F66-88A95C9B09F4}">
+      <IDSymbol name="PackageMenu" value="0xA001" />
+      <IDSymbol name="ShellRestartGroup" value="0x0100" />
+      <IDSymbol name="ShellRestartDropDown" value="0x0101" />
+      <IDSymbol name="ShellRestartCommands" value="0x0102" />
+      <IDSymbol name="RestartNormalCommand" value="0x0103" />
+      <IDSymbol name="RestartElevatedCommand" value="0x0104" />
+      <IDSymbol name="EnvironmentGroup" value="0x0200" />
+      <IDSymbol name="EnvironmentDropDown" value="0x0201" />
+      <IDSymbol name="EnvironmentCommands" value="0x0202" />
+      <IDSymbol name="PathVariablesCommand" value="0x0203" />
+      <IDSymbol name="StartupProjectsToolbar" value="0x1101"/>
+      <IDSymbol name="StartupProjectsToolbarGroup" value="0x1102"/>
+      <IDSymbol name="StartupProjectsComboBoxCommand" value="0x1103"/>
+      <IDSymbol name="StartupProjectsComboBoxItemsCommand" value="0x1104"/>
+      <IDSymbol name="ProjectGroup" value="0x0300" />
+      <IDSymbol name="ProjectDropDown" value="0x0301" />
+      <IDSymbol name="ProjectCommands" value="0x0302" />
+      <IDSymbol name="OpenOutputFolderCommand" value="0x0303" />
+      <IDSymbol name="ShowOutputFileInExplorerCommand" value="0x0304" />
+      <IDSymbol name="ReloadProjectCommand" value="0x0305" />
+      <IDSymbol name="ProjectItemGroup" value="0x0400" />
+      <IDSymbol name="ProjectItemDropDown" value="0x0401" />
+      <IDSymbol name="ProjectItemCommands" value="0x0402" />
+      <IDSymbol name="ShowInExplorerCommand" value="0x0403" />
+      <IDSymbol name="RefactorGroup" value="0x0500" />
+      <IDSymbol name="RefactorDropDown" value="0x0501" />
+      <IDSymbol name="RefactorCommands" value="0x0502" />
+      <IDSymbol name="MoveToSettingsCommand" value="0x0503" />
+      <IDSymbol name="ToolsGroup" value="0x0900" />
+      <IDSymbol name="ToolsDropDown" value="0x0901" />
+      <IDSymbol name="ToolsCommands" value="0x0902" />
+      <IDSymbol name="ReplaceGuidPlaceholdersCommand" value="0x0903" />
+      <IDSymbol name="PackageGroup" value="0x1000" />
+      <IDSymbol name="PackageDropDown" value="0x1001" />
+      <IDSymbol name="PackageCommands" value="0x1002" />
+      <IDSymbol name="ShowOptionPageCommand" value="0x1003" />
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>

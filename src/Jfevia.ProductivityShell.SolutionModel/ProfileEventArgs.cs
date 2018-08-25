@@ -5,16 +5,16 @@ using Jfevia.ProductivityShell.Configuration;
 
 namespace Jfevia.ProductivityShell.SolutionModel
 {
-    public class StartupProjectsEventArgs : EventArgs
+    public class ProfileEventArgs : EventArgs
     {
         /// <inheritdoc />
         /// <summary>
-        ///     Initializes a new instance of the <see cref="T:Jfevia.ProductivityShell.SolutionModel.StartupProjectsEventArgs" />
+        ///     Initializes a new instance of the <see cref="T:Jfevia.ProductivityShell.SolutionModel.ProfileEventArgs" />
         ///     class.
         /// </summary>
-        /// <param name="profile"></param>
+        /// <param name="profile">The profile.</param>
         /// <param name="startupProjects">The startup projects.</param>
-        public StartupProjectsEventArgs(Profile profile, IEnumerable<string> startupProjects)
+        public ProfileEventArgs(Profile profile, IEnumerable<string> startupProjects)
         {
             Profile = profile;
             StartupProjects = new HashSet<string>(startupProjects);
@@ -22,10 +22,10 @@ namespace Jfevia.ProductivityShell.SolutionModel
 
         /// <inheritdoc />
         /// <summary>
-        ///     Initializes a new instance of the <see cref="T:Jfevia.ProductivityShell.SolutionModel.StartupProjectsEventArgs" />
+        ///     Initializes a new instance of the <see cref="T:Jfevia.ProductivityShell.SolutionModel.ProfileEventArgs" />
         ///     class.
         /// </summary>
-        public StartupProjectsEventArgs()
+        public ProfileEventArgs()
             : this(null, Enumerable.Empty<string>())
         {
         }

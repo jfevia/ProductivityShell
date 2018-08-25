@@ -47,7 +47,7 @@ namespace Jfevia.ProductivityShell.SolutionModel
         /// <summary>
         ///     Occurs when [query startup projects].
         /// </summary>
-        public event EventHandler<StartupProjectsEventArgs> QueryStartupProjects;
+        public event EventHandler<ProfileEventArgs> QueryStartupProjects;
 
         /// <summary>
         ///     Occurs when [renamed project].
@@ -55,9 +55,9 @@ namespace Jfevia.ProductivityShell.SolutionModel
         public event EventHandler<RenameProjectEventArgs> RenamedProject;
 
         /// <summary>
-        ///     Occurs when [current startup projects changed].
+        ///     Occurs when [current profile changed].
         /// </summary>
-        public event EventHandler<StartupProjectsEventArgs> CurrentStartupProjectsChanged;
+        public event EventHandler<ProfileEventArgs> CurrentProfileChanged;
 
         /// <summary>
         ///     Gets or sets a value indicating whether this instance is opening.
@@ -84,11 +84,11 @@ namespace Jfevia.ProductivityShell.SolutionModel
         }
 
         /// <summary>
-        ///     Called when [startup projects changed].
+        ///     Called when [startup profile changed].
         /// </summary>
         /// <param name="profile">The profile.</param>
         /// <param name="startupProjects">The startup projects.</param>
-        public void OnStartupProjectsChanged(Profile profile, string[] startupProjects)
+        public void OnStartupProfileChanged(Profile profile, string[] startupProjects)
         {
             // Skip update if explicitly requested (e.g.: startup projects being set through our combo box)
             if (_startupProjectChangeNotificationsSuspended)
@@ -105,7 +105,7 @@ namespace Jfevia.ProductivityShell.SolutionModel
 
             SuspendStartupProjectChangeNotifications();
             _currentProfile = profile;
-            CurrentStartupProjectsChanged?.Invoke(this, new StartupProjectsEventArgs(profile, startupProjects));
+            CurrentProfileChanged?.Invoke(this, new ProfileEventArgs(profile, startupProjects));
             ResumeStartupProjectChangeNotifications();
         }
 
@@ -164,7 +164,7 @@ namespace Jfevia.ProductivityShell.SolutionModel
         /// <returns>The startup projects.</returns>
         private ICollection<string> GetStartupProjects()
         {
-            var startupProjectsEventArgs = new StartupProjectsEventArgs();
+            var startupProjectsEventArgs = new ProfileEventArgs();
             QueryStartupProjects?.Invoke(this, startupProjectsEventArgs);
             return startupProjectsEventArgs.StartupProjects;
         }

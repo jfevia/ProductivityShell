@@ -52,7 +52,7 @@
     <Compile Include="ProjectEventArgs.cs" />
     <Compile Include="RenameProjectEventArgs.cs" />
     <Compile Include="SolutionEventArgs.cs" />
-    <Compile Include="StartupProjectsEventArgs.cs" />
+    <Compile Include="ProfileEventArgs.cs" />
     <Compile Include="CurrentStartupProjectsEventArgs.cs" />
     <Compile Include="ParseConfigurationEventArgs.cs" />
     <Compile Include="Solution.cs" />

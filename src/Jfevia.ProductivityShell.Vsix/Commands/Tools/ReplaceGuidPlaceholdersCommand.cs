@@ -20,7 +20,7 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Tools
         /// </summary>
         /// <param name="package">The package.</param>
         private ReplaceGuidPlaceholdersCommand(PackageBase package)
-            : base(package, PackageCommands.ToolsReplaceGuidReplaceholdersCommand)
+            : base(package, PackageCommands.ToolsReplaceGuidPlaceholdersCommand)
         {
         }
 

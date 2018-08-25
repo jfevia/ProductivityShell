@@ -86,7 +86,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// <summary>
         ///     Occurs when [current startup projects changed].
         /// </summary>
-        public event EventHandler<StartupProjectsEventArgs> CurrentStartupProjectsChanged;
+        public event EventHandler<ProfileEventArgs> CurrentStartupProjectsChanged;
 
         /// <summary>
         ///     Occurs when [opened].
@@ -135,7 +135,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
             _psSolution.QueryStartupProjects -= Solution_QueryStartupProjects;
             _psSolution.QueryConfiguration -= Solution_QueryConfiguration;
             _psSolution.ParseConfiguration -= Solution_ParseConfiguration;
-            _psSolution.CurrentStartupProjectsChanged -= Solution_CurrentStartupProjectsChanged;
+            _psSolution.CurrentProfileChanged -= Solution_CurrentProfileChanged;
             _psSolution.Opened -= Solution_Opened;
             _psSolution.ClosingProject -= Solution_ClosingProject;
             _psSolution.OpenedProject -= Solution_OpenedProject;
@@ -166,8 +166,8 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         ///     Handles the QueryStartupProjects event of the Solution control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="StartupProjectsEventArgs" /> instance containing the event data.</param>
-        private void Solution_QueryStartupProjects(object sender, StartupProjectsEventArgs e)
+        /// <param name="e">The <see cref="ProfileEventArgs" /> instance containing the event data.</param>
+        private void Solution_QueryStartupProjects(object sender, ProfileEventArgs e)
         {
             foreach (var startupProject in GetStartupProjects())
                 e.StartupProjects.Add(startupProject);
@@ -214,7 +214,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
             var currentStartupProjects = GetCurrentStartupProjects();
             var configurationLayer = LoadConfigurationLayer();
             var parsedConfiguration = ParseConfiguration(configurationLayer.ComputedConfig.Startup.Profiles, startupProjects, currentStartupProjects.ToArray());
-            OnStartupProjectChanged(parsedConfiguration.CurrentProfile);
+            OnStartupProfileChanged(parsedConfiguration.CurrentProfile);
         }
 
         /// <summary>
@@ -230,11 +230,14 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         }
 
         /// <summary>
-        ///     Called when [startup project changed].
+        ///     Called when [startup profile changed].
         /// </summary>
         /// <param name="profile">The profile.</param>
-        public void OnStartupProjectChanged(Profile profile)
+        public void OnStartupProfileChanged(Profile profile)
         {
+            if (profile == null)
+                return;
+
             var startupProjects = profile.Projects.Select(s => _projectCache.TryGetProjectByName(s.Name, out var project) ? project : null).ToList();
             foreach (var startupProject in startupProjects.Where(s => s != null))
             {
@@ -280,7 +283,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
                 }
             }
 
-            _psSolution.OnStartupProjectsChanged(profile, startupProjects.Select(s => s.RelativePath).ToArray());
+            _psSolution.OnStartupProfileChanged(profile, startupProjects.Select(s => s.RelativePath).ToArray());
         }
 
         /// <summary>
@@ -292,7 +295,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
             _psSolution.QueryStartupProjects += Solution_QueryStartupProjects;
             _psSolution.QueryConfiguration += Solution_QueryConfiguration;
             _psSolution.ParseConfiguration += Solution_ParseConfiguration;
-            _psSolution.CurrentStartupProjectsChanged += Solution_CurrentStartupProjectsChanged;
+            _psSolution.CurrentProfileChanged += Solution_CurrentProfileChanged;
             _psSolution.Opened += Solution_Opened;
             _psSolution.ClosingProject += Solution_ClosingProject;
             _psSolution.OpenedProject += Solution_OpenedProject;
@@ -310,11 +313,11 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         }
 
         /// <summary>
-        ///     Handles the CurrentStartupProjectsChanged event of the Solution control.
+        ///     Handles the CurrentProfileChanged event of the Solution control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="StartupProjectsEventArgs" /> instance containing the event data.</param>
-        private void Solution_CurrentStartupProjectsChanged(object sender, StartupProjectsEventArgs e)
+        /// <param name="e">The <see cref="ProfileEventArgs" /> instance containing the event data.</param>
+        private void Solution_CurrentProfileChanged(object sender, ProfileEventArgs e)
         {
             var projects = e.StartupProjects.Cast<object>().ToArray();
             _vsSolution.SolutionBuild.StartupProjects = projects.Length == 1 ? projects[0] : projects;

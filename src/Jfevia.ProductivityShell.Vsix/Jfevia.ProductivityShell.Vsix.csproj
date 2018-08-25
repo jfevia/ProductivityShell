@@ -70,8 +70,8 @@
     <Compile Include="Projects\ProjectProxy.cs" />
     <Compile Include="Solutions\ConfigurationFileTracker.cs" />
     <Compile Include="Configuration\ProfileScore.cs" />
-    <Compile Include="Solutions\StartupProjectsChangedEventArgs.cs" />
-    <Compile Include="Solutions\StartupProjectsService.cs" />
+    <Compile Include="Solutions\StartupProfileChangedEventArgs.cs" />
+    <Compile Include="Solutions\StartupProfilesService.cs" />
     <Compile Include="Settings\AccessModifier.cs" />
     <Compile Include="Settings\Setting.cs" />
     <Compile Include="Settings\SettingsContainer.cs" />

@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.Shell;
 
 namespace Jfevia.ProductivityShell.Vsix.Solutions
 {
-    internal class StartupProjectsService
+    internal class StartupProfilesService
     {
         private readonly IMenuCommandService _menuCommandService;
         private Profile _editConfigurationItem;
@@ -20,10 +20,10 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         private Profile _selectedItem;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="StartupProjectsService" /> class.
+        ///     Initializes a new instance of the <see cref="StartupProfilesService" /> class.
         /// </summary>
         /// <param name="menuCommandService">The menu command service.</param>
-        public StartupProjectsService(IMenuCommandService menuCommandService)
+        public StartupProfilesService(IMenuCommandService menuCommandService)
         {
             _menuCommandService = menuCommandService;
             Initialize();
@@ -35,9 +35,9 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         public event EventHandler<EventArgs> RequestedShowConfiguration;
 
         /// <summary>
-        ///     Occurs when [selected startup project changed].
+        ///     Occurs when [selected startup profile changed].
         /// </summary>
-        public event EventHandler<StartupProjectsChangedEventArgs> SelectedStartupProjectsChanged;
+        public event EventHandler<StartupProfileChangedEventArgs> SelectedStartupProfileChanged;
 
         /// <summary>
         ///     Gets or sets the selected item.
@@ -104,7 +104,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         private void RegisterCommands()
         {
             // Commands for the selected item
-            _selectedItemCommand = new CommandID(PackageGuids.PackageCommandSet, PackageCommands.StartupProjectsComboBoxCommand);
+            _selectedItemCommand = new CommandID(PackageGuids.PackageCommandSet, PackageCommands.StartupProfilesComboBoxCommand);
             _querySelectedItemCommand = new OleMenuCommand(OnQuerySelectedItemCommand, _selectedItemCommand);
 
             // Accept any argument string
@@ -112,7 +112,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
             _querySelectedItemCommand.Enabled = false;
 
             // Commands for the items source
-            _itemsSourceCommand = new CommandID(PackageGuids.PackageCommandSet, PackageCommands.StartupProjectsComboBoxItemsCommand);
+            _itemsSourceCommand = new CommandID(PackageGuids.PackageCommandSet, PackageCommands.StartupProfilesComboBoxItemsCommand);
             _queryItemsSourceCommand = new OleMenuCommand(OnQueryItemsSourceCommand, _itemsSourceCommand);
 
             _menuCommandService.AddCommand(_querySelectedItemCommand);
@@ -162,7 +162,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
                 }
 
                 SelectedItem = selectedItem;
-                SelectedStartupProjectsChanged?.Invoke(this, new StartupProjectsChangedEventArgs(SelectedItem));
+                SelectedStartupProfileChanged?.Invoke(this, new StartupProfileChangedEventArgs(SelectedItem));
             }
         }
 

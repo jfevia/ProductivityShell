@@ -10,9 +10,9 @@
         public const int ProjectReloadCommand = 0x0305;
         public const int ProjectItemShowInExplorerCommand = 0x0403;
         public const int RefactorMoveToSettingsCommand = 0x0503;
-        public const int ToolsReplaceGuidReplaceholdersCommand = 0x0903;
+        public const int ToolsReplaceGuidPlaceholdersCommand = 0x0903;
         public const int PackageShowOptionPageCommand = 0x1003;
-        public const int StartupProjectsComboBoxCommand = 0x1103;
-        public const int StartupProjectsComboBoxItemsCommand = 0x1104;
+        public const int StartupProfilesComboBoxCommand = 0x1103;
+        public const int StartupProfilesComboBoxItemsCommand = 0x1104;
     }
 }

@@ -64,7 +64,7 @@
       <Group guid="PackageCommandSet" id="EnvironmentCommands" priority="0x0000">
         <Parent guid="PackageCommandSet" id="EnvironmentDropDown" />
       </Group>
-      <Group guid="PackageCommandSet" id="StartupProjectsToolbarGroup" priority="0xFF45">
+      <Group guid="PackageCommandSet" id="StartupProfilesToolbarGroup" priority="0xFF45">
         <Parent guid="guidVSDebugGroup" id="IDM_DEBUG_MENU"/>
       </Group>
       <Group guid="PackageCommandSet" id="ProjectGroup" priority="0x0000" />
@@ -203,14 +203,14 @@
       </Button>
     </Buttons>
     <Combos>
-      <Combo guid="PackageCommandSet" id="StartupProjectsComboBoxCommand" type="IndexCombo" defaultWidth="200" idCommandList="StartupProjectsComboBoxItemsCommand">
+      <Combo guid="PackageCommandSet" id="StartupProfilesComboBoxCommand" type="IndexCombo" defaultWidth="200" idCommandList="StartupProfilesComboBoxItemsCommand">
         <CommandFlag>CommandWellOnly</CommandFlag>
         <Strings>
-          <ButtonText>Startup Projects</ButtonText>
-          <ToolTipText>Startup Projects</ToolTipText>
-          <CommandName>Startup Projects</CommandName>
-          <CanonicalName>Startup Projects Combo Box</CanonicalName>
-          <LocCanonicalName>Startup Projects Combo Box</LocCanonicalName>
+          <ButtonText>Startup Profiles</ButtonText>
+          <ToolTipText>Startup Profiles</ToolTipText>
+          <CommandName>Startup Profiles</CommandName>
+          <CanonicalName>Startup Profiles Combo Box</CanonicalName>
+          <LocCanonicalName>Startup Profiles Combo Box</LocCanonicalName>
         </Strings>
       </Combo>
     </Combos>
@@ -268,11 +268,11 @@
     <CommandPlacement guid="PackageCommandSet" id="ShowInExplorerCommand">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_ITEM_OPEN" />
     </CommandPlacement>
-    <CommandPlacement guid="PackageCommandSet" id="StartupProjectsComboBoxCommand" priority="0x0150">
+    <CommandPlacement guid="PackageCommandSet" id="StartupProfilesComboBoxCommand" priority="0x0150">
       <Parent guid="guidSHLMainMenu" id="IDG_VS_TOOLSB_RUNBUILD" />
     </CommandPlacement>
-    <CommandPlacement guid="PackageCommandSet" id="StartupProjectsComboBoxCommand" priority="0">
-      <Parent guid="PackageCommandSet" id="StartupProjectsToolbarGroup" />
+    <CommandPlacement guid="PackageCommandSet" id="StartupProfilesComboBoxCommand" priority="0">
+      <Parent guid="PackageCommandSet" id="StartupProfilesToolbarGroup" />
     </CommandPlacement>
   </CommandPlacements>
   <Symbols>
@@ -288,10 +288,10 @@
       <IDSymbol name="EnvironmentDropDown" value="0x0201" />
       <IDSymbol name="EnvironmentCommands" value="0x0202" />
       <IDSymbol name="PathVariablesCommand" value="0x0203" />
-      <IDSymbol name="StartupProjectsToolbar" value="0x1101"/>
-      <IDSymbol name="StartupProjectsToolbarGroup" value="0x1102"/>
-      <IDSymbol name="StartupProjectsComboBoxCommand" value="0x1103"/>
-      <IDSymbol name="StartupProjectsComboBoxItemsCommand" value="0x1104"/>
+      <IDSymbol name="StartupProfilesToolbar" value="0x1101"/>
+      <IDSymbol name="StartupProfilesToolbarGroup" value="0x1102"/>
+      <IDSymbol name="StartupProfilesComboBoxCommand" value="0x1103"/>
+      <IDSymbol name="StartupProfilesComboBoxItemsCommand" value="0x1104"/>
       <IDSymbol name="ProjectGroup" value="0x0300" />
       <IDSymbol name="ProjectDropDown" value="0x0301" />
       <IDSymbol name="ProjectCommands" value="0x0302" />

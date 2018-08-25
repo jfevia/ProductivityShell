@@ -82,7 +82,7 @@ namespace Jfevia.ProductivityShell.Vsix.VisualStudio
 
     public class VisualStudioProxy : VisualStudioProxyBase, IDisposable
     {
-        private readonly StartupProjectsService _startupProjectsService;
+        private readonly StartupProfilesService _startupProfileService;
         private uint _debuggingCookie;
         private uint _selectionEventsCookie;
         private SolutionProxy _solutionProxy;
@@ -96,9 +96,9 @@ namespace Jfevia.ProductivityShell.Vsix.VisualStudio
         public VisualStudioProxy(Package package)
             : base(package)
         {
-            _startupProjectsService = new StartupProjectsService(MenuCommandService);
-            _startupProjectsService.SelectedStartupProjectsChanged += StartupProjectsService_SelectedStartupProjectChanged;
-            _startupProjectsService.RequestedShowConfiguration += StartupProjectsService_RequestedShowConfiguration;
+            _startupProfileService = new StartupProfilesService(MenuCommandService);
+            _startupProfileService.SelectedStartupProfileChanged += StartupProfileService_SelectedStartupProfileChanged;
+            _startupProfileService.RequestedShowConfiguration += StartupProfileService_RequestedShowConfiguration;
         }
 
         /// <summary>
@@ -157,10 +157,10 @@ namespace Jfevia.ProductivityShell.Vsix.VisualStudio
                 _solutionProxy.Dispose();
             }
 
-            if (_startupProjectsService != null)
+            if (_startupProfileService != null)
             {
-                _startupProjectsService.SelectedStartupProjectsChanged -= StartupProjectsService_SelectedStartupProjectChanged;
-                _startupProjectsService.RequestedShowConfiguration -= StartupProjectsService_RequestedShowConfiguration;
+                _startupProfileService.SelectedStartupProfileChanged -= StartupProfileService_SelectedStartupProfileChanged;
+                _startupProfileService.RequestedShowConfiguration -= StartupProfileService_RequestedShowConfiguration;
             }
         }
 
@@ -168,8 +168,8 @@ namespace Jfevia.ProductivityShell.Vsix.VisualStudio
         ///     Handles the CurrentStartupProjectsChanged event of the SolutionProxy control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="StartupProjectsEventArgs" /> instance containing the event data.</param>
-        private void SolutionProxy_CurrentStartupProjectsChanged(object sender, StartupProjectsEventArgs e)
+        /// <param name="e">The <see cref="ProfileEventArgs" /> instance containing the event data.</param>
+        private void SolutionProxy_CurrentStartupProjectsChanged(object sender, ProfileEventArgs e)
         {
             UpdateCurrentStartupProjectService(e.Profile);
         }
@@ -183,7 +183,7 @@ namespace Jfevia.ProductivityShell.Vsix.VisualStudio
             if (profile == null)
                 return;
 
-            _startupProjectsService.SelectedItem = profile;
+            _startupProfileService.SelectedItem = profile;
         }
 
         /// <summary>
@@ -207,23 +207,23 @@ namespace Jfevia.ProductivityShell.Vsix.VisualStudio
         }
 
         /// <summary>
-        ///     Handles the RequestedShowConfiguration event of the StartupProjectsService control.
+        ///     Handles the RequestedShowConfiguration event of the StartupProfileService control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
-        private void StartupProjectsService_RequestedShowConfiguration(object sender, EventArgs e)
+        private void StartupProfileService_RequestedShowConfiguration(object sender, EventArgs e)
         {
             SolutionProxy.OpenConfigurationFile();
         }
 
         /// <summary>
-        ///     Handles the SelectedStartupProjectChanged event of the StartupProjectsService control.
+        ///     Handles the SelectedStartupProfileChanged event of the StartupProfileService control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="StartupProjectsChangedEventArgs" /> instance containing the event data.</param>
-        private void StartupProjectsService_SelectedStartupProjectChanged(object sender, StartupProjectsChangedEventArgs e)
+        /// <param name="e">The <see cref="StartupProfileChangedEventArgs" /> instance containing the event data.</param>
+        private void StartupProfileService_SelectedStartupProfileChanged(object sender, StartupProfileChangedEventArgs e)
         {
-            SolutionProxy.OnStartupProjectChanged(e.Profile);
+            SolutionProxy.OnStartupProfileChanged(e.Profile);
         }
 
         /// <summary>
@@ -233,12 +233,12 @@ namespace Jfevia.ProductivityShell.Vsix.VisualStudio
         /// <param name="e">The <see cref="SolutionEventArgs" /> instance containing the event data.</param>
         private void SolutionProxy_Opened(object sender, SolutionEventArgs e)
         {
-            _startupProjectsService.Items = e.Profiles.OrderBy(s => s.DisplayName);
+            _startupProfileService.Items = e.Profiles.OrderBy(s => s.DisplayName);
 
             if (e.SelectedProfile == null)
                 return;
 
-            _startupProjectsService.SelectedItem = e.SelectedProfile;
+            _startupProfileService.SelectedItem = e.SelectedProfile;
         }
 
         /// <summary>
@@ -272,7 +272,7 @@ namespace Jfevia.ProductivityShell.Vsix.VisualStudio
         /// <param name="isEnabled">if set to <c>true</c> [is enabled].</param>
         public void OnDebuggingStateChanged(bool isEnabled)
         {
-            _startupProjectsService.OnDebuggingStateChanged(isEnabled);
+            _startupProfileService.OnDebuggingStateChanged(isEnabled);
         }
 
         /// <summary>
@@ -280,7 +280,7 @@ namespace Jfevia.ProductivityShell.Vsix.VisualStudio
         /// </summary>
         public void OnClosedSolution()
         {
-            _startupProjectsService.OnClosedSolution();
+            _startupProfileService.OnClosedSolution();
             SolutionProxy.OnClosedSolution();
         }
 
@@ -311,7 +311,7 @@ namespace Jfevia.ProductivityShell.Vsix.VisualStudio
         private void UpdateStartupProjects(IEnumerable<Profile> profiles, Profile currentProfile)
         {
             var itemMap = profiles.OrderBy(s => s.DisplayName).ToDictionary(s => s);
-            _startupProjectsService.Items = itemMap.Values;
+            _startupProfileService.Items = itemMap.Values;
 
             UpdateCurrentStartupProjectService(currentProfile);
         }

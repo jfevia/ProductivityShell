@@ -10,7 +10,7 @@ Productivity tools for Visual Studio.
 
 ![https://imgur.com/Dikiri6](https://i.imgur.com/Dikiri6.png)
 
-A customizable way to configure startup projects with extra debugging options. Productivity Shell allows you to customize the list of startup projects, including advanced extra debugging options. Switching between Startup Profiles is quickly done with a single click. 
+Productivity Shell allows you to customize the list of startup projects, including advanced extra debugging options. Switching between Startup Profiles is quickly done with a single click. 
 
 The below example provides insight of the Startup Profiles configuration for Productivity Shell. This configuration can be stored as machine-wide, team-shared and user-specific with a layer mechanism for each solution for better modularity.
 

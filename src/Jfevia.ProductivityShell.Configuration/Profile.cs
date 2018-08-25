@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 
 namespace Jfevia.ProductivityShell.Configuration
 {
-    public class ProjectConfiguration
+    public class Profile
     {
         /// <summary>
         ///     Gets or sets the display name.

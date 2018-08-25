@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using Jfevia.ProductivityShell.Configuration;
 
 namespace Jfevia.ProductivityShell.SolutionModel
 {
     public class Solution
     {
+        private Profile _currentProfile;
         private bool _startupProjectChangeNotificationsSuspended;
 
         /// <summary>
@@ -52,9 +55,9 @@ namespace Jfevia.ProductivityShell.SolutionModel
         public event EventHandler<RenameProjectEventArgs> RenamedProject;
 
         /// <summary>
-        ///     Occurs when [startup projects changed].
+        ///     Occurs when [current startup projects changed].
         /// </summary>
-        public event EventHandler<StartupProjectsEventArgs> StartupProjectsChanged;
+        public event EventHandler<StartupProjectsEventArgs> CurrentStartupProjectsChanged;
 
         /// <summary>
         ///     Gets or sets a value indicating whether this instance is opening.
@@ -81,10 +84,11 @@ namespace Jfevia.ProductivityShell.SolutionModel
         }
 
         /// <summary>
-        ///     Sets the startup projects.
+        ///     Called when [startup projects changed].
         /// </summary>
+        /// <param name="profile">The profile.</param>
         /// <param name="startupProjects">The startup projects.</param>
-        public void SetStartupProjects(string[] startupProjects)
+        public void OnStartupProjectsChanged(Profile profile, string[] startupProjects)
         {
             // Skip update if explicitly requested (e.g.: startup projects being set through our combo box)
             if (_startupProjectChangeNotificationsSuspended)
@@ -96,8 +100,12 @@ namespace Jfevia.ProductivityShell.SolutionModel
             if (startupProjects == null)
                 return;
 
+            if (ProfileEqualityComparer.Instance.Equals(_currentProfile, profile))
+                return;
+
             SuspendStartupProjectChangeNotifications();
-            StartupProjectsChanged?.Invoke(this, new StartupProjectsEventArgs(startupProjects));
+            _currentProfile = profile;
+            CurrentStartupProjectsChanged?.Invoke(this, new StartupProjectsEventArgs(profile, startupProjects));
             ResumeStartupProjectChangeNotifications();
         }
 
@@ -115,19 +123,61 @@ namespace Jfevia.ProductivityShell.SolutionModel
         {
             IsOpening = false;
 
-            var configurationEventArgs = new ConfigurationEventArgs();
-            QueryConfiguration?.Invoke(this, configurationEventArgs);
+            var configurationLayer = GetConfigurationLayer();
+            var startupProjects = GetStartupProjects();
+            var currentStartupProjects = GetCurrentStartupProjects();
+            var parsedConfiguration = GetParsedConfiguration(configurationLayer.ComputedConfig.Startup.Profiles, startupProjects, currentStartupProjects);
 
-            var startupProjectsEventArgs = new StartupProjectsEventArgs();
-            QueryStartupProjects?.Invoke(this, startupProjectsEventArgs);
+            _currentProfile = parsedConfiguration.CurrentProfile;
 
+            Opened?.Invoke(this, new SolutionEventArgs(configurationLayer.ComputedConfig, parsedConfiguration.Profiles, parsedConfiguration.CurrentProfile));
+        }
+
+        /// <summary>
+        ///     Gets the parsed configuration.
+        /// </summary>
+        /// <param name="profiles">The profiles.</param>
+        /// <param name="startupProjects">The startup projects.</param>
+        /// <param name="currentStartupProjects">The current startup projects.</param>
+        /// <returns>The parsed configuration.</returns>
+        private ParsedConfiguration GetParsedConfiguration(ICollection<Profile> profiles, ICollection<string> startupProjects, ICollection<string> currentStartupProjects)
+        {
+            var parseConfigurationEventArgs = new ParseConfigurationEventArgs(profiles, startupProjects, currentStartupProjects);
+            ParseConfiguration?.Invoke(this, parseConfigurationEventArgs);
+            return parseConfigurationEventArgs.ParsedConfiguration;
+        }
+
+        /// <summary>
+        ///     Gets the current startup projects.
+        /// </summary>
+        /// <returns>The current startup projects.</returns>
+        private ICollection<string> GetCurrentStartupProjects()
+        {
             var currentStartupProjectsEventArgs = new CurrentStartupProjectsEventArgs();
             QueryCurrentStartupProjects?.Invoke(this, currentStartupProjectsEventArgs);
+            return currentStartupProjectsEventArgs.StartupProjects;
+        }
 
-            var parseConfigurationEventArgs = new ParseConfigurationEventArgs(configurationEventArgs.ConfigurationLayer.ComputedConfig.Startup.ProjectConfigurations, startupProjectsEventArgs.StartupProjects, currentStartupProjectsEventArgs.StartupProjects);
-            ParseConfiguration?.Invoke(this, parseConfigurationEventArgs);
+        /// <summary>
+        ///     Gets the startup projects.
+        /// </summary>
+        /// <returns>The startup projects.</returns>
+        private ICollection<string> GetStartupProjects()
+        {
+            var startupProjectsEventArgs = new StartupProjectsEventArgs();
+            QueryStartupProjects?.Invoke(this, startupProjectsEventArgs);
+            return startupProjectsEventArgs.StartupProjects;
+        }
 
-            Opened?.Invoke(this, new SolutionEventArgs(configurationEventArgs.ConfigurationLayer.ComputedConfig, parseConfigurationEventArgs.ParsedConfiguration.ProjectConfigurations, parseConfigurationEventArgs.ParsedConfiguration.CurrentProjectConfiguration));
+        /// <summary>
+        ///     Gets the configuration layer.
+        /// </summary>
+        /// <returns>The configuration layer.</returns>
+        private ConfigurationLayer GetConfigurationLayer()
+        {
+            var configurationEventArgs = new ConfigurationEventArgs();
+            QueryConfiguration?.Invoke(this, configurationEventArgs);
+            return configurationEventArgs.ConfigurationLayer;
         }
 
         /// <summary>
@@ -135,20 +185,14 @@ namespace Jfevia.ProductivityShell.SolutionModel
         /// </summary>
         public void OnConfigurationChanged()
         {
-            // TODO: Code reuse, this is the same as OnOpened
-            var configurationEventArgs = new ConfigurationEventArgs();
-            QueryConfiguration?.Invoke(this, configurationEventArgs);
+            var configurationLayer = GetConfigurationLayer();
+            var startupProjects = GetStartupProjects();
+            var currentStartupProjects = GetCurrentStartupProjects();
+            var parsedConfiguration = GetParsedConfiguration(configurationLayer.ComputedConfig.Startup.Profiles, startupProjects, currentStartupProjects);
 
-            var startupProjectsEventArgs = new StartupProjectsEventArgs();
-            QueryStartupProjects?.Invoke(this, startupProjectsEventArgs);
+            _currentProfile = parsedConfiguration.CurrentProfile;
 
-            var currentStartupProjectsEventArgs = new CurrentStartupProjectsEventArgs();
-            QueryCurrentStartupProjects?.Invoke(this, currentStartupProjectsEventArgs);
-
-            var parseConfigurationEventArgs = new ParseConfigurationEventArgs(configurationEventArgs.ConfigurationLayer.ComputedConfig.Startup.ProjectConfigurations, startupProjectsEventArgs.StartupProjects, currentStartupProjectsEventArgs.StartupProjects);
-            ParseConfiguration?.Invoke(this, parseConfigurationEventArgs);
-
-            ConfigurationChanged?.Invoke(this, new ConfigurationChangedEventArgs(configurationEventArgs.ConfigurationLayer.ComputedConfig, parseConfigurationEventArgs.ParsedConfiguration.ProjectConfigurations, parseConfigurationEventArgs.ParsedConfiguration.CurrentProjectConfiguration));
+            ConfigurationChanged?.Invoke(this, new ConfigurationChangedEventArgs(configurationLayer.ComputedConfig, parsedConfiguration.Profiles, parsedConfiguration.CurrentProfile));
         }
 
         /// <summary>
@@ -157,20 +201,14 @@ namespace Jfevia.ProductivityShell.SolutionModel
         /// <param name="projectName">Name of the project.</param>
         public void OnClosingProject(string projectName)
         {
-            // TODO: Code reuse, this is the same as OnOpened
-            var configurationEventArgs = new ConfigurationEventArgs();
-            QueryConfiguration?.Invoke(this, configurationEventArgs);
+            var configurationLayer = GetConfigurationLayer();
+            var startupProjects = GetStartupProjects();
+            var currentStartupProjects = GetCurrentStartupProjects();
+            var parsedConfiguration = GetParsedConfiguration(configurationLayer.ComputedConfig.Startup.Profiles, startupProjects, currentStartupProjects);
 
-            var startupProjectsEventArgs = new StartupProjectsEventArgs();
-            QueryStartupProjects?.Invoke(this, startupProjectsEventArgs);
+            _currentProfile = parsedConfiguration.CurrentProfile;
 
-            var currentStartupProjectsEventArgs = new CurrentStartupProjectsEventArgs();
-            QueryCurrentStartupProjects?.Invoke(this, currentStartupProjectsEventArgs);
-
-            var parseConfigurationEventArgs = new ParseConfigurationEventArgs(configurationEventArgs.ConfigurationLayer.ComputedConfig.Startup.ProjectConfigurations, startupProjectsEventArgs.StartupProjects, currentStartupProjectsEventArgs.StartupProjects);
-            ParseConfiguration?.Invoke(this, parseConfigurationEventArgs);
-
-            ClosingProject?.Invoke(this, new ProjectEventArgs(projectName, configurationEventArgs.ConfigurationLayer.ComputedConfig, parseConfigurationEventArgs.ParsedConfiguration.ProjectConfigurations, parseConfigurationEventArgs.ParsedConfiguration.CurrentProjectConfiguration));
+            ClosingProject?.Invoke(this, new ProjectEventArgs(projectName, configurationLayer.ComputedConfig, parsedConfiguration.Profiles, parsedConfiguration.CurrentProfile));
         }
 
         /// <summary>
@@ -187,20 +225,14 @@ namespace Jfevia.ProductivityShell.SolutionModel
         /// <param name="projectName">Name of the project.</param>
         public void OnOpenedProject(string projectName)
         {
-            // TODO: Code reuse, this is the same as OnOpened
-            var configurationEventArgs = new ConfigurationEventArgs();
-            QueryConfiguration?.Invoke(this, configurationEventArgs);
+            var configurationLayer = GetConfigurationLayer();
+            var startupProjects = GetStartupProjects();
+            var currentStartupProjects = GetCurrentStartupProjects();
+            var parsedConfiguration = GetParsedConfiguration(configurationLayer.ComputedConfig.Startup.Profiles, startupProjects, currentStartupProjects);
 
-            var startupProjectsEventArgs = new StartupProjectsEventArgs();
-            QueryStartupProjects?.Invoke(this, startupProjectsEventArgs);
+            _currentProfile = parsedConfiguration.CurrentProfile;
 
-            var currentStartupProjectsEventArgs = new CurrentStartupProjectsEventArgs();
-            QueryCurrentStartupProjects?.Invoke(this, currentStartupProjectsEventArgs);
-
-            var parseConfigurationEventArgs = new ParseConfigurationEventArgs(configurationEventArgs.ConfigurationLayer.ComputedConfig.Startup.ProjectConfigurations, startupProjectsEventArgs.StartupProjects, currentStartupProjectsEventArgs.StartupProjects);
-            ParseConfiguration?.Invoke(this, parseConfigurationEventArgs);
-
-            OpenedProject?.Invoke(this, new ProjectEventArgs(projectName, configurationEventArgs.ConfigurationLayer.ComputedConfig, parseConfigurationEventArgs.ParsedConfiguration.ProjectConfigurations, parseConfigurationEventArgs.ParsedConfiguration.CurrentProjectConfiguration));
+            OpenedProject?.Invoke(this, new ProjectEventArgs(projectName, configurationLayer.ComputedConfig, parsedConfiguration.Profiles, parsedConfiguration.CurrentProfile));
         }
 
         /// <summary>

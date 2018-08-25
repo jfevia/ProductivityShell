@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Jfevia.ProductivityShell.Configuration;
 
 namespace Jfevia.ProductivityShell.SolutionModel
 {
@@ -11,20 +12,31 @@ namespace Jfevia.ProductivityShell.SolutionModel
         ///     Initializes a new instance of the <see cref="T:Jfevia.ProductivityShell.SolutionModel.StartupProjectsEventArgs" />
         ///     class.
         /// </summary>
+        /// <param name="profile"></param>
         /// <param name="startupProjects">The startup projects.</param>
-        public StartupProjectsEventArgs(IEnumerable<string> startupProjects)
+        public StartupProjectsEventArgs(Profile profile, IEnumerable<string> startupProjects)
         {
+            Profile = profile;
             StartupProjects = new HashSet<string>(startupProjects);
         }
 
         /// <inheritdoc />
         /// <summary>
-        ///     Initializes a new instance of the <see cref="T:Jfevia.ProductivityShell.SolutionModel.StartupProjectsEventArgs" /> class.
+        ///     Initializes a new instance of the <see cref="T:Jfevia.ProductivityShell.SolutionModel.StartupProjectsEventArgs" />
+        ///     class.
         /// </summary>
         public StartupProjectsEventArgs()
-            : this(Enumerable.Empty<string>())
+            : this(null, Enumerable.Empty<string>())
         {
         }
+
+        /// <summary>
+        ///     Gets the profile.
+        /// </summary>
+        /// <value>
+        ///     The profile.
+        /// </value>
+        public Profile Profile { get; }
 
         /// <summary>
         ///     Gets the startup projects.

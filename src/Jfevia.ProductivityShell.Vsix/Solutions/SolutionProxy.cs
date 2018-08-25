@@ -5,6 +5,7 @@ using System.Linq;
 using EnvDTE;
 using Jfevia.ProductivityShell.Configuration;
 using Jfevia.ProductivityShell.SolutionModel;
+using Jfevia.ProductivityShell.Vsix.Configuration;
 using Jfevia.ProductivityShell.Vsix.Extensions;
 using Jfevia.ProductivityShell.Vsix.Projects;
 using Jfevia.ProductivityShell.Vsix.VisualStudio;
@@ -83,6 +84,11 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         public event EventHandler<ConfigurationChangedEventArgs> ConfigurationChanged;
 
         /// <summary>
+        ///     Occurs when [current startup projects changed].
+        /// </summary>
+        public event EventHandler<StartupProjectsEventArgs> CurrentStartupProjectsChanged;
+
+        /// <summary>
         ///     Occurs when [opened].
         /// </summary>
         public event EventHandler<SolutionEventArgs> Opened;
@@ -129,7 +135,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
             _psSolution.QueryStartupProjects -= Solution_QueryStartupProjects;
             _psSolution.QueryConfiguration -= Solution_QueryConfiguration;
             _psSolution.ParseConfiguration -= Solution_ParseConfiguration;
-            _psSolution.StartupProjectsChanged -= Solution_StartupProjectsChanged;
+            _psSolution.CurrentStartupProjectsChanged -= Solution_CurrentStartupProjectsChanged;
             _psSolution.Opened -= Solution_Opened;
             _psSolution.ClosingProject -= Solution_ClosingProject;
             _psSolution.OpenedProject -= Solution_OpenedProject;
@@ -207,8 +213,8 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
             var startupProjects = GetStartupProjects();
             var currentStartupProjects = GetCurrentStartupProjects();
             var configurationLayer = LoadConfigurationLayer();
-            var parsedConfiguration = ParseConfiguration(configurationLayer.ComputedConfig.Startup.ProjectConfigurations, startupProjects, currentStartupProjects.ToArray());
-            OnStartupProjectChanged(parsedConfiguration.CurrentProjectConfiguration);
+            var parsedConfiguration = ParseConfiguration(configurationLayer.ComputedConfig.Startup.Profiles, startupProjects, currentStartupProjects.ToArray());
+            OnStartupProjectChanged(parsedConfiguration.CurrentProfile);
         }
 
         /// <summary>
@@ -226,13 +232,13 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// <summary>
         ///     Called when [startup project changed].
         /// </summary>
-        /// <param name="projectConfiguration">The project configuration.</param>
-        public void OnStartupProjectChanged(ProjectConfiguration projectConfiguration)
+        /// <param name="profile">The profile.</param>
+        public void OnStartupProjectChanged(Profile profile)
         {
-            var startupProjects = projectConfiguration.Projects.Select(s => _projectCache.TryGetProjectByName(s.Name, out var project) ? project : null).ToList();
+            var startupProjects = profile.Projects.Select(s => _projectCache.TryGetProjectByName(s.Name, out var project) ? project : null).ToList();
             foreach (var startupProject in startupProjects.Where(s => s != null))
             {
-                var startupProjectConfig = projectConfiguration.Projects.FirstOrDefault(s => string.Equals(s.Name, startupProject.Name, StringComparison.OrdinalIgnoreCase));
+                var startupProjectConfig = profile.Projects.FirstOrDefault(s => string.Equals(s.Name, startupProject.Name, StringComparison.OrdinalIgnoreCase));
                 if (startupProjectConfig == null)
                     continue;
 
@@ -274,7 +280,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
                 }
             }
 
-            _psSolution.SetStartupProjects(startupProjects.Select(s => s.RelativePath).ToArray());
+            _psSolution.OnStartupProjectsChanged(profile, startupProjects.Select(s => s.RelativePath).ToArray());
         }
 
         /// <summary>
@@ -286,7 +292,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
             _psSolution.QueryStartupProjects += Solution_QueryStartupProjects;
             _psSolution.QueryConfiguration += Solution_QueryConfiguration;
             _psSolution.ParseConfiguration += Solution_ParseConfiguration;
-            _psSolution.StartupProjectsChanged += Solution_StartupProjectsChanged;
+            _psSolution.CurrentStartupProjectsChanged += Solution_CurrentStartupProjectsChanged;
             _psSolution.Opened += Solution_Opened;
             _psSolution.ClosingProject += Solution_ClosingProject;
             _psSolution.OpenedProject += Solution_OpenedProject;
@@ -304,14 +310,15 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         }
 
         /// <summary>
-        ///     Handles the StartupProjectsChanged event of the Solution control.
+        ///     Handles the CurrentStartupProjectsChanged event of the Solution control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="StartupProjectsEventArgs" /> instance containing the event data.</param>
-        private void Solution_StartupProjectsChanged(object sender, StartupProjectsEventArgs e)
+        private void Solution_CurrentStartupProjectsChanged(object sender, StartupProjectsEventArgs e)
         {
             var projects = e.StartupProjects.Cast<object>().ToArray();
             _vsSolution.SolutionBuild.StartupProjects = projects.Length == 1 ? projects[0] : projects;
+            CurrentStartupProjectsChanged?.Invoke(this, e);
         }
 
         /// <summary>
@@ -319,63 +326,91 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="ParseConfigurationEventArgs" /> instance containing the event data.</param>
-        private static void Solution_ParseConfiguration(object sender, ParseConfigurationEventArgs e)
+        private void Solution_ParseConfiguration(object sender, ParseConfigurationEventArgs e)
         {
-            e.ParsedConfiguration = ParseConfiguration(e.ProjectConfigurations, e.StartupProjects, e.SelectedStartupProjects);
+            e.ParsedConfiguration = ParseConfiguration(e.Profiles, e.StartupProjects, e.SelectedStartupProjects);
         }
 
         /// <summary>
         ///     Parses the configuration.
         /// </summary>
-        /// <param name="projectConfigurations">The project configurations.</param>
+        /// <param name="profiles">The profiles.</param>
         /// <param name="startupProjects">The startup projects.</param>
         /// <param name="currentStartupProjects">The current startup projects.</param>
         /// <returns>The parsed configuration.</returns>
-        private static ParsedConfiguration ParseConfiguration(IEnumerable<ProjectConfiguration> projectConfigurations, IEnumerable<string> startupProjects, ICollection<string> currentStartupProjects)
+        private ParsedConfiguration ParseConfiguration(IEnumerable<Profile> profiles, IEnumerable<string> startupProjects, ICollection<string> currentStartupProjects)
         {
             var parsedConfiguration = new ParsedConfiguration();
 
             // List all projects
             foreach (var startupProject in startupProjects)
             {
-                var projConfiguration = new ProjectConfiguration();
-                projConfiguration.DisplayName = startupProject;
+                var profile = new Profile();
+                profile.DisplayName = startupProject;
 
                 var projectItem = new Project();
                 projectItem.Name = startupProject;
 
-                projConfiguration.Projects.Add(projectItem);
-                parsedConfiguration.ProjectConfigurations.Add(projConfiguration);
+                profile.Projects.Add(projectItem);
+                parsedConfiguration.Profiles.Add(profile);
+            }
+
+            var currentProfile = new Profile();
+            foreach (var startupProject in currentStartupProjects)
+            {
+                var projectName = Path.GetFileNameWithoutExtension(startupProject);
+                if (!_projectCache.TryGetProjectByName(projectName, out var projectProxy))
+                    continue;
+
+                var projectItem = new Project();
+                projectItem.Name = projectProxy.Name;
+
+                foreach (EnvDTE.Configuration configuration in projectProxy.VsProject.ConfigurationManager)
+                {
+                    if (configuration?.Properties == null)
+                        continue;
+
+                    foreach (var property in configuration.Properties.Cast<Property>())
+                    {
+                        if (property == null)
+                            continue;
+
+                        switch (property.Name)
+                        {
+                            case "StartArguments":
+                                projectItem.CommandLineArgs = Convert.ToString(property.Value);
+                                break;
+                            case "StartWorkingDirectory":
+                                projectItem.WorkingDirectory = Convert.ToString(property.Value);
+                                break;
+                            case "StartProgram":
+                                projectItem.StartExternalProgram = Convert.ToString(property.Value);
+                                break;
+                            case "StartURL":
+                                projectItem.StartBrowserUrl = Convert.ToString(property.Value);
+                                break;
+                            case "RemoteDebugEnabled":
+                                projectItem.IsRemoteDebuggingEnabled = Convert.ToBoolean(property.Value);
+                                break;
+                            case "RemoteDebugMachine":
+                                projectItem.RemoteDebuggingMachine = Convert.ToString(property.Value);
+                                break;
+                        }
+                    }
+                }
+
+                currentProfile.Projects.Add(projectItem);
             }
 
             // List custom configuration
-            foreach (var projConfiguration in projectConfigurations)
-                parsedConfiguration.ProjectConfigurations.Add(projConfiguration);
+            foreach (var profile in profiles)
+                parsedConfiguration.Profiles.Add(profile);
 
             // Identify current configuration
-            ProjectConfiguration matchProjectConfig = null;
+            var profileScores = ProfileScore.Generate(parsedConfiguration.Profiles, currentProfile);
+            var bestMatch = profileScores.OrderByDescending(s => s.Score).FirstOrDefault();
 
-            // TODO: Use score instead of IEnumerable<T>.OrderByDescending(s => s.Projects.Count)
-            foreach (var projConfiguration in parsedConfiguration.ProjectConfigurations.OrderByDescending(s => s.Projects.Count))
-            {
-                var isMatch = true;
-                foreach (var startupProject in currentStartupProjects)
-                {
-                    if (projConfiguration.Projects.Any(s => string.Equals(s.Name, Path.GetFileNameWithoutExtension(startupProject), StringComparison.OrdinalIgnoreCase)))
-                        continue;
-
-                    isMatch = false;
-                    break;
-                }
-
-                if (!isMatch)
-                    continue;
-
-                matchProjectConfig = projConfiguration;
-                break;
-            }
-
-            parsedConfiguration.CurrentProjectConfiguration = matchProjectConfig;
+            parsedConfiguration.CurrentProfile = bestMatch?.Configuration;
             return parsedConfiguration;
         }
 
@@ -409,7 +444,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
             if (File.Exists(configurationLayer.UserFilePath))
                 configurationLayer.UserConfig = ConfigurationXmlSerializer.Deserialize(File.OpenRead(configurationLayer.UserFilePath));
 
-            configurationLayer.ComputedConfig = Configuration.Configuration.ComputeConfig(configurationLayer.MachineConfig, configurationLayer.SharedConfig, configurationLayer.UserConfig);
+            configurationLayer.ComputedConfig = ProductivityShell.Configuration.Configuration.ComputeConfig(configurationLayer.MachineConfig, configurationLayer.SharedConfig, configurationLayer.UserConfig);
             return configurationLayer;
         }
 
@@ -537,7 +572,9 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
 
                 Directory.CreateDirectory(directoryName);
                 using (var fileStream = File.OpenWrite(config.FilePath))
+                {
                     ConfigurationXmlSerializer.Serialize(fileStream, config.Configuration);
+                }
             }
         }
 

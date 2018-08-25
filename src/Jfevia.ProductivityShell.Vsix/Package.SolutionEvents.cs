@@ -36,32 +36,32 @@ namespace Jfevia.ProductivityShell.Vsix
         /// <summary>
         ///     Reports that an element value has changed.
         /// </summary>
-        /// <param name="elementid">
+        /// <param name="elementId">
         ///     [in] DWORD value representing a particular entry in the array of element values associated with
-        ///     the selection context. For valid <paramref name="elementid" /> values, see
+        ///     the selection context. For valid <paramref name="elementId" /> values, see
         ///     <see cref="T:Microsoft.VisualStudio.VSConstants.VSSELELEMID" />.
         /// </param>
         /// <param name="varValueOld">
         ///     [in] VARIANT that contains the previous element value. This parameter contains
         ///     element-specific data, such as a pointer to the
-        ///     <see cref="T:Microsoft.VisualStudio.OLE.Interop.IOleCommandTarget" /> interface if <paramref name="elementid" /> is
+        ///     <see cref="T:Microsoft.VisualStudio.OLE.Interop.IOleCommandTarget" /> interface if <paramref name="elementId" /> is
         ///     set to <see langword="SEID_ResultsList" /> or a pointer to the
-        ///     <see cref="T:Microsoft.VisualStudio.OLE.Interop.IOleUndoManager" /> interface if <paramref name="elementid" /> is
+        ///     <see cref="T:Microsoft.VisualStudio.OLE.Interop.IOleUndoManager" /> interface if <paramref name="elementId" /> is
         ///     set to <see langword="SEID_UndoManager" />.
         /// </param>
         /// <param name="varValueNew">
         ///     [in] VARIANT that contains the new element value. This parameter contains element-specific
-        ///     data, such as a pointer to the <see langword="IOleCommandTarget" /> interface if <paramref name="elementid" /> is
+        ///     data, such as a pointer to the <see langword="IOleCommandTarget" /> interface if <paramref name="elementId" /> is
         ///     set to <see langword="SEID_ResultsList" /> or a pointer to the <see langword="IOleUndoManager" /> interface if
-        ///     <paramref name="elementid" /> is set to <see langword="SEID_UndoManager" />.
+        ///     <paramref name="elementId" /> is set to <see langword="SEID_UndoManager" />.
         /// </param>
         /// <returns>
         ///     If the method succeeds, it returns <see cref="F:Microsoft.VisualStudio.VSConstants.S_OK" />. If it fails, it
         ///     returns an error code.
         /// </returns>
-        public int OnElementValueChanged(uint elementid, object varValueOld, object varValueNew)
+        public int OnElementValueChanged(uint elementId, object varValueOld, object varValueNew)
         {
-            if (elementid == (uint) VSConstants.VSSELELEMID.SEID_StartupProject)
+            if (elementId == (uint) VSConstants.VSSELELEMID.SEID_StartupProject)
                 _visualStudioProxy.OnStartupProjectChanged();
 
             return VSConstants.S_OK;

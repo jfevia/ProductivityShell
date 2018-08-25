@@ -9,18 +9,18 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// <summary>
         ///     Initializes a new instance of the <see cref="T:Jfevia.ProductivityShell.Vsix.Solutions.StartupProjectsChangedEventArgs" /> class.
         /// </summary>
-        /// <param name="projectConfiguration">The project configuration.</param>
-        public StartupProjectsChangedEventArgs(ProjectConfiguration projectConfiguration)
+        /// <param name="profile">The profile.</param>
+        public StartupProjectsChangedEventArgs(Profile profile)
         {
-            ProjectConfiguration = projectConfiguration;
+            Profile = profile;
         }
 
         /// <summary>
-        ///     Gets the project configuration.
+        ///     Gets the profile.
         /// </summary>
         /// <value>
-        ///     The project configuration.
+        ///     The profile.
         /// </value>
-        public ProjectConfiguration ProjectConfiguration { get; }
+        public Profile Profile { get; }
     }
 }

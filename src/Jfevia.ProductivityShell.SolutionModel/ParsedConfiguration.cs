@@ -10,7 +10,7 @@ namespace Jfevia.ProductivityShell.SolutionModel
         /// </summary>
         public ParsedConfiguration()
         {
-            ProjectConfigurations = new HashSet<ProjectConfiguration>();
+            Profiles = new HashSet<Profile>();
         }
 
         /// <summary>
@@ -19,14 +19,14 @@ namespace Jfevia.ProductivityShell.SolutionModel
         /// <value>
         ///     The resulting startup projects.
         /// </value>
-        public ICollection<ProjectConfiguration> ProjectConfigurations { get; }
+        public ICollection<Profile> Profiles { get; }
 
         /// <summary>
-        ///     Gets or sets the selected project configuration.
+        ///     Gets or sets the selected profile.
         /// </summary>
         /// <value>
-        ///     The selected project configuration.
+        ///     The selected profile.
         /// </value>
-        public ProjectConfiguration CurrentProjectConfiguration { get; set; }
+        public Profile CurrentProfile { get; set; }
     }
 }

@@ -11,13 +11,13 @@ namespace Jfevia.ProductivityShell.SolutionModel
         ///     Initializes a new instance of the <see cref="T:Jfevia.ProductivityShell.SolutionModel.SolutionEventArgs" /> class.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
-        /// <param name="projectConfigurations">The project configurations.</param>
-        /// <param name="selectedProjectConfiguration">The selected project configuration.</param>
-        public SolutionEventArgs(Configuration.Configuration configuration, ICollection<ProjectConfiguration> projectConfigurations, ProjectConfiguration selectedProjectConfiguration)
+        /// <param name="profiles">The profiles.</param>
+        /// <param name="selectedProfile">The selected profile.</param>
+        public SolutionEventArgs(Configuration.Configuration configuration, ICollection<Profile> profiles, Profile selectedProfile)
         {
             Configuration = configuration;
-            ProjectConfigurations = projectConfigurations;
-            SelectedProjectConfiguration = selectedProjectConfiguration;
+            Profiles = profiles;
+            SelectedProfile = selectedProfile;
         }
 
         /// <summary>
@@ -29,19 +29,19 @@ namespace Jfevia.ProductivityShell.SolutionModel
         public Configuration.Configuration Configuration { get; }
 
         /// <summary>
-        ///     Gets the project configurations.
+        ///     Gets the profiles.
         /// </summary>
         /// <value>
-        ///     The project configurations.
+        ///     The profiles.
         /// </value>
-        public ICollection<ProjectConfiguration> ProjectConfigurations { get; }
+        public ICollection<Profile> Profiles { get; }
 
         /// <summary>
-        ///     Gets the selected project configuration.
+        ///     Gets the selected profile.
         /// </summary>
         /// <value>
-        ///     The selected project configuration.
+        ///     The selected profile.
         /// </value>
-        public ProjectConfiguration SelectedProjectConfiguration { get; }
+        public Profile SelectedProfile { get; }
     }
 }

@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Linq;
 using EnvDTE;
 using EnvDTE80;
+using Jfevia.ProductivityShell.Configuration;
 using Jfevia.ProductivityShell.SolutionModel;
 using Jfevia.ProductivityShell.Vsix.Extensions;
 using Jfevia.ProductivityShell.Vsix.Solutions;
@@ -116,6 +118,7 @@ namespace Jfevia.ProductivityShell.Vsix.VisualStudio
                     _solutionProxy.ClosingProject += SolutionProxy_ClosingProject;
                     _solutionProxy.OpenedProject += SolutionProxy_OpenedProject;
                     _solutionProxy.ConfigurationChanged += SolutionProxy_ConfigurationChanged;
+                    _solutionProxy.CurrentStartupProjectsChanged += SolutionProxy_CurrentStartupProjectsChanged;
                 }
 
                 return _solutionProxy;
@@ -150,6 +153,7 @@ namespace Jfevia.ProductivityShell.Vsix.VisualStudio
                 _solutionProxy.ClosingProject -= SolutionProxy_ClosingProject;
                 _solutionProxy.OpenedProject -= SolutionProxy_OpenedProject;
                 _solutionProxy.ConfigurationChanged -= SolutionProxy_ConfigurationChanged;
+                _solutionProxy.CurrentStartupProjectsChanged -= SolutionProxy_CurrentStartupProjectsChanged;
                 _solutionProxy.Dispose();
             }
 
@@ -161,20 +165,35 @@ namespace Jfevia.ProductivityShell.Vsix.VisualStudio
         }
 
         /// <summary>
+        ///     Handles the CurrentStartupProjectsChanged event of the SolutionProxy control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="StartupProjectsEventArgs" /> instance containing the event data.</param>
+        private void SolutionProxy_CurrentStartupProjectsChanged(object sender, StartupProjectsEventArgs e)
+        {
+            UpdateCurrentStartupProjectService(e.Profile);
+        }
+
+        /// <summary>
+        ///     Updates the current startup project service.
+        /// </summary>
+        /// <param name="profile">The profile.</param>
+        private void UpdateCurrentStartupProjectService(Profile profile)
+        {
+            if (profile == null)
+                return;
+
+            _startupProjectsService.SelectedItem = profile;
+        }
+
+        /// <summary>
         ///     Handles the ConfigurationChanged event of the SolutionProxy control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="ConfigurationChangedEventArgs" /> instance containing the event data.</param>
         private void SolutionProxy_ConfigurationChanged(object sender, ConfigurationChangedEventArgs e)
         {
-            // TODO: Needs code reuse, this is exactly the same in SolutionProxy_Opened
-            var itemMap = e.ProjectConfigurations.OrderBy(s => s.DisplayName).ToDictionary(s => s);
-            _startupProjectsService.Items = itemMap.Values;
-
-            if (e.SelectedProjectConfiguration == null)
-                return;
-
-            _startupProjectsService.SelectedItem = itemMap[e.SelectedProjectConfiguration];
+            UpdateStartupProjects(e.Profiles, e.SelectedProfile);
         }
 
         /// <summary>
@@ -184,14 +203,7 @@ namespace Jfevia.ProductivityShell.Vsix.VisualStudio
         /// <param name="e">The <see cref="ProjectEventArgs" /> instance containing the event data.</param>
         private void SolutionProxy_OpenedProject(object sender, ProjectEventArgs e)
         {
-            // TODO: Needs code reuse, this is exactly the same in SolutionProxy_Opened
-            var itemMap = e.ProjectConfigurations.OrderBy(s => s.DisplayName).ToDictionary(s => s);
-            _startupProjectsService.Items = itemMap.Values;
-
-            if (e.SelectedProjectConfiguration == null)
-                return;
-
-            _startupProjectsService.SelectedItem = itemMap[e.SelectedProjectConfiguration];
+            UpdateStartupProjects(e.Profiles, e.SelectedProfile);
         }
 
         /// <summary>
@@ -211,7 +223,7 @@ namespace Jfevia.ProductivityShell.Vsix.VisualStudio
         /// <param name="e">The <see cref="StartupProjectsChangedEventArgs" /> instance containing the event data.</param>
         private void StartupProjectsService_SelectedStartupProjectChanged(object sender, StartupProjectsChangedEventArgs e)
         {
-            SolutionProxy.OnStartupProjectChanged(e.ProjectConfiguration);
+            SolutionProxy.OnStartupProjectChanged(e.Profile);
         }
 
         /// <summary>
@@ -221,13 +233,12 @@ namespace Jfevia.ProductivityShell.Vsix.VisualStudio
         /// <param name="e">The <see cref="SolutionEventArgs" /> instance containing the event data.</param>
         private void SolutionProxy_Opened(object sender, SolutionEventArgs e)
         {
-            var itemMap = e.ProjectConfigurations.OrderBy(s => s.DisplayName).ToDictionary(s => s);
-            _startupProjectsService.Items = itemMap.Values;
+            _startupProjectsService.Items = e.Profiles.OrderBy(s => s.DisplayName);
 
-            if (e.SelectedProjectConfiguration == null)
+            if (e.SelectedProfile == null)
                 return;
 
-            _startupProjectsService.SelectedItem = itemMap[e.SelectedProjectConfiguration];
+            _startupProjectsService.SelectedItem = e.SelectedProfile;
         }
 
         /// <summary>
@@ -289,14 +300,20 @@ namespace Jfevia.ProductivityShell.Vsix.VisualStudio
         /// <param name="e">The <see cref="SolutionEventArgs" /> instance containing the event data.</param>
         private void SolutionProxy_ClosingProject(object sender, ProjectEventArgs e)
         {
-            // TODO: Needs code reuse, this is exactly the same in SolutionProxy_Opened
-            var itemMap = e.ProjectConfigurations.OrderBy(s => s.DisplayName).ToDictionary(s => s);
+            UpdateStartupProjects(e.Profiles, e.SelectedProfile);
+        }
+
+        /// <summary>
+        ///     Updates the startup projects.
+        /// </summary>
+        /// <param name="profiles">The profiles.</param>
+        /// <param name="currentProfile">The current profile.</param>
+        private void UpdateStartupProjects(IEnumerable<Profile> profiles, Profile currentProfile)
+        {
+            var itemMap = profiles.OrderBy(s => s.DisplayName).ToDictionary(s => s);
             _startupProjectsService.Items = itemMap.Values;
 
-            if (e.SelectedProjectConfiguration == null)
-                return;
-
-            _startupProjectsService.SelectedItem = itemMap[e.SelectedProjectConfiguration];
+            UpdateCurrentStartupProjectService(currentProfile);
         }
 
         /// <summary>

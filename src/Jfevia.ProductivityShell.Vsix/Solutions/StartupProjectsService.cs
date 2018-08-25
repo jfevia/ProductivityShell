@@ -11,12 +11,13 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
     internal class StartupProjectsService
     {
         private readonly IMenuCommandService _menuCommandService;
-        private ProjectConfiguration _editConfigurationItem;
-        private IList<ProjectConfiguration> _items;
+        private Profile _editConfigurationItem;
+        private IList<Profile> _items;
         private CommandID _itemsSourceCommand;
         private OleMenuCommand _queryItemsSourceCommand;
         private OleMenuCommand _querySelectedItemCommand;
         private CommandID _selectedItemCommand;
+        private Profile _selectedItem;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="StartupProjectsService" /> class.
@@ -44,7 +45,17 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// <value>
         ///     The selected item.
         /// </value>
-        public ProjectConfiguration SelectedItem { get; set; }
+        public Profile SelectedItem
+        {
+            get => _selectedItem;
+            set
+            {
+                if (ProfileEqualityComparer.Instance.Equals(_selectedItem, value))
+                    return;
+
+                _selectedItem = value;
+            }
+        }
 
         /// <summary>
         ///     Gets the items.
@@ -52,12 +63,12 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// <value>
         ///     The items.
         /// </value>
-        public IEnumerable<ProjectConfiguration> Items
+        public IEnumerable<Profile> Items
         {
-            get => _items ?? (_items = new List<ProjectConfiguration>());
+            get => _items ?? (_items = new List<Profile>());
             set
             {
-                _items = new List<ProjectConfiguration>(value);
+                _items = new List<Profile>(value);
                 _items.Add(_editConfigurationItem);
             }
         }
@@ -79,7 +90,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// </summary>
         private void Initialize()
         {
-            _editConfigurationItem = new ProjectConfiguration
+            _editConfigurationItem = new Profile
             {
                 DisplayName = "Configure..."
             };

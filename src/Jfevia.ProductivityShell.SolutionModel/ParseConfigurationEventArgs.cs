@@ -8,23 +8,23 @@ namespace Jfevia.ProductivityShell.SolutionModel
         /// <summary>
         ///     Initializes a new instance of the <see cref="ParseConfigurationEventArgs" /> class.
         /// </summary>
-        /// <param name="projectConfigurations">The project configurations.</param>
+        /// <param name="profiles">The profiles.</param>
         /// <param name="startupProjects">The startup projects.</param>
         /// <param name="selectedStartupProjects">The selected startup projects.</param>
-        public ParseConfigurationEventArgs(ICollection<ProjectConfiguration> projectConfigurations, ICollection<string> startupProjects, ICollection<string> selectedStartupProjects)
+        public ParseConfigurationEventArgs(ICollection<Profile> profiles, ICollection<string> startupProjects, ICollection<string> selectedStartupProjects)
         {
-            ProjectConfigurations = projectConfigurations;
+            Profiles = profiles;
             StartupProjects = startupProjects;
             SelectedStartupProjects = selectedStartupProjects;
         }
 
         /// <summary>
-        ///     Gets the project configurations.
+        ///     Gets the profiles.
         /// </summary>
         /// <value>
-        ///     The project configurations.
+        ///     The profiles.
         /// </value>
-        public ICollection<ProjectConfiguration> ProjectConfigurations { get; }
+        public ICollection<Profile> Profiles { get; }
 
         /// <summary>
         ///     Gets the startup projects.

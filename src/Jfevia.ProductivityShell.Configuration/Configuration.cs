@@ -28,16 +28,16 @@ namespace Jfevia.ProductivityShell.Configuration
             var configs = new[] {machineConfig, sharedConfig, userConfig};
             foreach (var config in configs.Where(s => s != null))
             {
-                foreach (var item in config.Startup.ProjectConfigurations)
+                foreach (var item in config.Startup.Profiles)
                 {
-                    var existingProjConfig = configuration.Startup.ProjectConfigurations.FirstOrDefault(s => string.Equals(s.DisplayName, item.DisplayName, StringComparison.OrdinalIgnoreCase));
-                    if (existingProjConfig == null)
+                    var existingProfile = configuration.Startup.Profiles.FirstOrDefault(s => string.Equals(s.DisplayName, item.DisplayName, StringComparison.OrdinalIgnoreCase));
+                    if (existingProfile == null)
                     {
-                        configuration.Startup.ProjectConfigurations.Add(item);
+                        configuration.Startup.Profiles.Add(item);
                         continue;
                     }
 
-                    existingProjConfig.Projects = new List<Project>(item.Projects);
+                    existingProfile.Projects = new List<Project>(item.Projects);
                 }
             }
 

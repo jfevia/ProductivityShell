@@ -11,10 +11,10 @@ namespace Jfevia.ProductivityShell.SolutionModel
         /// </summary>
         /// <param name="projectName">Name of the project.</param>
         /// <param name="configuration">The configuration.</param>
-        /// <param name="projectConfigurations">The project configurations.</param>
-        /// <param name="selectedProjectConfiguration">The selected project configuration.</param>
-        public ProjectEventArgs(string projectName, Configuration.Configuration configuration, ICollection<ProjectConfiguration> projectConfigurations, ProjectConfiguration selectedProjectConfiguration)
-            : base(configuration, projectConfigurations, selectedProjectConfiguration)
+        /// <param name="profiles">The profiles.</param>
+        /// <param name="selectedProfile">The selected profile.</param>
+        public ProjectEventArgs(string projectName, Configuration.Configuration configuration, ICollection<Profile> profiles, Profile selectedProfile)
+            : base(configuration, profiles, selectedProfile)
         {
             ProjectName = projectName;
         }

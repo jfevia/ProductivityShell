@@ -48,8 +48,10 @@
   <ItemGroup>
     <Compile Include="Configuration.cs" />
     <Compile Include="ConfigurationXmlSerializer.cs" />
+    <Compile Include="ProfileEqualityComparer.cs" />
     <Compile Include="Project.cs" />
-    <Compile Include="ProjectConfiguration.cs" />
+    <Compile Include="Profile.cs" />
+    <Compile Include="ProjectEqualityComparer.cs" />
     <Compile Include="ProjectExtensions.cs" />
     <Compile Include="ProjectStartAction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

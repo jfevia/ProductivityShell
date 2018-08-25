@@ -10,10 +10,10 @@ namespace Jfevia.ProductivityShell.SolutionModel
         ///     Initializes a new instance of the <see cref="ConfigurationChangedEventArgs" /> class.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
-        /// <param name="projectConfigurations">The project configurations.</param>
-        /// <param name="selectedProjectConfiguration">The selected project configuration.</param>
-        public ConfigurationChangedEventArgs(Configuration.Configuration configuration, ICollection<ProjectConfiguration> projectConfigurations, ProjectConfiguration selectedProjectConfiguration)
-            : base(configuration, projectConfigurations, selectedProjectConfiguration)
+        /// <param name="profiles">The profiles.</param>
+        /// <param name="selectedProfile">The selected profile.</param>
+        public ConfigurationChangedEventArgs(Configuration.Configuration configuration, ICollection<Profile> profiles, Profile selectedProfile)
+            : base(configuration, profiles, selectedProfile)
         {
         }
     }

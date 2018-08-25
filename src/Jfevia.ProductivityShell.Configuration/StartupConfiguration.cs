@@ -5,11 +5,11 @@ namespace Jfevia.ProductivityShell.Configuration
     public class StartupConfiguration
     {
         /// <summary>
-        ///     Gets or sets the project configurations.
+        ///     Gets or sets the profiles.
         /// </summary>
         /// <value>
-        ///     The project configurations.
+        ///     The profiles.
         /// </value>
-        public List<ProjectConfiguration> ProjectConfigurations { get; set; } = new List<ProjectConfiguration>();
+        public List<Profile> Profiles { get; set; } = new List<Profile>();
     }
 }

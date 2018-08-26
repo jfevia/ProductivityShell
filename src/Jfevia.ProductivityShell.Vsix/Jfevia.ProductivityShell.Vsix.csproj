@@ -121,7 +121,7 @@
     <Compile Include="Commands\Refactor\MoveToSettingsWindow.xaml.cs">
       <DependentUpon>MoveToSettingsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="VisualStudio\VisualStudioProxy.cs" />
+    <Compile Include="Shell\ShellProxy.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Key.snk">

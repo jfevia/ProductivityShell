@@ -40,30 +40,33 @@ namespace Jfevia.ProductivityShell.Vsix.Settings
                     settingsContainer.AddOrUpdate(profileElement?.Value);
 
             XElement settingsParentElement;
-            if ((settingsParentElement = root.Element(SettingsName)) != null)
-                foreach (var settingElement in settingsParentElement.Elements(SingleSettingName))
-                {
-                    var setting = new Setting();
+            if ((settingsParentElement = root.Element(SettingsName)) == null)
+                return settingsContainer;
 
-                    var typeName = settingElement.Attribute("Type")?.Value;
-                    if (!string.IsNullOrWhiteSpace(typeName))
-                        setting.Type = Type.GetType(typeName);
+            foreach (var settingElement in settingsParentElement.Elements(SingleSettingName))
+            {
+                var setting = new Setting();
 
-                    var scopeName = settingElement.Attribute("Scope")?.Value;
-                    if (!string.IsNullOrWhiteSpace(scopeName))
-                        setting.Scope = (SettingScope) Enum.Parse(typeof(SettingScope), scopeName);
+                var typeName = settingElement.Attribute("Type")?.Value;
+                if (!string.IsNullOrWhiteSpace(typeName))
+                    setting.Type = Type.GetType(typeName);
 
-                    setting.Name = settingElement.Attribute("Name")?.Value;
+                var scopeName = settingElement.Attribute("Scope")?.Value;
+                if (!string.IsNullOrWhiteSpace(scopeName))
+                    setting.Scope = (SettingScope) Enum.Parse(typeof(SettingScope), scopeName);
 
-                    var valueElement = settingElement.Element(ValueName);
-                    if (valueElement == null)
-                        throw new ArgumentOutOfRangeException(nameof(valueElement));
+                setting.Name = settingElement.Attribute("Name")?.Value;
 
-                    setting.Profile = valueElement.Attribute("Profile")?.Value;
-                    setting.Value = valueElement.Value;
+                var valueElement = settingElement.Element(ValueName);
+                if (valueElement == null)
+                    throw new ArgumentOutOfRangeException(nameof(valueElement));
 
-                    settingsContainer.AddOrUpdate(setting);
-                }
+                setting.Profile = valueElement.Attribute("Profile")?.Value;
+                setting.Value = valueElement.Value;
+                setting.DefaultValue = valueElement.Value;
+
+                settingsContainer.AddOrUpdate(setting);
+            }
 
             return settingsContainer;
         }

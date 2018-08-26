@@ -1,4 +1,4 @@
-﻿using Jfevia.ProductivityShell.Vsix.VisualStudio;
+﻿using Jfevia.ProductivityShell.Vsix.Shell;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 
@@ -6,7 +6,7 @@ namespace Jfevia.ProductivityShell.Vsix
 {
     public partial class Package : IVsSolutionEvents, IVsSolutionEvents4, IVsSolutionLoadEvents, IVsSelectionEvents
     {
-        private VisualStudioProxy _visualStudioProxy;
+        private ShellProxy _shellProxy;
         private bool _projectsLoadInBatches;
 
         /// <inheritdoc />
@@ -26,8 +26,8 @@ namespace Jfevia.ProductivityShell.Vsix
         /// </returns>
         public int OnCmdUIContextChanged(uint dwCmdUICookie, int fActive)
         {
-            if (dwCmdUICookie == _visualStudioProxy.DebuggingCookie)
-                _visualStudioProxy.OnDebuggingStateChanged(fActive != 0);
+            if (dwCmdUICookie == _shellProxy.DebuggingCookie)
+                _shellProxy.OnDebuggingStateChanged(fActive != 0);
 
             return VSConstants.S_OK;
         }
@@ -62,7 +62,7 @@ namespace Jfevia.ProductivityShell.Vsix
         public int OnElementValueChanged(uint elementId, object varValueOld, object varValueNew)
         {
             if (elementId == (uint) VSConstants.VSSELELEMID.SEID_StartupProject)
-                _visualStudioProxy.OnStartupProjectChanged();
+                _shellProxy.OnStartupProjectChanged();
 
             return VSConstants.S_OK;
         }
@@ -123,7 +123,7 @@ namespace Jfevia.ProductivityShell.Vsix
         /// </returns>
         public int OnAfterCloseSolution(object pUnkReserved)
         {
-            _visualStudioProxy.OnClosedSolution();
+            _shellProxy.OnClosedSolution();
             return VSConstants.S_OK;
         }
 
@@ -145,7 +145,7 @@ namespace Jfevia.ProductivityShell.Vsix
         /// </returns>
         public int OnAfterLoadProject(IVsHierarchy pStubHierarchy, IVsHierarchy pRealHierarchy)
         {
-            _visualStudioProxy.OnProjectLoaded();
+            _shellProxy.OnProjectLoaded();
             return VSConstants.S_OK;
         }
 
@@ -167,7 +167,7 @@ namespace Jfevia.ProductivityShell.Vsix
         /// </returns>
         public int OnAfterOpenProject(IVsHierarchy pHierarchy, int fAdded)
         {
-            _visualStudioProxy.OnOpenedProject(pHierarchy, fAdded == 1);
+            _shellProxy.OnOpenedProject(pHierarchy, fAdded == 1);
             return VSConstants.S_OK;
         }
 
@@ -187,7 +187,7 @@ namespace Jfevia.ProductivityShell.Vsix
         public int OnAfterOpenSolution(object pUnkReserved, int fNewSolution)
         {
             if (!_projectsLoadInBatches)
-                _visualStudioProxy.OnOpenedSolution();
+                _shellProxy.OnOpenedSolution();
 
             return VSConstants.S_OK;
         }
@@ -211,7 +211,7 @@ namespace Jfevia.ProductivityShell.Vsix
         /// </returns>
         public int OnBeforeCloseProject(IVsHierarchy pHierarchy, int fRemoved)
         {
-            _visualStudioProxy.OnClosingProject(pHierarchy);
+            _shellProxy.OnClosingProject(pHierarchy);
             return VSConstants.S_OK;
         }
 
@@ -226,7 +226,7 @@ namespace Jfevia.ProductivityShell.Vsix
         /// </returns>
         public int OnBeforeCloseSolution(object pUnkReserved)
         {
-            _visualStudioProxy.OnClosingSolution();
+            _shellProxy.OnClosingSolution();
             return VSConstants.S_OK;
         }
 
@@ -368,7 +368,7 @@ namespace Jfevia.ProductivityShell.Vsix
         /// </returns>
         public int OnAfterRenameProject(IVsHierarchy pHierarchy)
         {
-            _visualStudioProxy.OnRenamedProject(pHierarchy);
+            _shellProxy.OnRenamedProject(pHierarchy);
             return VSConstants.S_OK;
         }
 
@@ -407,7 +407,7 @@ namespace Jfevia.ProductivityShell.Vsix
         /// </returns>
         public int OnAfterBackgroundSolutionLoadComplete()
         {
-            _visualStudioProxy.OnOpenedSolution();
+            _shellProxy.OnOpenedSolution();
             return VSConstants.S_OK;
         }
 
@@ -473,7 +473,7 @@ namespace Jfevia.ProductivityShell.Vsix
         public int OnBeforeOpenSolution(string pszSolutionFilename)
         {
             _projectsLoadInBatches = false;
-            _visualStudioProxy.OnOpeningSolution();
+            _shellProxy.OnOpeningSolution();
             return VSConstants.S_OK;
         }
 

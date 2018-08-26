@@ -49,5 +49,13 @@
         ///     The name of the designer file.
         /// </value>
         public string DesignerFileName { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the language.
+        /// </summary>
+        /// <value>
+        ///     The language.
+        /// </value>
+        public string Language { get; set; }
     }
 }

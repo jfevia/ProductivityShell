@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -8,6 +9,7 @@ using System.IO;
 using System.Linq;
 using EnvDTE;
 using Jfevia.ProductivityShell.Vsix.AppConfig;
+using Jfevia.ProductivityShell.Vsix.Extensions;
 using Jfevia.ProductivityShell.Vsix.Helpers;
 using Jfevia.ProductivityShell.Vsix.Settings;
 using Jfevia.ProductivityShell.Vsix.Shell;
@@ -193,7 +195,7 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Refactor
             serializedContainer = SettingsSerializer.Serialize(settingsContainer);
             File.WriteAllText(file.FullPath, serializedContainer);
 
-            SettingsFileGenerator.Write(file.DesignerFilePath, settingsContainer);
+            SettingsFileGenerator.Write(file, settingsContainer);
             AppConfigFileGenerator.Write(settingsContainer);
 
             var startEditPoint = _textSelection.TopPoint.CreateEditPoint();
@@ -210,13 +212,16 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Refactor
         private IEnumerable<SettingsFile> GetDetectedSettingsFiles()
         {
             foreach (var settingsFile in _settingsFiles)
+            {
+                var language = settingsFile.ContainingProject.CodeModel.Language.ToLanguage();
+                var defaultExtension = language.ToDefaultExtension();
                 for (short index = 0; index < settingsFile.FileCount; ++index)
                 {
                     var filePath = settingsFile.FileNames[index];
                     var relativePath = filePath.Replace(_projectPath, $"<{settingsFile.ContainingProject.Name}>");
                     var directoryName = Path.GetDirectoryName(filePath);
                     var fileName = Path.GetFileNameWithoutExtension(filePath);
-                    var designerFileName = $"{fileName}.Designer.cs";
+                    var designerFileName = $"{fileName}.Designer{defaultExtension}";
                     var designerFilePath = Path.Combine(directoryName, designerFileName);
 
                     yield return new SettingsFile
@@ -226,9 +231,11 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Refactor
                         DirectoryName = directoryName,
                         FileName = fileName,
                         DesignerFileName = designerFileName,
-                        DesignerFilePath = designerFilePath
+                        DesignerFilePath = designerFilePath,
+                        Language = language
                     };
                 }
+            }
         }
 
         /// <summary>

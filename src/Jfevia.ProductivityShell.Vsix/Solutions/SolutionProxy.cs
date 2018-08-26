@@ -8,7 +8,7 @@ using Jfevia.ProductivityShell.SolutionModel;
 using Jfevia.ProductivityShell.Vsix.Configuration;
 using Jfevia.ProductivityShell.Vsix.Extensions;
 using Jfevia.ProductivityShell.Vsix.Projects;
-using Jfevia.ProductivityShell.Vsix.VisualStudio;
+using Jfevia.ProductivityShell.Vsix.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Constants = EnvDTE.Constants;
 using Project = Jfevia.ProductivityShell.Configuration.Project;
@@ -24,7 +24,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         ///     Initializes a new instance of the <see cref="SolutionProxyBase" /> class.
         /// </summary>
         /// <param name="vsProxy">The Visual Studio proxy.</param>
-        protected SolutionProxyBase(VisualStudioProxy vsProxy)
+        protected SolutionProxyBase(ShellProxy vsProxy)
         {
             VsProxy = vsProxy;
         }
@@ -35,7 +35,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// <value>
         ///     The Visual Studio proxy.
         /// </value>
-        public VisualStudioProxy VsProxy { get; }
+        public ShellProxy VsProxy { get; }
 
         /// <summary>
         ///     Gets the Visual Studio solution.
@@ -62,7 +62,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// </summary>
         /// <param name="vsProxy">The Visual Studio proxy.</param>
         /// <param name="psSolution">The Productivity Shell solution.</param>
-        public SolutionProxy(VisualStudioProxy vsProxy, Solution psSolution)
+        public SolutionProxy(ShellProxy vsProxy, Solution psSolution)
             : base(vsProxy)
         {
             _configurationFileTrackers = new List<ConfigurationFileTracker>();

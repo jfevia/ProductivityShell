@@ -12,9 +12,9 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using Solution = EnvDTE.Solution;
 
-namespace Jfevia.ProductivityShell.Vsix.VisualStudio
+namespace Jfevia.ProductivityShell.Vsix.Shell
 {
-    public abstract class VisualStudioProxyBase
+    public abstract class ShellProxyBase
     {
         private DTE _dte;
         private DTE2 _dte2;
@@ -23,10 +23,10 @@ namespace Jfevia.ProductivityShell.Vsix.VisualStudio
         private IVsMonitorSelection _monitorSelection;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="VisualStudioProxyBase" /> class.
+        ///     Initializes a new instance of the <see cref="ShellProxyBase" /> class.
         /// </summary>
         /// <param name="package">The package.</param>
-        protected VisualStudioProxyBase(Package package)
+        protected ShellProxyBase(Package package)
         {
             Package = package;
         }
@@ -80,7 +80,7 @@ namespace Jfevia.ProductivityShell.Vsix.VisualStudio
         public Package Package { get; }
     }
 
-    public class VisualStudioProxy : VisualStudioProxyBase, IDisposable
+    public class ShellProxy : ShellProxyBase, IDisposable
     {
         private readonly StartupProfilesService _startupProfileService;
         private uint _debuggingCookie;
@@ -89,11 +89,11 @@ namespace Jfevia.ProductivityShell.Vsix.VisualStudio
 
         /// <inheritdoc />
         /// <summary>
-        ///     Initializes a new instance of the <see cref="T:Jfevia.ProductivityShell.Vsix.VisualStudio.VisualStudioProxy" />
+        ///     Initializes a new instance of the <see cref="T:Jfevia.ProductivityShell.Vsix.Shell.ShellProxy" />
         ///     class.
         /// </summary>
         /// <param name="package">The package.</param>
-        public VisualStudioProxy(Package package)
+        public ShellProxy(Package package)
             : base(package)
         {
             _startupProfileService = new StartupProfilesService(MenuCommandService);

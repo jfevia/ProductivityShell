@@ -10,7 +10,6 @@ using Jfevia.ProductivityShell.Vsix.Commands.Tools;
 using Jfevia.ProductivityShell.Vsix.DialogPages;
 using Jfevia.ProductivityShell.Vsix.Shell;
 using Jfevia.ProductivityShell.Vsix.Solutions;
-using Jfevia.ProductivityShell.Vsix.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
@@ -40,8 +39,8 @@ namespace Jfevia.ProductivityShell.Vsix
         {
             base.Dispose(disposing);
 
-            _visualStudioProxy.SolutionProxy.UnadviseSolutionEvents();
-            _visualStudioProxy.UnadviseSelectionEvents();
+            _shellProxy.SolutionProxy.UnadviseSolutionEvents();
+            _shellProxy.UnadviseSelectionEvents();
         }
 
         /// <summary>
@@ -60,10 +59,10 @@ namespace Jfevia.ProductivityShell.Vsix
         {
             base.Initialize();
 
-            _visualStudioProxy = new VisualStudioProxy(this);
-            _visualStudioProxy.AdviseDebuggingEvents(this);
-            _visualStudioProxy.AdviseSelectionEvents(this);
-            _visualStudioProxy.SolutionProxy.AdviseSolutionEvents(this);
+            _shellProxy = new ShellProxy(this);
+            _shellProxy.AdviseDebuggingEvents(this);
+            _shellProxy.AdviseSelectionEvents(this);
+            _shellProxy.SolutionProxy.AdviseSolutionEvents(this);
 
             // Shell
             RestartNormalCommand.Initialize(this);

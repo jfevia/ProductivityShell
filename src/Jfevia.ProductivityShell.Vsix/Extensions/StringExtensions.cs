@@ -1,4 +1,5 @@
 ﻿using System;
+using EnvDTE;
 
 namespace Jfevia.ProductivityShell.Vsix.Extensions
 {
@@ -27,6 +28,49 @@ namespace Jfevia.ProductivityShell.Vsix.Extensions
             }
 
             return text;
+        }
+
+        /// <summary>
+        ///     Converts the string to its language equivalent.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>The language.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">value - null</exception>
+        public static string ToLanguage(this string value)
+        {
+            switch (value)
+            {
+                case CodeModelLanguageConstants.vsCMLanguageVB:
+                    return "VisualBasic";
+                case CodeModelLanguageConstants.vsCMLanguageCSharp:
+                    return "CSharp";
+                case CodeModelLanguageConstants.vsCMLanguageVC:
+                case CodeModelLanguageConstants.vsCMLanguageMC:
+                    return "Cpp";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(value), value, null);
+            }
+        }
+
+        /// <summary>
+        ///     Converts the string to its equivalent default extension.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>The default extension.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">value - null</exception>
+        public static string ToDefaultExtension(this string value)
+        {
+            switch (value)
+            {
+                case "VisualBasic":
+                    return ".vb";
+                case "CSharp":
+                    return ".cs";
+                case "Cpp":
+                    return "cpp";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(value), value, null);
+            }
         }
     }
 }

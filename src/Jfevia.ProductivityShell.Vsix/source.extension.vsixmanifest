@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="b86685dd-7fdb-4ee5-bacc-647c4f42168d" Version="1.3" Language="en-US" Publisher="jfevia" />
+        <Identity Id="b86685dd-7fdb-4ee5-bacc-647c4f42168d" Version="1.4" Language="en-US" Publisher="jfevia" />
         <DisplayName>Productivity Shell</DisplayName>
         <Description xml:space="preserve">Productivity tools for Visual Studio.</Description>
         <MoreInfo>https://github.com/jfevia/ProductivityShell</MoreInfo>

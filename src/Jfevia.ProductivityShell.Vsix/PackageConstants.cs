@@ -4,7 +4,7 @@
     {
         public const string ProductName = "Productivity Shell";
         public const string ProductDetails = "Productivity tools for Visual Studio.";
-        public const string ProductVersion = "1.3";
+        public const string ProductVersion = "1.4";
         public const string GeneralPage = "General";
         public const string ToolsPage = "Tools";
         public const string GeneralCategory = "General";

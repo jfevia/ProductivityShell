@@ -11,7 +11,7 @@ namespace Jfevia.ProductivityShell.Vsix
         public const string Name = "Productivity Shell";
         public const string Description = @"Productivity tools for Visual Studio.";
         public const string Language = "en-US";
-        public const string Version = "1.3";
+        public const string Version = "1.4";
         public const string Author = "jfevia";
         public const string Tags = "Productivity, Command, GUID, WiX, Tools, Build, Time Savers, refactor, jfevia";
     }

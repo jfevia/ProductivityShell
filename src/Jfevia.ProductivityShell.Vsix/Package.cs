@@ -1,5 +1,4 @@
 ﻿using System.Runtime.InteropServices;
-using Jfevia.ProductivityShell.SolutionModel;
 using Jfevia.ProductivityShell.Vsix.Commands.Environment;
 using Jfevia.ProductivityShell.Vsix.Commands.Package;
 using Jfevia.ProductivityShell.Vsix.Commands.Project;
@@ -9,7 +8,6 @@ using Jfevia.ProductivityShell.Vsix.Commands.Shell;
 using Jfevia.ProductivityShell.Vsix.Commands.Tools;
 using Jfevia.ProductivityShell.Vsix.DialogPages;
 using Jfevia.ProductivityShell.Vsix.Shell;
-using Jfevia.ProductivityShell.Vsix.Solutions;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 

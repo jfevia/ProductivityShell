@@ -58,7 +58,6 @@
     <Compile Include="Solution.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SolutionBuildConfiguration.cs" />
-    <Compile Include="SolutionProject.cs" />
     <Compile Include="ConfigurationEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>

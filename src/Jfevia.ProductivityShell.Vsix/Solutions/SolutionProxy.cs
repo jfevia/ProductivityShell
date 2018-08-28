@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using EnvDTE;
 using Jfevia.ProductivityShell.Configuration;
+using Jfevia.ProductivityShell.ProjectModel;
 using Jfevia.ProductivityShell.SolutionModel;
 using Jfevia.ProductivityShell.Vsix.Configuration;
 using Jfevia.ProductivityShell.Vsix.Extensions;
@@ -12,11 +13,11 @@ using Jfevia.ProductivityShell.Vsix.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Constants = EnvDTE.Constants;
 using Project = Jfevia.ProductivityShell.Configuration.Project;
-using Solution = Jfevia.ProductivityShell.SolutionModel.Solution;
+using Solution = EnvDTE.Solution;
 
 namespace Jfevia.ProductivityShell.Vsix.Solutions
 {
-    public abstract class SolutionProxyBase
+    internal abstract class SolutionProxyBase : ProxyBase<Solution, SolutionModel.Solution>
     {
         private IVsSolution2 _solution2;
 
@@ -46,14 +47,12 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         public IVsSolution2 Solution2 => _solution2 ?? (_solution2 = VsProxy.Package.GetService<SVsSolution, IVsSolution2>());
     }
 
-    public class SolutionProxy : SolutionProxyBase, IDisposable
+    internal class SolutionProxy : SolutionProxyBase, IDisposable
     {
         private const string LocalExtension = ".ProductivityShell";
         private const string UserExtension = ".ProductivityShell.user";
         private readonly List<ConfigurationFileTracker> _configurationFileTrackers;
         private readonly ProjectCache _projectCache;
-        private readonly Solution _psSolution;
-        private readonly EnvDTE.Solution _vsSolution;
         private uint _solutionEventsCookie;
 
         /// <inheritdoc />
@@ -61,14 +60,14 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         ///     Initializes a new instance of the <see cref="T:Jfevia.ProductivityShell.Vsix.Solutions.SolutionProxy" /> class.
         /// </summary>
         /// <param name="vsProxy">The Visual Studio proxy.</param>
-        /// <param name="psSolution">The Productivity Shell solution.</param>
-        public SolutionProxy(ShellProxy vsProxy, Solution psSolution)
+        /// <param name="target">The Productivity Shell solution.</param>
+        public SolutionProxy(ShellProxy vsProxy, SolutionModel.Solution target)
             : base(vsProxy)
         {
             _configurationFileTrackers = new List<ConfigurationFileTracker>();
             _projectCache = new ProjectCache();
-            _vsSolution = VsProxy.VsSolution;
-            _psSolution = psSolution;
+            Source = VsProxy.VsSolution;
+            Target = target;
 
             Initialize();
         }
@@ -104,7 +103,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// <value>
         ///     The machine configuration file path.
         /// </value>
-        public string MachineConfigFilePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Jfevia", "ProductivityShell", "Shared", "vAny", $"{Path.GetFileName(_vsSolution.FullName)}{LocalExtension}");
+        public string MachineConfigFilePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Jfevia", "ProductivityShell", "Shared", "vAny", $"{Path.GetFileName(Source.FullName)}{LocalExtension}");
 
         /// <summary>
         ///     Gets the shared configuration file path.
@@ -112,7 +111,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// <value>
         ///     The shared configuration file path.
         /// </value>
-        public string SharedConfigFilePath => $"{_vsSolution.FullName}{LocalExtension}";
+        public string SharedConfigFilePath => $"{Source.FullName}{LocalExtension}";
 
         /// <summary>
         ///     Gets the user configuration file path.
@@ -120,7 +119,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// <value>
         ///     The user configuration file path.
         /// </value>
-        public string UserConfigFilePath => $"{_vsSolution.FullName}{UserExtension}";
+        public string UserConfigFilePath => $"{Source.FullName}{UserExtension}";
 
         /// <inheritdoc />
         /// <summary>
@@ -128,18 +127,30 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// </summary>
         public void Dispose()
         {
-            if (_psSolution == null)
-                return;
+            if (Target != null)
+            {
+                Target.QueryCurrentStartupProjects -= Solution_QueryCurrentStartupProjects;
+                Target.QueryStartupProjects -= Solution_QueryStartupProjects;
+                Target.QueryConfiguration -= Solution_QueryConfiguration;
+                Target.ParseConfiguration -= Solution_ParseConfiguration;
+                Target.CurrentProfileChanged -= Solution_CurrentProfileChanged;
+                Target.Opened -= Solution_Opened;
+                Target.ClosingProject -= Solution_ClosingProject;
+                Target.OpenedProject -= Solution_OpenedProject;
+                Target.ConfigurationChanged -= Solution_ConfigurationChanged;
+            }
 
-            _psSolution.QueryCurrentStartupProjects -= Solution_QueryCurrentStartupProjects;
-            _psSolution.QueryStartupProjects -= Solution_QueryStartupProjects;
-            _psSolution.QueryConfiguration -= Solution_QueryConfiguration;
-            _psSolution.ParseConfiguration -= Solution_ParseConfiguration;
-            _psSolution.CurrentProfileChanged -= Solution_CurrentProfileChanged;
-            _psSolution.Opened -= Solution_Opened;
-            _psSolution.ClosingProject -= Solution_ClosingProject;
-            _psSolution.OpenedProject -= Solution_OpenedProject;
-            _psSolution.ConfigurationChanged -= Solution_ConfigurationChanged;
+            if (_configurationFileTrackers != null)
+            {
+                _configurationFileTrackers.ForEach(s =>
+                {
+                    s.FileChanged -= ConfigurationFileTracker_FileChanged;
+                    s.Stop();
+                });
+                _configurationFileTrackers.Clear();
+            }
+
+            _projectCache?.Dispose();
         }
 
         /// <summary>
@@ -223,10 +234,10 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// <returns>The current startup projects.</returns>
         private IEnumerable<string> GetCurrentStartupProjects()
         {
-            if (_vsSolution.SolutionBuild.StartupProjects == null)
+            if (Source.SolutionBuild.StartupProjects == null)
                 return Enumerable.Empty<string>();
 
-            return ((object[]) _vsSolution.SolutionBuild.StartupProjects).Cast<string>();
+            return ((object[]) Source.SolutionBuild.StartupProjects).Cast<string>();
         }
 
         /// <summary>
@@ -245,7 +256,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
                 if (startupProjectConfig == null)
                     continue;
 
-                foreach (EnvDTE.Configuration configuration in startupProject.VsProject.ConfigurationManager)
+                foreach (EnvDTE.Configuration configuration in startupProject.Source.ConfigurationManager)
                 {
                     if (configuration?.Properties == null)
                         continue;
@@ -283,7 +294,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
                 }
             }
 
-            _psSolution.OnStartupProfileChanged(profile, startupProjects.Select(s => s.RelativePath).ToArray());
+            Target.OnStartupProfileChanged(profile, startupProjects.Select(s => s.RelativePath).ToArray());
         }
 
         /// <summary>
@@ -291,15 +302,15 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// </summary>
         private void Initialize()
         {
-            _psSolution.QueryCurrentStartupProjects += Solution_QueryCurrentStartupProjects;
-            _psSolution.QueryStartupProjects += Solution_QueryStartupProjects;
-            _psSolution.QueryConfiguration += Solution_QueryConfiguration;
-            _psSolution.ParseConfiguration += Solution_ParseConfiguration;
-            _psSolution.CurrentProfileChanged += Solution_CurrentProfileChanged;
-            _psSolution.Opened += Solution_Opened;
-            _psSolution.ClosingProject += Solution_ClosingProject;
-            _psSolution.OpenedProject += Solution_OpenedProject;
-            _psSolution.ConfigurationChanged += Solution_ConfigurationChanged;
+            Target.QueryCurrentStartupProjects += Solution_QueryCurrentStartupProjects;
+            Target.QueryStartupProjects += Solution_QueryStartupProjects;
+            Target.QueryConfiguration += Solution_QueryConfiguration;
+            Target.ParseConfiguration += Solution_ParseConfiguration;
+            Target.CurrentProfileChanged += Solution_CurrentProfileChanged;
+            Target.Opened += Solution_Opened;
+            Target.ClosingProject += Solution_ClosingProject;
+            Target.OpenedProject += Solution_OpenedProject;
+            Target.ConfigurationChanged += Solution_ConfigurationChanged;
         }
 
         /// <summary>
@@ -320,7 +331,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         private void Solution_CurrentProfileChanged(object sender, ProfileEventArgs e)
         {
             var projects = e.StartupProjects.Cast<object>().ToArray();
-            _vsSolution.SolutionBuild.StartupProjects = projects.Length == 1 ? projects[0] : projects;
+            Source.SolutionBuild.StartupProjects = projects.Length == 1 ? projects[0] : projects;
             CurrentStartupProjectsChanged?.Invoke(this, e);
         }
 
@@ -368,7 +379,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
                 var projectItem = new Project();
                 projectItem.Name = projectProxy.Name;
 
-                foreach (EnvDTE.Configuration configuration in projectProxy.VsProject.ConfigurationManager)
+                foreach (EnvDTE.Configuration configuration in projectProxy.Source.ConfigurationManager)
                 {
                     if (configuration?.Properties == null)
                         continue;
@@ -473,7 +484,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         public void OnClosedSolution()
         {
             _projectCache.Clear();
-            _psSolution.OnClosed();
+            Target.OnClosed();
         }
 
         /// <summary>
@@ -490,7 +501,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
                 s.Start();
             });
 
-            _psSolution.OnOpened();
+            Target.OnOpened();
         }
 
         /// <summary>
@@ -500,7 +511,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
         private void ConfigurationFileTracker_FileChanged(object sender, EventArgs e)
         {
-            _psSolution.OnConfigurationChanged();
+            Target.OnConfigurationChanged();
         }
 
         /// <summary>
@@ -524,15 +535,24 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
             if (string.IsNullOrWhiteSpace(project.FullName))
                 return;
 
-            var projectProxy = new ProjectProxy();
+            var projectProxy = new ProjectProxy(project.Name, project);
             projectProxy.Hierarchy = hierarchy;
             projectProxy.SolutionProxy = this;
-            projectProxy.VsProject = project;
-            projectProxy.Name = project.Name;
-            projectProxy.RelativePath = project.GetRelativePath(_vsSolution);
+            projectProxy.RelativePath = project.GetRelativePath(Source);
+            projectProxy.Renamed += ProjectProxy_Renamed;
 
             _projectCache.Add(projectProxy);
-            _psSolution.OnOpenedProject(projectProxy.Name);
+            Target.OnOpenedProject(projectProxy.Name);
+        }
+
+        /// <summary>
+        ///     Handles the Renamed event of the ProjectProxy control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="ProjectModel.RenamedProjectEventArgs" /> instance containing the event data.</param>
+        private void ProjectProxy_Renamed(object sender, RenamedProjectEventArgs e)
+        {
+            Target.OnRenamedProject(e.OldName, e.NewName);
         }
 
         /// <summary>
@@ -591,7 +611,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
                 return;
 
             _projectCache.Remove(project);
-            _psSolution.OnClosingProject(project.Name);
+            Target.OnClosingProject(project.Name);
         }
 
         /// <summary>
@@ -615,7 +635,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// </summary>
         public void OnOpeningSolution()
         {
-            _psSolution.OnOpening();
+            Target.OnOpening();
         }
 
         /// <summary>
@@ -635,17 +655,12 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
             if (!_projectCache.TryGetProjectByHierarchy(hierarchy, out var project))
                 return;
 
-            var newProject = hierarchy.ToProject();
             var oldName = project.Name;
+            var newName = project.Source.Name;
 
-            project.Hierarchy = hierarchy;
-            project.SolutionProxy = this;
-            project.VsProject = newProject;
-            project.Name = newProject.Name;
-            project.RelativePath = newProject.GetRelativePath(_vsSolution);
+            project.Rename(newName);
 
-            _projectCache.Rename(project, oldName, project.Name);
-            _psSolution.OnRenamedProject(oldName, project.Name);
+            _projectCache.Rename(project, oldName, newName);
         }
     }
 }

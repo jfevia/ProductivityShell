@@ -66,8 +66,10 @@
     <Compile Include="Extensions\ServiceProviderExtensions.cs" />
     <Compile Include="Extensions\HierarchyExtensions.cs" />
     <Compile Include="Helpers\PathHelpers.cs" />
+    <Compile Include="IProxy.cs" />
     <Compile Include="Projects\ProjectCache.cs" />
     <Compile Include="Projects\ProjectProxy.cs" />
+    <Compile Include="ProxyBase.cs" />
     <Compile Include="Solutions\ConfigurationFileTracker.cs" />
     <Compile Include="Configuration\ProfileScore.cs" />
     <Compile Include="Solutions\StartupProfileChangedEventArgs.cs" />
@@ -313,9 +315,17 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Jfevia.Core\Jfevia.Core.csproj">
+      <Project>{faed3bfb-35e3-4604-9a5f-4e8337263c32}</Project>
+      <Name>Jfevia.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Jfevia.ProductivityShell.Configuration\Jfevia.ProductivityShell.Configuration.csproj">
       <Project>{3734b946-0ad9-40b6-8327-f0dc21553eb2}</Project>
       <Name>Jfevia.ProductivityShell.Configuration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Jfevia.ProductivityShell.ProjectModel\Jfevia.ProductivityShell.ProjectModel.csproj">
+      <Project>{89c8bc31-9cd0-46a0-b4f4-839818e2c438}</Project>
+      <Name>Jfevia.ProductivityShell.ProjectModel</Name>
     </ProjectReference>
     <ProjectReference Include="..\Jfevia.ProductivityShell.SolutionModel\Jfevia.ProductivityShell.SolutionModel.csproj">
       <Project>{ee3c3f6d-2827-47ff-83ce-f431bab0a416}</Project>

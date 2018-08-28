@@ -14,7 +14,7 @@ using Solution = EnvDTE.Solution;
 
 namespace Jfevia.ProductivityShell.Vsix.Shell
 {
-    public abstract class ShellProxyBase
+    internal abstract class ShellProxyBase : ProxyBase
     {
         private DTE _dte;
         private DTE2 _dte2;
@@ -80,7 +80,7 @@ namespace Jfevia.ProductivityShell.Vsix.Shell
         public Package Package { get; }
     }
 
-    public class ShellProxy : ShellProxyBase, IDisposable
+    internal class ShellProxy : ShellProxyBase, IDisposable
     {
         private readonly StartupProfilesService _startupProfileService;
         private uint _debuggingCookie;

@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Jfevia.ProductivityShell.Vsix.Projects
 {
-    internal class ProjectCache
+    internal class ProjectCache : IDisposable
     {
         private readonly IDictionary<IVsHierarchy, ProjectProxy> _projectByHierarchy;
         private readonly IDictionary<string, ProjectProxy> _projectByName;
@@ -16,6 +16,16 @@ namespace Jfevia.ProductivityShell.Vsix.Projects
         {
             _projectByHierarchy = new Dictionary<IVsHierarchy, ProjectProxy>();
             _projectByName = new Dictionary<string, ProjectProxy>();
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        ///     Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            _projectByName?.Clear();
+            _projectByHierarchy?.Clear();
         }
 
         /// <summary>

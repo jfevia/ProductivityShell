@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.Threading.Tasks;
 using Jfevia.ProductivityShell.Vsix.Extensions;
 using Jfevia.ProductivityShell.Vsix.Settings;
 using Microsoft.VisualStudio;
@@ -14,14 +15,15 @@ namespace Jfevia.ProductivityShell.Vsix.AppConfig
         ///     Writes the specified settings container.
         /// </summary>
         /// <param name="settingsContainer">The settings container.</param>
-        public static void Write(SettingsContainer settingsContainer)
+        public static async Task WriteAsync(SettingsContainer settingsContainer)
         {
             var sectionName = $"{settingsContainer.Namespace}.{settingsContainer.Name}";
             var solution = Package.Instance.GetGlobalService<SVsSolution, IVsSolution>();
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
             solution.GetProjectOfUniqueName(Package.Instance.Dte.ActiveDocument.ProjectItem.ContainingProject.UniqueName,
                 out var vsHierarchy);
 
-            var appConfigDocData = GetAppConfigDocData(Package.Instance, vsHierarchy, false);
+            var appConfigDocData = await GetAppConfigDocDataAsync(Package.Instance, vsHierarchy, false);
             if (appConfigDocData == null)
                 return;
 
@@ -85,9 +87,10 @@ namespace Jfevia.ProductivityShell.Vsix.AppConfig
         /// <param name="createIfNotExists">if set to <see langword="true" /> [create if not exists].</param>
         /// <returns>The application configuration document data.</returns>
         /// <exception cref="NotSupportedException">Incompatible buffer</exception>
-        public static DocData GetAppConfigDocData(IServiceProvider serviceProvider, IVsHierarchy hierarchy,
+        public static async Task<DocData> GetAppConfigDocDataAsync(IServiceProvider serviceProvider, IVsHierarchy hierarchy,
             bool createIfNotExists)
         {
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
             var projSpecialFiles = hierarchy as IVsProjectSpecialFiles;
             DocData appConfigDocData = null;
 

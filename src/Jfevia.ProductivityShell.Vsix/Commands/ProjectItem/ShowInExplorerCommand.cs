@@ -5,6 +5,7 @@ using EnvDTE;
 using Jfevia.ProductivityShell.Vsix.Helpers;
 using Jfevia.ProductivityShell.Vsix.Shell;
 using Microsoft.VisualStudio.Shell;
+using Task = System.Threading.Tasks.Task;
 
 namespace Jfevia.ProductivityShell.Vsix.Commands.ProjectItem
 {
@@ -12,7 +13,8 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.ProjectItem
     {
         /// <inheritdoc />
         /// <summary>
-        ///     Initializes a new instance of the <see cref="T:Jfevia.ProductivityShell.Vsix.Commands.ProjectItem.ShowInExplorerCommand" /> class.
+        ///     Initializes a new instance of the
+        ///     <see cref="T:Jfevia.ProductivityShell.Vsix.Commands.ProjectItem.ShowInExplorerCommand" /> class.
         /// </summary>
         /// <param name="package">The package.</param>
         private ShowInExplorerCommand(PackageBase package)
@@ -24,9 +26,22 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.ProjectItem
         ///     Initializes the specified package.
         /// </summary>
         /// <param name="package">The package.</param>
-        public static void Initialize(PackageBase package)
+        public static async Task InitializeAsync(PackageBase package)
         {
             Instance = new ShowInExplorerCommand(package);
+            await Instance.InitializeAsync();
+        }
+
+        /// <summary>
+        ///     Called when [before query status].
+        /// </summary>
+        /// <param name="command">The command.</param>
+        /// <returns>
+        ///     The task.
+        /// </returns>
+        protected override async Task OnBeforeQueryStatusAsync(OleMenuCommand command)
+        {
+            await Task.Yield();
         }
 
         /// <inheritdoc />
@@ -34,13 +49,14 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.ProjectItem
         ///     Called when [execute].
         /// </summary>
         /// <param name="command">The command.</param>
-        protected override void OnExecute(OleMenuCommand command)
+        protected override async Task OnExecuteAsync(OleMenuCommand command)
         {
+            await ProductivityShell.Vsix.Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+
             if (Package.Dte.SelectedItems.Count == 0)
                 return;
 
             var paths = new HashSet<string>();
-
             foreach (var selectedItem in UIHierarchyHelper.GetSelectedUIHierarchyItems(Package))
             {
                 if (selectedItem.Object is EnvDTE.ProjectItem projectItem)
@@ -57,6 +73,18 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.ProjectItem
             var groupedPaths = paths.GroupBy(Path.GetDirectoryName);
             foreach (var path in groupedPaths)
                 WindowsExplorerHelper.FilesOrFolders(path);
+        }
+
+        /// <summary>
+        ///     Called when [change].
+        /// </summary>
+        /// <param name="command">The command.</param>
+        /// <returns>
+        ///     The task.
+        /// </returns>
+        protected override async Task OnChangeAsync(OleMenuCommand command)
+        {
+            await Task.Yield();
         }
     }
 }

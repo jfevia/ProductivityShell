@@ -1,5 +1,4 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -15,6 +14,7 @@ using Jfevia.ProductivityShell.Vsix.Settings;
 using Jfevia.ProductivityShell.Vsix.Shell;
 using Microsoft.VisualStudio.Shell;
 using SettingScope = Jfevia.ProductivityShell.Vsix.Settings.SettingScope;
+using Task = System.Threading.Tasks.Task;
 
 namespace Jfevia.ProductivityShell.Vsix.Commands.Refactor
 {
@@ -80,9 +80,10 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Refactor
         ///     Initializes the specified package.
         /// </summary>
         /// <param name="package">The package.</param>
-        public static void Initialize(PackageBase package)
+        public static async Task InitializeAsync(PackageBase package)
         {
             Instance = new MoveToSettingsCommand(package);
+            await Instance.InitializeAsync();
         }
 
         /// <inheritdoc />
@@ -90,7 +91,7 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Refactor
         ///     Called when [before query status].
         /// </summary>
         /// <param name="command">The command.</param>
-        protected override void OnBeforeQueryStatus(OleMenuCommand command)
+        protected override async Task OnBeforeQueryStatusAsync(OleMenuCommand command)
         {
             command.Enabled = false;
 
@@ -125,6 +126,8 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Refactor
             _extension = extension;
 
             command.Enabled = true;
+
+            await Task.Yield();
         }
 
         /// <summary>
@@ -138,12 +141,11 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Refactor
                 .Where(s => s.Name.EndsWith(SettingsFileExtension));
         }
 
-        /// <inheritdoc />
         /// <summary>
         ///     Called when [execute].
         /// </summary>
         /// <param name="command">The command.</param>
-        protected override void OnExecute(OleMenuCommand command)
+        protected override async Task OnExecuteAsync(OleMenuCommand command)
         {
             var window = new MoveToSettingsWindow();
             window.SettingsName = "NewSettings";
@@ -170,7 +172,16 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Refactor
             setting.DefaultValue = window.Value;
             //setting.Profile = window.Profile;
 
-            AddOrUpdate(window.SelectedSettings, setting);
+            await AddOrUpdateAsync(window.SelectedSettings, setting);
+        }
+
+        /// <summary>
+        ///     Called when [change].
+        /// </summary>
+        /// <param name="command">The command.</param>
+        protected override async Task OnChangeAsync(OleMenuCommand command)
+        {
+            await Task.Yield();
         }
 
         /// <summary>
@@ -178,7 +189,7 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Refactor
         /// </summary>
         /// <param name="file">The file.</param>
         /// <param name="setting">The setting.</param>
-        private void AddOrUpdate(SettingsFile file, Setting setting)
+        private async Task AddOrUpdateAsync(SettingsFile file, Setting setting)
         {
             var replacementContent = GetReplacementContent(_extension, setting.Name);
             if (replacementContent == null)
@@ -196,7 +207,7 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Refactor
             File.WriteAllText(file.FullPath, serializedContainer);
 
             SettingsFileGenerator.Write(file, settingsContainer);
-            AppConfigFileGenerator.Write(settingsContainer);
+            await AppConfigFileGenerator.WriteAsync(settingsContainer);
 
             var startEditPoint = _textSelection.TopPoint.CreateEditPoint();
             var endEditPoint = _textSelection.BottomPoint.CreateEditPoint();
@@ -271,7 +282,7 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Refactor
         /// </summary>
         /// <param name="extension">The extension.</param>
         /// <param name="entryName">Name of the entry.</param>
-        /// <returns></returns>
+        /// <returns>The content of the replacement.</returns>
         /// <exception cref="ArgumentOutOfRangeException">extension</exception>
         private string GetReplacementContent(string extension, string entryName)
         {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using EnvDTE;
 using Jfevia.ProductivityShell.Configuration;
 using Jfevia.ProductivityShell.ProjectModel;
@@ -44,7 +45,10 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// <value>
         ///     The Visual Studio solution.
         /// </value>
-        public IVsSolution2 Solution2 => _solution2 ?? (_solution2 = VsProxy.Package.GetService<SVsSolution, IVsSolution2>());
+        public async Task<IVsSolution2> GetSolution2Async()
+        {
+            return _solution2 ?? (_solution2 = await VsProxy.Package.GetServiceAsync<SVsSolution, IVsSolution2>());
+        }
     }
 
     internal class SolutionProxy : SolutionProxyBase, IDisposable
@@ -145,7 +149,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
                 _configurationFileTrackers.ForEach(s =>
                 {
                     s.FileChanged -= ConfigurationFileTracker_FileChanged;
-                    s.Stop();
+                    Package.Instance.JoinableTaskFactory.Run(s.StopAsync);
                 });
                 _configurationFileTrackers.Clear();
             }
@@ -473,9 +477,11 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         ///     If the method succeeds, it returns <see cref="Microsoft.VisualStudio.VSConstants.S_OK" />. If it fails, it
         ///     returns an error code.
         /// </returns>
-        public int AdviseSolutionEvents(Package package)
+        public async Task<int> AdviseSolutionEventsAsync(Package package)
         {
-            return Solution2.AdviseSolutionEvents(package, out _solutionEventsCookie);
+            var solution2 = await GetSolution2Async();
+            await package.JoinableTaskFactory.SwitchToMainThreadAsync();
+            return solution2.AdviseSolutionEvents(package, out _solutionEventsCookie);
         }
 
         /// <summary>
@@ -490,16 +496,17 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// <summary>
         ///     Called when [opened solution].
         /// </summary>
-        public void OnOpenedSolution()
+        public async Task OnOpenedSolutionAsync()
         {
-            _configurationFileTrackers.Add(new ConfigurationFileTracker(MachineConfigFilePath, VsProxy.FileChange));
-            _configurationFileTrackers.Add(new ConfigurationFileTracker(SharedConfigFilePath, VsProxy.FileChange));
-            _configurationFileTrackers.Add(new ConfigurationFileTracker(UserConfigFilePath, VsProxy.FileChange));
-            _configurationFileTrackers.ForEach(s =>
+            _configurationFileTrackers.Add(new ConfigurationFileTracker(MachineConfigFilePath, await VsProxy.GetFileChangeAsync()));
+            _configurationFileTrackers.Add(new ConfigurationFileTracker(SharedConfigFilePath, await VsProxy.GetFileChangeAsync()));
+            _configurationFileTrackers.Add(new ConfigurationFileTracker(UserConfigFilePath, await VsProxy.GetFileChangeAsync()));
+
+            foreach (var tracker in _configurationFileTrackers)
             {
-                s.FileChanged += ConfigurationFileTracker_FileChanged;
-                s.Start();
-            });
+                tracker.FileChanged += ConfigurationFileTracker_FileChanged;
+                await tracker.StartAsync();
+            }
 
             Target.OnOpened();
         }
@@ -517,10 +524,16 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// <summary>
         ///     Unadvises the solution events.
         /// </summary>
-        public void UnadviseSolutionEvents()
+        /// <param name="package">The package.</param>
+        /// <returns>The task.</returns>
+        public async Task UnadviseSolutionEventsAsync(Package package)
         {
-            if (Solution2 != null && _solutionEventsCookie != 0)
-                Solution2.UnadviseSolutionEvents(_solutionEventsCookie);
+            var solution2 = await GetSolution2Async();
+            if (solution2 != null && _solutionEventsCookie != 0)
+            {
+                await package.JoinableTaskFactory.SwitchToMainThreadAsync();
+                solution2.UnadviseSolutionEvents(_solutionEventsCookie);
+            }
         }
 
         /// <summary>
@@ -528,10 +541,13 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// </summary>
         /// <param name="hierarchy">The hierarchy.</param>
         /// <param name="isNew">if set to <c>true</c> [is new].</param>
-        public void OnOpenedProject(IVsHierarchy hierarchy, bool isNew)
+        /// <returns>The task.</returns>
+        public async Task OnOpenedProjectAsync(IVsHierarchy hierarchy, bool isNew)
         {
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+
             // Visual Studio reports folders as opened projects but without a name
-            var project = hierarchy.ToProject();
+            var project = await hierarchy.ToProjectAsync();
             if (string.IsNullOrWhiteSpace(project.FullName))
                 return;
 
@@ -617,16 +633,18 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// <summary>
         ///     Called when [closing solution].
         /// </summary>
-        public void OnClosingSolution()
+        /// <returns>The task.</returns>
+        public async Task OnClosingSolutionAsync()
         {
             if (_configurationFileTrackers == null)
                 return;
 
-            _configurationFileTrackers.ForEach(s =>
+            foreach (var tracker in _configurationFileTrackers)
             {
-                s.FileChanged -= ConfigurationFileTracker_FileChanged;
-                s.Stop();
-            });
+                tracker.FileChanged -= ConfigurationFileTracker_FileChanged;
+                await tracker.StopAsync();
+            }
+
             _configurationFileTrackers.Clear();
         }
 

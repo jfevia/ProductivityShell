@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 
@@ -64,11 +65,12 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// <summary>
         ///     Stops this instance.
         /// </summary>
-        public void Stop()
+        public async Task StopAsync()
         {
             if (!_isRunning)
                 throw new InvalidOperationException("The file tracker is not running");
 
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
             _fileChangeService.UnadviseFileChange(_fileChangeCookie);
             _isRunning = false;
         }
@@ -76,8 +78,9 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// <summary>
         ///     Starts this instance.
         /// </summary>
-        public void Start()
+        public async Task StartAsync()
         {
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
             _fileChangeService.AdviseFileChange(_configFilePath, (uint) (_VSFILECHANGEFLAGS.VSFILECHG_Size | _VSFILECHANGEFLAGS.VSFILECHG_Time), this, out _fileChangeCookie);
             _isRunning = true;
         }

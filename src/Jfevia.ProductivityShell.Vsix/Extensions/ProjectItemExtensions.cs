@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using EnvDTE;
 using Jfevia.ProductivityShell.Vsix.Helpers;
 
@@ -15,7 +16,7 @@ namespace Jfevia.ProductivityShell.Vsix.Extensions
         /// </summary>
         /// <param name="projectItem">The project item.</param>
         /// <returns>The filename of the project item if available, otherwise null.</returns>
-        internal static string GetFileName(this ProjectItem projectItem)
+        internal static async Task<string> GetFileNameAsync(this ProjectItem projectItem)
         {
             try
             {
@@ -23,7 +24,7 @@ namespace Jfevia.ProductivityShell.Vsix.Extensions
             }
             catch (Exception ex)
             {
-                OutputWindowHelper.DiagnosticWriteLine("Unable to retrieve ProjectItem file name", ex);
+                await OutputWindowHelper.DiagnosticWriteLineAsync("Unable to retrieve ProjectItem file name", ex);
                 return null;
             }
         }
@@ -33,7 +34,7 @@ namespace Jfevia.ProductivityShell.Vsix.Extensions
         /// </summary>
         /// <param name="projectItem">The project item.</param>
         /// <returns>The parent project item, otherwise null.</returns>
-        internal static ProjectItem GetParentProjectItem(this ProjectItem projectItem)
+        internal static async Task<ProjectItem> GetParentProjectItemAsync(this ProjectItem projectItem)
         {
             try
             {
@@ -42,7 +43,7 @@ namespace Jfevia.ProductivityShell.Vsix.Extensions
             }
             catch (Exception ex)
             {
-                OutputWindowHelper.DiagnosticWriteLine("Unable to retrieve parent ProjectItem", ex);
+                await OutputWindowHelper.DiagnosticWriteLineAsync("Unable to retrieve parent ProjectItem", ex);
                 return null;
             }
         }
@@ -52,18 +53,18 @@ namespace Jfevia.ProductivityShell.Vsix.Extensions
         /// </summary>
         /// <param name="projectItem">The project item.</param>
         /// <returns>True if the project item is external, otherwise false.</returns>
-        internal static bool IsExternal(this ProjectItem projectItem)
+        internal static async Task<bool> IsExternalAsync(this ProjectItem projectItem)
         {
             try
             {
-                if (projectItem.Collection == null || !projectItem.IsPhysicalFile())
+                if (projectItem.Collection == null || !await projectItem.IsPhysicalFileAsync())
                     return true;
 
                 return projectItem.Collection.OfType<ProjectItem>().All(x => x.Object != projectItem.Object);
             }
             catch (Exception ex)
             {
-                OutputWindowHelper.DiagnosticWriteLine("Unable to determine if ProjectItem is external", ex);
+                await OutputWindowHelper.DiagnosticWriteLineAsync("Unable to determine if ProjectItem is external", ex);
                 return false;
             }
         }
@@ -73,7 +74,7 @@ namespace Jfevia.ProductivityShell.Vsix.Extensions
         /// </summary>
         /// <param name="projectItem">The project item.</param>
         /// <returns>True if the project item is a physical file, otherwise false.</returns>
-        internal static bool IsPhysicalFile(this ProjectItem projectItem)
+        internal static async Task<bool> IsPhysicalFileAsync(this ProjectItem projectItem)
         {
             try
             {
@@ -82,7 +83,7 @@ namespace Jfevia.ProductivityShell.Vsix.Extensions
             catch (Exception ex)
             {
                 // Some ProjectItem types (e.g. WiX) may throw an error when accessing the Kind member.
-                OutputWindowHelper.DiagnosticWriteLine("Unable to determine if ProjectItem is a physical file", ex);
+                await OutputWindowHelper.DiagnosticWriteLineAsync("Unable to determine if ProjectItem is a physical file", ex);
                 return false;
             }
         }

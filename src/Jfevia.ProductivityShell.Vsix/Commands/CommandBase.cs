@@ -2,10 +2,11 @@
 using System.ComponentModel.Design;
 using Jfevia.ProductivityShell.Vsix.Shell;
 using Microsoft.VisualStudio.Shell;
+using Task = System.Threading.Tasks.Task;
 
 namespace Jfevia.ProductivityShell.Vsix.Commands
 {
-    public class CommandBase<T>
+    public abstract class CommandBase<T>
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="CommandBase{T}" /> class.
@@ -17,8 +18,6 @@ namespace Jfevia.ProductivityShell.Vsix.Commands
         {
             Package = package ?? throw new ArgumentNullException(nameof(package));
             Id = id;
-
-            Initialize();
         }
 
         /// <summary>
@@ -48,14 +47,14 @@ namespace Jfevia.ProductivityShell.Vsix.Commands
         /// <summary>
         ///     Initializes this instance.
         /// </summary>
-        private void Initialize()
+        public async Task InitializeAsync()
         {
             var menuCommandId = new CommandID(Package.CommandSet, Id);
-            var menuItem = new OleMenuCommand((s, e) => { ExecuteHandler(s); }, (s, e) => { ChangeHandler(s); },
-                menuCommandId);
-            menuItem.BeforeQueryStatus += (s, e) => { BeforeQueryStatusHandler(s); };
+            var menuItem = new OleMenuCommand((s, e) => ExecuteHandler(s), (s, e) => ChangeHandler(s), menuCommandId);
+            menuItem.BeforeQueryStatus += (s, e) => BeforeQueryStatusHandler(s);
 
-            Package.CommandService.AddCommand(menuItem);
+            var commandService = await Package.GetCommandServiceAsync();
+            commandService.AddCommand(menuItem);
         }
 
         /// <summary>
@@ -67,32 +66,29 @@ namespace Jfevia.ProductivityShell.Vsix.Commands
             if (!(sender is OleMenuCommand command))
                 return;
 
-            OnBeforeQueryStatus(command);
+            OnBeforeQueryStatusAsync(command);
         }
 
         /// <summary>
         ///     Called when [before query status].
         /// </summary>
         /// <param name="command">The command.</param>
-        protected virtual void OnBeforeQueryStatus(OleMenuCommand command)
-        {
-        }
+        /// <returns>The task.</returns>
+        protected abstract Task OnBeforeQueryStatusAsync(OleMenuCommand command);
 
         /// <summary>
         ///     Called when [execute].
         /// </summary>
         /// <param name="command">The command.</param>
-        protected virtual void OnExecute(OleMenuCommand command)
-        {
-        }
+        /// <returns>The task.</returns>
+        protected abstract Task OnExecuteAsync(OleMenuCommand command);
 
         /// <summary>
         ///     Called when [change].
         /// </summary>
         /// <param name="command">The command.</param>
-        protected virtual void OnChange(OleMenuCommand command)
-        {
-        }
+        /// <returns>The task.</returns>
+        protected abstract Task OnChangeAsync(OleMenuCommand command);
 
         /// <summary>
         ///     Executes the handler.
@@ -103,7 +99,7 @@ namespace Jfevia.ProductivityShell.Vsix.Commands
             if (!(sender is OleMenuCommand command))
                 return;
 
-            OnExecute(command);
+            OnExecuteAsync(command);
         }
 
         /// <summary>
@@ -115,7 +111,7 @@ namespace Jfevia.ProductivityShell.Vsix.Commands
             if (!(sender is OleMenuCommand command))
                 return;
 
-            OnChange(command);
+            OnChangeAsync(command);
         }
     }
 }

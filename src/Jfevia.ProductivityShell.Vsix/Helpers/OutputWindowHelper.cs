@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Jfevia.ProductivityShell.Vsix.DialogPages;
 using Microsoft.VisualStudio.Shell.Interop;
 
@@ -11,14 +12,14 @@ namespace Jfevia.ProductivityShell.Vsix.Helpers
     {
         private static IVsOutputWindowPane _packageOutputWindowPane;
 
-        private static IVsOutputWindowPane PackageOutputWindowPane => _packageOutputWindowPane ?? (_packageOutputWindowPane = GetPackageOutputWindowPane());
+        private static async Task<IVsOutputWindowPane> GetPackageOutputWindowPaneAsync() => _packageOutputWindowPane ?? (_packageOutputWindowPane = await GetInternalPackageOutputWindowPaneAsync());
 
         /// <summary>
         ///     Writes the specified diagnostic line to the ProductivityShell output pane, but only if diagnostics are enabled.
         /// </summary>
         /// <param name="message">The message.</param>
         /// <param name="ex">An optional exception that was handled.</param>
-        internal static void DiagnosticWriteLine(string message, Exception ex = null)
+        internal static async Task DiagnosticWriteLineAsync(string message, Exception ex = null)
         {
             var generalOptionsPage = Package.Instance.GetDialogPage<GeneralDialogPage>();
             if (!generalOptionsPage.DiagnosticsMode)
@@ -27,7 +28,7 @@ namespace Jfevia.ProductivityShell.Vsix.Helpers
             if (ex != null)
                 message += $": {ex}";
 
-            WriteLine("Diagnostic", message);
+            await WriteLineAsync("Diagnostic", message);
         }
 
         /// <summary>
@@ -35,33 +36,34 @@ namespace Jfevia.ProductivityShell.Vsix.Helpers
         /// </summary>
         /// <param name="message">The message.</param>
         /// <param name="ex">The exception that was handled.</param>
-        internal static void ExceptionWriteLine(string message, Exception ex)
+        internal static async Task ExceptionWriteLineAsync(string message, Exception ex)
         {
             var exceptionMessage = $"{message}: {ex}";
 
-            WriteLine("Handled Exception", exceptionMessage);
+            await WriteLineAsync("Handled Exception", exceptionMessage);
         }
 
         /// <summary>
         ///     Writes the specified warning line to the ProductivityShell output pane.
         /// </summary>
         /// <param name="message">The message.</param>
-        internal static void WarningWriteLine(string message)
+        internal static async Task WarningWriteLineAsync(string message)
         {
-            WriteLine("Warning", message);
+            await WriteLineAsync("Warning", message);
         }
 
         /// <summary>
         ///     Attempts to create and retrieve the ProductivityShell output window pane.
         /// </summary>
         /// <returns>The ProductivityShell output window pane, otherwise null.</returns>
-        private static IVsOutputWindowPane GetPackageOutputWindowPane()
+        private static async Task<IVsOutputWindowPane> GetInternalPackageOutputWindowPaneAsync()
         {
             if (!(Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(SVsOutputWindow)) is IVsOutputWindow outputWindow))
                 return null;
 
             var outputPaneGuid = new Guid(PackageGuids.OutputPaneString);
 
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
             outputWindow.CreatePane(ref outputPaneGuid, PackageConstants.ProductName, 1, 1);
             outputWindow.GetPane(ref outputPaneGuid, out var windowPane);
 
@@ -73,13 +75,14 @@ namespace Jfevia.ProductivityShell.Vsix.Helpers
         /// </summary>
         /// <param name="category">The category.</param>
         /// <param name="message">The message.</param>
-        private static void WriteLine(string category, string message)
+        private static async Task WriteLineAsync(string category, string message)
         {
-            var outputWindowPane = PackageOutputWindowPane;
+            var outputWindowPane = await GetPackageOutputWindowPaneAsync();
             if (outputWindowPane != null)
             {
                 var outputMessage = $"[{PackageConstants.ProductName} {category} {DateTime.Now:hh:mm:ss tt}] {message}{Environment.NewLine}";
 
+                await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
                 outputWindowPane.OutputString(outputMessage);
             }
         }

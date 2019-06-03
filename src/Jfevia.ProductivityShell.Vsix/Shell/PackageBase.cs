@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Design;
+using System.Threading.Tasks;
 using EnvDTE;
 using EnvDTE80;
 using Jfevia.ProductivityShell.Vsix.Extensions;
@@ -9,7 +10,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Jfevia.ProductivityShell.Vsix.Shell
 {
-    public class PackageBase : Microsoft.VisualStudio.Shell.Package
+    public abstract class PackageBase : AsyncPackage
     {
         private readonly IVsShell3 _shell3;
         private readonly IVsShell4 _shell4;
@@ -21,7 +22,7 @@ namespace Jfevia.ProductivityShell.Vsix.Shell
         ///     Initializes a new instance of the <see cref="T:Jfevia.ProductivityShell.Vsix.Shell.PackageBase" /> class.
         /// </summary>
         /// <param name="commandSet">The command set.</param>
-        public PackageBase(Guid commandSet)
+        protected PackageBase(Guid commandSet)
         {
             CommandSet = commandSet;
 
@@ -35,7 +36,7 @@ namespace Jfevia.ProductivityShell.Vsix.Shell
         /// <value>
         ///     The command service.
         /// </value>
-        internal IMenuCommandService CommandService => _commandService ?? (_commandService = this.GetService<IMenuCommandService>());
+        internal async Task<IMenuCommandService> GetCommandServiceAsync() => _commandService ?? (_commandService = await this.GetServiceAsync<IMenuCommandService>());
 
         /// <summary>
         ///     Gets the command set.
@@ -67,13 +68,11 @@ namespace Jfevia.ProductivityShell.Vsix.Shell
             }
         }
 
-        public bool IsRunningElevated
+        public async Task<bool> GetIsRunningElevatedAsync()
         {
-            get
-            {
-                _shell3.IsRunningElevated(out var isElevated);
-                return isElevated;
-            }
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+            _shell3.IsRunningElevated(out var isElevated);
+            return isElevated;
         }
 
         public bool ActivateOutputWindow()
@@ -109,17 +108,18 @@ namespace Jfevia.ProductivityShell.Vsix.Shell
         /// </summary>
         /// <param name="mode">The restart mode.</param>
         /// <returns>Whether the restart is successful.</returns>
-        public bool Restart(RestartMode mode)
+        public async Task<bool> RestartAsync(RestartMode mode)
         {
             var vsRestartMode = __VSRESTARTTYPE.RESTART_Normal;
             if (mode == RestartMode.Elevated)
                 vsRestartMode = __VSRESTARTTYPE.RESTART_Elevated;
 
-            return !ErrorHandler.Failed(Restart(vsRestartMode));
+            return !ErrorHandler.Failed(await RestartAsync(vsRestartMode));
         }
 
-        private int Restart(__VSRESTARTTYPE vsRestartMode)
+        private async Task<int> RestartAsync(__VSRESTARTTYPE vsRestartMode)
         {
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
             return _shell4.Restart((uint) vsRestartMode);
         }
     }

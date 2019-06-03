@@ -4,7 +4,7 @@ namespace Jfevia.ProductivityShell.Vsix.Shell
 {
     internal sealed class GuidStringBuilder
     {
-        public Guid Guid { get; set; } = default(Guid);
+        public Guid Guid { get; set; } = default;
 
         public GuidFormattingOption Format { get; set; } = GuidFormattingOption.HyphenSeparation;
 

@@ -4,6 +4,7 @@ using Jfevia.ProductivityShell.Vsix.Helpers;
 using Jfevia.ProductivityShell.Vsix.Shell;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Task = System.Threading.Tasks.Task;
 
 namespace Jfevia.ProductivityShell.Vsix.Commands.Project
 {
@@ -24,9 +25,19 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Project
         ///     Initializes the specified package.
         /// </summary>
         /// <param name="package">The package.</param>
-        public static void Initialize(PackageBase package)
+        public static async Task InitializeAsync(PackageBase package)
         {
             Instance = new ReloadCommand(package);
+            await Instance.InitializeAsync();
+        }
+
+        /// <summary>
+        ///     Called when [before query status].
+        /// </summary>
+        /// <param name="command">The command.</param>
+        protected override async Task OnBeforeQueryStatusAsync(OleMenuCommand command)
+        {
+            await Task.Yield();
         }
 
         /// <inheritdoc />
@@ -34,7 +45,7 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Project
         ///     Called when [execute].
         /// </summary>
         /// <param name="command">The command.</param>
-        protected override void OnExecute(OleMenuCommand command)
+        protected override async Task OnExecuteAsync(OleMenuCommand command)
         {
             if (Package.Dte.SelectedItems.Count == 0)
                 return;
@@ -46,8 +57,8 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Project
                 var project = selectedItem.Project;
                 if (project != null)
                 {
-                    OutputWindowHelper.DiagnosticWriteLine($"Reloading project: {project.Name}");
-                    SolutionHelper.ReloadProject(solution, project);
+                    await OutputWindowHelper.DiagnosticWriteLineAsync($"Reloading project: {project.Name}");
+                    await SolutionHelper.ReloadProjectAsync(solution, project);
                 }
                 else
                 {
@@ -55,10 +66,19 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Project
                     if (projectItem?.ContainingProject == null)
                         continue;
 
-                    OutputWindowHelper.DiagnosticWriteLine($"Reloading project: {projectItem.ContainingProject.Name}");
-                    SolutionHelper.ReloadProject(solution, projectItem.ContainingProject);
+                    await OutputWindowHelper.DiagnosticWriteLineAsync($"Reloading project: {projectItem.ContainingProject.Name}");
+                    await SolutionHelper.ReloadProjectAsync(solution, projectItem.ContainingProject);
                 }
             }
+        }
+
+        /// <summary>
+        ///     Called when [change].
+        /// </summary>
+        /// <param name="command">The command.</param>
+        protected override async Task OnChangeAsync(OleMenuCommand command)
+        {
+            await Task.Yield();
         }
     }
 }

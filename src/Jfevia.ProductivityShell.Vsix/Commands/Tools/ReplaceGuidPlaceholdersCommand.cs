@@ -8,6 +8,7 @@ using Jfevia.ProductivityShell.Vsix.Extensions;
 using Jfevia.ProductivityShell.Vsix.Helpers;
 using Jfevia.ProductivityShell.Vsix.Shell;
 using Microsoft.VisualStudio.Shell;
+using Task = System.Threading.Tasks.Task;
 
 namespace Jfevia.ProductivityShell.Vsix.Commands.Tools
 {
@@ -15,7 +16,8 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Tools
     {
         /// <inheritdoc />
         /// <summary>
-        ///     Initializes a new instance of the <see cref="T:Jfevia.ProductivityShell.Vsix.Commands.Tools.ReplaceGuidPlaceholdersCommand" />
+        ///     Initializes a new instance of the
+        ///     <see cref="T:Jfevia.ProductivityShell.Vsix.Commands.Tools.ReplaceGuidPlaceholdersCommand" />
         ///     class.
         /// </summary>
         /// <param name="package">The package.</param>
@@ -28,9 +30,22 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Tools
         ///     Initializes the specified package.
         /// </summary>
         /// <param name="package">The package.</param>
-        public static void Initialize(PackageBase package)
+        public static async Task InitializeAsync(PackageBase package)
         {
             Instance = new ReplaceGuidPlaceholdersCommand(package);
+            await Instance.InitializeAsync();
+        }
+
+        /// <summary>
+        ///     Called when [before query status].
+        /// </summary>
+        /// <param name="command">The command.</param>
+        /// <returns>
+        ///     The task.
+        /// </returns>
+        protected override async Task OnBeforeQueryStatusAsync(OleMenuCommand command)
+        {
+            await Task.Yield();
         }
 
         /// <inheritdoc />
@@ -38,15 +53,27 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Tools
         ///     Called when [execute].
         /// </summary>
         /// <param name="command">The command.</param>
-        protected override void OnExecute(OleMenuCommand command)
+        protected override async Task OnExecuteAsync(OleMenuCommand command)
         {
-            ReplacePlaceholdersInSelectedItems();
+            await ReplacePlaceholdersInSelectedItemsAsync();
+        }
+
+        /// <summary>
+        ///     Called when [change].
+        /// </summary>
+        /// <param name="command">The command.</param>
+        /// <returns>
+        ///     The task.
+        /// </returns>
+        protected override async Task OnChangeAsync(OleMenuCommand command)
+        {
+            await Task.Yield();
         }
 
         /// <summary>
         ///     Replaces the placeholders in selected items.
         /// </summary>
-        private void ReplacePlaceholdersInSelectedItems()
+        private async Task ReplacePlaceholdersInSelectedItemsAsync()
         {
             var projectItems = SolutionHelper.GetSelectedProjectItemsRecursively(Package)
                 .Distinct(new ProjecItemEqualityComparer()).ToList();
@@ -61,15 +88,17 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Tools
                 return;
 
             foreach (var projectItem in projectItems)
-                ReplaceGuidPlaceholders(projectItem);
+                await ReplaceGuidPlaceholdersAsync(projectItem);
         }
 
         /// <summary>
         ///     Replaces GUID placeholders in a project item.
         /// </summary>
         /// <param name="projectItem">The project item.</param>
-        private void ReplaceGuidPlaceholders(EnvDTE.ProjectItem projectItem)
+        private async Task ReplaceGuidPlaceholdersAsync(EnvDTE.ProjectItem projectItem)
         {
+            await ProductivityShell.Vsix.Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+
             // Attempt to open the document if not already opened.
             var wasOpen = projectItem.IsOpen[Constants.vsViewKindTextView] ||
                           projectItem.IsOpen[Constants.vsViewKindCode];
@@ -87,7 +116,7 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Tools
             {
                 if (projectItem.Document != null)
                 {
-                    ReplaceGuidPlaceholders(projectItem.Document);
+                    await ReplaceGuidPlaceholdersAsync(projectItem.Document);
 
                     // Close the document if it was opened for cleanup.
                     if (!wasOpen)
@@ -104,8 +133,10 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Tools
         ///     Replaces GUID placeholders in a document.
         /// </summary>
         /// <param name="document">The document.</param>
-        private void ReplaceGuidPlaceholders(Document document)
+        private async Task ReplaceGuidPlaceholdersAsync(Document document)
         {
+            await ProductivityShell.Vsix.Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+
             // Make sure the document to be cleaned up is active, required for some commands like format document.
             document.Activate();
 
@@ -114,28 +145,30 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Tools
                 return;
 
             if (Package.Dte.ActiveDocument != document)
-                OutputWindowHelper.WarningWriteLine(
+                await OutputWindowHelper.WarningWriteLineAsync(
                     $"Activation was not completed before replacing began for '{document.Name}'");
 
-            OutputWindowHelper.DiagnosticWriteLine($"ReplaceGuidPlaceholders started for '{document.FullName}'");
+            await OutputWindowHelper.DiagnosticWriteLineAsync($"ReplaceGuidPlaceholdersAsync started for '{document.FullName}'");
             Package.Dte.StatusBar.Text = $"Replacing GUID placeholders in '{document.Name}'...";
 
             var textDocument = document.GetTextDocument();
-            ReplaceGuidPlaceholders(textDocument);
+            await ReplaceGuidPlaceholdersAsync(textDocument);
 
             Package.Dte.StatusBar.Text = $"Replaced GUID placeholders in '{document.Name}'.";
-            OutputWindowHelper.DiagnosticWriteLine($"ReplaceGuidPlaceholders completed for '{document.FullName}'");
+            await OutputWindowHelper.DiagnosticWriteLineAsync($"ReplaceGuidPlaceholdersAsync completed for '{document.FullName}'");
         }
 
         /// <summary>
         ///     Replaces GUID placeholders in a text document.
         /// </summary>
         /// <param name="textDocument">The text document.</param>
-        private void ReplaceGuidPlaceholders(TextDocument textDocument)
+        private async Task ReplaceGuidPlaceholdersAsync(TextDocument textDocument)
         {
             var toolsDialogPage = Package.GetDialogPage<ToolsDialogPage>();
             if (string.IsNullOrWhiteSpace(toolsDialogPage.GuidPlaceholders))
                 return;
+
+            await ProductivityShell.Vsix.Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
 
             foreach (var placeholder in toolsDialogPage.GuidPlaceholders.Split(
                 Properties.Settings.Default.GuidPlaceholderSplitChar))

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Linq;
+using System.Threading.Tasks;
 using EnvDTE;
 using EnvDTE80;
 using Jfevia.ProductivityShell.Configuration;
@@ -48,12 +49,23 @@ namespace Jfevia.ProductivityShell.Vsix.Shell
         public DTE2 Dte2 => _dte2 ?? (_dte2 = Package.GetGlobalService<_DTE, DTE2>());
 
         /// <summary>
+        ///     Gets the package.
+        /// </summary>
+        /// <value>
+        ///     The package.
+        /// </value>
+        public Package Package { get; }
+
+        /// <summary>
         ///     Gets the monitor selection.
         /// </summary>
         /// <value>
         ///     The monitor selection.
         /// </value>
-        public IVsMonitorSelection MonitorSelection => _monitorSelection ?? (_monitorSelection = Package.GetService<SVsShellMonitorSelection, IVsMonitorSelection>());
+        public async Task<IVsMonitorSelection> GetMonitorSelectionAsync()
+        {
+            return _monitorSelection ?? (_monitorSelection = await Package.GetServiceAsync<SVsShellMonitorSelection, IVsMonitorSelection>());
+        }
 
         /// <summary>
         ///     Gets the file change.
@@ -61,7 +73,10 @@ namespace Jfevia.ProductivityShell.Vsix.Shell
         /// <value>
         ///     The file change.
         /// </value>
-        public IVsFileChangeEx FileChange => _fileChange ?? (_fileChange = Package.GetService<SVsFileChangeEx, IVsFileChangeEx>());
+        public async Task<IVsFileChangeEx> GetFileChangeAsync()
+        {
+            return _fileChange ?? (_fileChange = await Package.GetServiceAsync<SVsFileChangeEx, IVsFileChangeEx>());
+        }
 
         /// <summary>
         ///     Gets the menu command service.
@@ -69,23 +84,18 @@ namespace Jfevia.ProductivityShell.Vsix.Shell
         /// <value>
         ///     The menu command service.
         /// </value>
-        public IMenuCommandService MenuCommandService => _menuCommandService ?? (_menuCommandService = Package.GetService<IMenuCommandService>());
-
-        /// <summary>
-        ///     Gets the package.
-        /// </summary>
-        /// <value>
-        ///     The package.
-        /// </value>
-        public Package Package { get; }
+        public async Task<IMenuCommandService> GetMenuCommandServiceAsync()
+        {
+            return _menuCommandService ?? (_menuCommandService = await Package.GetServiceAsync<IMenuCommandService>());
+        }
     }
 
     internal class ShellProxy : ShellProxyBase, IDisposable
     {
-        private readonly StartupProfilesService _startupProfileService;
         private uint _debuggingCookie;
         private uint _selectionEventsCookie;
         private SolutionProxy _solutionProxy;
+        private StartupProfilesService _startupProfileService;
 
         /// <inheritdoc />
         /// <summary>
@@ -96,9 +106,6 @@ namespace Jfevia.ProductivityShell.Vsix.Shell
         public ShellProxy(Package package)
             : base(package)
         {
-            _startupProfileService = new StartupProfilesService(MenuCommandService);
-            _startupProfileService.SelectedStartupProfileChanged += StartupProfileService_SelectedStartupProfileChanged;
-            _startupProfileService.RequestedShowConfiguration += StartupProfileService_RequestedShowConfiguration;
         }
 
         /// <summary>
@@ -162,6 +169,21 @@ namespace Jfevia.ProductivityShell.Vsix.Shell
                 _startupProfileService.SelectedStartupProfileChanged -= StartupProfileService_SelectedStartupProfileChanged;
                 _startupProfileService.RequestedShowConfiguration -= StartupProfileService_RequestedShowConfiguration;
             }
+        }
+
+        /// <summary>
+        ///     Gets the startup profile service.
+        /// </summary>
+        /// <returns>The startup profile service.</returns>
+        public async Task<StartupProfilesService> GetStartupProfileServiceAsync()
+        {
+            if (_startupProfileService != null)
+                return _startupProfileService;
+
+            _startupProfileService = new StartupProfilesService(await GetMenuCommandServiceAsync());
+            _startupProfileService.SelectedStartupProfileChanged += StartupProfileService_SelectedStartupProfileChanged;
+            _startupProfileService.RequestedShowConfiguration += StartupProfileService_RequestedShowConfiguration;
+            return _startupProfileService;
         }
 
         /// <summary>
@@ -245,9 +267,15 @@ namespace Jfevia.ProductivityShell.Vsix.Shell
         ///     Advises the debugging events.
         /// </summary>
         /// <param name="package">The package.</param>
-        public void AdviseDebuggingEvents(Package package)
+        /// <returns>The task.</returns>
+        public async Task AdviseDebuggingEventsAsync(Package package)
         {
-            MonitorSelection?.GetCmdUIContextCookie(VSConstants.UICONTEXT.Debugging_guid, out _debuggingCookie);
+            var monitorSelection = await GetMonitorSelectionAsync();
+            if (monitorSelection != null)
+            {
+                await package.JoinableTaskFactory.SwitchToMainThreadAsync();
+                monitorSelection.GetCmdUIContextCookie(VSConstants.UICONTEXT.Debugging_guid, out _debuggingCookie);
+            }
         }
 
         /// <summary>
@@ -261,9 +289,14 @@ namespace Jfevia.ProductivityShell.Vsix.Shell
         ///     If the method succeeds, it returns <see cref="Microsoft.VisualStudio.VSConstants.S_OK" />. If it fails, it
         ///     returns an error code.
         /// </returns>
-        public int? AdviseSelectionEvents(Package package)
+        public async Task<int?> AdviseSelectionEventsAsync(Package package)
         {
-            return MonitorSelection?.AdviseSelectionEvents(package, out _selectionEventsCookie);
+            var monitorSelection = await GetMonitorSelectionAsync();
+            if (monitorSelection == null)
+                return null;
+
+            await package.JoinableTaskFactory.SwitchToMainThreadAsync();
+            return monitorSelection.AdviseSelectionEvents(package, out _selectionEventsCookie);
         }
 
         /// <summary>
@@ -287,10 +320,16 @@ namespace Jfevia.ProductivityShell.Vsix.Shell
         /// <summary>
         ///     Unadvises the selection events.
         /// </summary>
-        public void UnadviseSelectionEvents()
+        /// <param name="package">The package.</param>
+        /// <returns>The task.</returns>
+        public async Task UnadviseSelectionEventsAsync(Package package)
         {
-            if (MonitorSelection != null && _selectionEventsCookie != 0)
-                MonitorSelection.UnadviseSelectionEvents(_selectionEventsCookie);
+            var monitorSelection = await GetMonitorSelectionAsync();
+            if (monitorSelection != null && _selectionEventsCookie != 0)
+            {
+                await package.JoinableTaskFactory.SwitchToMainThreadAsync();
+                monitorSelection.UnadviseSelectionEvents(_selectionEventsCookie);
+            }
         }
 
         /// <summary>
@@ -329,9 +368,10 @@ namespace Jfevia.ProductivityShell.Vsix.Shell
         /// <summary>
         ///     Called when [closing solution].
         /// </summary>
-        public void OnClosingSolution()
+        /// <returns>The task.</returns>
+        public async Task OnClosingSolutionAsync()
         {
-            _solutionProxy.OnClosingSolution();
+            await _solutionProxy.OnClosingSolutionAsync();
         }
 
         /// <summary>
@@ -347,17 +387,18 @@ namespace Jfevia.ProductivityShell.Vsix.Shell
         /// </summary>
         /// <param name="hierarchy">The hierarchy.</param>
         /// <param name="isNew">if set to <c>true</c> [is new].</param>
-        public void OnOpenedProject(IVsHierarchy hierarchy, bool isNew)
+        /// <returns>The task.</returns>
+        public async Task OnOpenedProjectAsync(IVsHierarchy hierarchy, bool isNew)
         {
-            SolutionProxy.OnOpenedProject(hierarchy, isNew);
+            await SolutionProxy.OnOpenedProjectAsync(hierarchy, isNew);
         }
 
         /// <summary>
         ///     Called when [opened solution].
         /// </summary>
-        public void OnOpenedSolution()
+        public async Task OnOpenedSolutionAsync()
         {
-            SolutionProxy.OnOpenedSolution();
+            await SolutionProxy.OnOpenedSolutionAsync();
         }
 
         /// <summary>

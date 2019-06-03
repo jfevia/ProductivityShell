@@ -15,9 +15,11 @@ namespace Jfevia.ProductivityShell.Vsix.EditorMargin
     [TextViewRole(PredefinedTextViewRoles.Interactive)]
     internal class BottomMarginFactory : IWpfTextViewMarginProvider
     {
-        [Import] private IClassifierAggregatorService _classifierService;
+        [Import]
+        private IClassifierAggregatorService _classifierService;
 
-        [Import] private ITextDocumentFactoryService _documentService;
+        [Import]
+        private ITextDocumentFactoryService _documentService;
 
         public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer)
         {

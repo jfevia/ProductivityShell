@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using EnvDTE;
 using Jfevia.ProductivityShell.Vsix.Shell;
 using Microsoft.VisualStudio;
@@ -70,8 +71,10 @@ namespace Jfevia.ProductivityShell.Vsix.Helpers
         ///     returns an error code. If the project was not previously unloaded, then this method does nothing and returns
         ///     <see cref="F:Microsoft.VisualStudio.VSConstants.S_FALSE" />.
         /// </returns>
-        internal static int ReloadProject(IVsSolution solution, string projectName)
+        internal static async Task<int> ReloadProjectAsync(IVsSolution solution, string projectName)
         {
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+
             int hr;
             if ((hr = solution.GetProjectOfUniqueName(projectName, out var projectHierarchy)) != VSConstants.S_OK)
                 return hr;
@@ -79,7 +82,7 @@ namespace Jfevia.ProductivityShell.Vsix.Helpers
             if ((hr = solution.GetGuidOfProject(projectHierarchy, out var projectGuid)) != VSConstants.S_OK)
                 return hr;
 
-            return ReloadProject(solution, projectGuid);
+            return await ReloadProjectAsync(solution, projectGuid);
         }
 
         /// <summary>
@@ -146,60 +149,67 @@ namespace Jfevia.ProductivityShell.Vsix.Helpers
             return new object[0];
         }
 
-        public static int GetGuidOfProject(IVsSolution solution, Project project, out Guid projectGuid)
+        public static async Task<ProjectGuidResult> GetGuidOfProjectAsync(IVsSolution solution, Project project)
         {
-            projectGuid = default(Guid);
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
 
             int hr;
             if ((hr = solution.GetProjectOfUniqueName(project.UniqueName, out var projectHierarchy)) !=
                 VSConstants.S_OK)
-                return hr;
+                return new ProjectGuidResult {HandlerResult = hr};
 
-            return solution.GetGuidOfProject(projectHierarchy, out projectGuid);
+            hr = solution.GetGuidOfProject(projectHierarchy, out var projectGuid);
+            return new ProjectGuidResult {HandlerResult = hr, Guid = projectGuid};
         }
 
-        public static int UnloadProject(IVsSolution solution, Project project)
+        public static async Task<int> UnloadProjectAsync(IVsSolution solution, Project project)
         {
-            int hr;
-            if ((hr = GetGuidOfProject(solution, project, out var projectGuid)) != VSConstants.S_OK)
-                return hr;
+            var projectGuidResult = await GetGuidOfProjectAsync(solution, project);
+            if (projectGuidResult.HandlerResult != VSConstants.S_OK)
+                return projectGuidResult.HandlerResult;
 
-            return UnloadProject((IVsSolution4) solution, projectGuid);
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+            return await UnloadProjectAsync((IVsSolution4) solution, projectGuidResult.Guid);
         }
 
-        public static int ReloadProject(IVsSolution solution, Guid projectGuid)
+        public static async Task<int> ReloadProjectAsync(IVsSolution solution, Guid projectGuid)
         {
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+
             var vsSolution4 = (IVsSolution4) solution;
-            UnloadProject(vsSolution4, projectGuid);
+            await UnloadProjectAsync(vsSolution4, projectGuid);
 
-            return LoadProject(vsSolution4, projectGuid);
+            return await LoadProjectAsync(vsSolution4, projectGuid);
         }
 
-        public static int ReloadProject(IVsSolution solution, Project project)
+        public static async Task<int> ReloadProjectAsync(IVsSolution solution, Project project)
         {
-            int hr;
-            if ((hr = GetGuidOfProject(solution, project, out var projectGuid)) != VSConstants.S_OK)
-                return hr;
+            var projectGuidResult = await GetGuidOfProjectAsync(solution, project);
+            if (projectGuidResult.HandlerResult != VSConstants.S_OK)
+                return projectGuidResult.HandlerResult;
 
-            return ReloadProject(solution, projectGuid);
+            return await ReloadProjectAsync(solution, projectGuidResult.Guid);
         }
 
-        public static int LoadProject(IVsSolution solution, Project project)
+        public static async Task<int> LoadProjectAsync(IVsSolution solution, Project project)
         {
-            int hr;
-            if ((hr = GetGuidOfProject(solution, project, out var projectGuid)) != VSConstants.S_OK)
-                return hr;
+            var projectGuidResult = await GetGuidOfProjectAsync(solution, project);
+            if (projectGuidResult.HandlerResult != VSConstants.S_OK)
+                return projectGuidResult.HandlerResult;
 
-            return LoadProject((IVsSolution4) solution, projectGuid);
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+            return await LoadProjectAsync((IVsSolution4) solution, projectGuidResult.Guid);
         }
 
-        public static int UnloadProject(IVsSolution4 solution, Guid projectGuid)
+        public static async Task<int> UnloadProjectAsync(IVsSolution4 solution, Guid projectGuid)
         {
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
             return solution.UnloadProject(ref projectGuid, (uint) _VSProjectUnloadStatus.UNLOADSTATUS_UnloadedByUser);
         }
 
-        public static int LoadProject(IVsSolution4 solution, Guid projectGuid)
+        public static async Task<int> LoadProjectAsync(IVsSolution4 solution, Guid projectGuid)
         {
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
             return solution.ReloadProject(ref projectGuid);
         }
     }

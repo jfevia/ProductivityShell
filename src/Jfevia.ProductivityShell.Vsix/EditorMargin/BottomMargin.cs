@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -17,11 +18,17 @@ namespace Jfevia.ProductivityShell.Vsix.EditorMargin
     internal class BottomMargin : DockPanel, IWpfTextViewMargin
     {
         public const string MarginName = "Productivity Shell Margin";
-        private readonly ITextDocument _doc;
         private readonly IClassifier _classifier;
-        private bool _isDisposed;
+        private readonly ITextDocument _doc;
         private readonly InteractiveTextControl _labelFilePath;
+        private bool _isDisposed;
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="BottomMargin" /> class.
+        /// </summary>
+        /// <param name="textView">The text view.</param>
+        /// <param name="classifier">The classifier.</param>
+        /// <param name="documentService">The document service.</param>
         public BottomMargin(IWpfTextView textView, IClassifierAggregatorService classifier, ITextDocumentFactoryService documentService)
         {
             _classifier = classifier.GetClassifier(textView.TextBuffer);
@@ -38,11 +45,81 @@ namespace Jfevia.ProductivityShell.Vsix.EditorMargin
 
             if (documentService.TryGetTextDocument(textView.TextDataModel.DocumentBuffer, out _doc))
             {
-                _doc.FileActionOccurred += FileChangedOnDisk;
-                UpdateFilePath(_doc);
+                _doc.FileActionOccurred += OnFileChangedOnDiskAsync;
+                Package.Instance.JoinableTaskFactory.Run(() => UpdateFilePathAsync(_doc));
             }
         }
 
+        /// <summary>
+        ///     Gets the <see cref="T:System.Windows.FrameworkElement" /> that renders the margin.
+        /// </summary>
+        public FrameworkElement VisualElement
+        {
+            get
+            {
+                ThrowIfDisposed();
+                return this;
+            }
+        }
+
+        /// <summary>
+        ///     Gets the size of the margin.
+        /// </summary>
+        public double MarginSize
+        {
+            get
+            {
+                ThrowIfDisposed();
+                return ActualHeight;
+            }
+        }
+
+        /// <summary>
+        ///     Determines whether the margin is enabled.
+        /// </summary>
+        public bool Enabled
+        {
+            get
+            {
+                ThrowIfDisposed();
+                return true;
+            }
+        }
+
+        /// <summary>
+        ///     Gets the <see cref="T:Microsoft.VisualStudio.Text.Editor.ITextViewMargin" /> with the specified margin name.
+        /// </summary>
+        /// <param name="marginName">The name of the <see cref="T:Microsoft.VisualStudio.Text.Editor.ITextViewMargin" />.</param>
+        /// <returns>
+        ///     The <see cref="T:Microsoft.VisualStudio.Text.Editor.ITextViewMargin" /> named <paramref name="marginName" />, or
+        ///     null if no match is found.
+        /// </returns>
+        public ITextViewMargin GetTextViewMargin(string marginName)
+        {
+            return marginName == MarginName ? this : null;
+        }
+
+        /// <summary>
+        ///     Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            if (!_isDisposed)
+            {
+                GC.SuppressFinalize(this);
+                _isDisposed = true;
+
+                _doc.FileActionOccurred -= OnFileChangedOnDiskAsync;
+
+                (_classifier as IDisposable)?.Dispose();
+            }
+        }
+
+        /// <summary>
+        ///     Called when [file path value mouse down].
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="MouseButtonEventArgs" /> instance containing the event data.</param>
         private void OnFilePathValueMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Right)
@@ -53,66 +130,28 @@ namespace Jfevia.ProductivityShell.Vsix.EditorMargin
                 return;
             }
 
-            if (e.ChangedButton == MouseButton.Left)
-            {
-                Clipboard.SetData(DataFormats.Text, _labelFilePath.Value);
-            }
+            if (e.ChangedButton == MouseButton.Left) Clipboard.SetData(DataFormats.Text, _labelFilePath.Value);
         }
 
-        public FrameworkElement VisualElement
+        /// <summary>
+        ///     Called when [file changed on disk asynchronous].
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="TextDocumentFileActionEventArgs" /> instance containing the event data.</param>
+        private async void OnFileChangedOnDiskAsync(object sender, TextDocumentFileActionEventArgs e)
         {
-            get
-            {
-                ThrowIfDisposed();
-                return this;
-            }
+            await UpdateFilePathAsync(_doc);
         }
 
-        public double MarginSize
+        /// <summary>
+        ///     Updates the file path.
+        /// </summary>
+        /// <param name="doc">The document.</param>
+        /// <returns>The task.</returns>
+        private async Task UpdateFilePathAsync(ITextDocument doc)
         {
-            get
-            {
-                ThrowIfDisposed();
-                return ActualHeight;
-            }
-        }
-
-        public bool Enabled
-        {
-            // The margin should always be enabled
-            get
-            {
-                ThrowIfDisposed();
-                return true;
-            }
-        }
-
-        public ITextViewMargin GetTextViewMargin(string marginName)
-        {
-            return marginName == MarginName ? this : null;
-        }
-
-        public void Dispose()
-        {
-            if (!_isDisposed)
-            {
-                GC.SuppressFinalize(this);
-                _isDisposed = true;
-
-                _doc.FileActionOccurred -= FileChangedOnDisk;
-
-                (_classifier as IDisposable)?.Dispose();
-            }
-        }
-
-        private void FileChangedOnDisk(object sender, TextDocumentFileActionEventArgs e)
-        {
-            UpdateFilePath(_doc);
-        }
-
-        private void UpdateFilePath(ITextDocument doc)
-        {
-            Dispatcher.BeginInvoke(new Action(() =>
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+            await Dispatcher.BeginInvoke(new Action(() =>
             {
                 try
                 {
@@ -125,6 +164,10 @@ namespace Jfevia.ProductivityShell.Vsix.EditorMargin
             }), DispatcherPriority.ApplicationIdle, null);
         }
 
+        /// <summary>
+        ///     Throws if disposed.
+        /// </summary>
+        /// <exception cref="ObjectDisposedException"></exception>
         private void ThrowIfDisposed()
         {
             if (_isDisposed)

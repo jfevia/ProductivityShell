@@ -1,79 +1,14 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{EE3C3F6D-2827-47FF-83CE-F431BAB0A416}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Jfevia.ProductivityShell.SolutionModel</RootNamespace>
-    <AssemblyName>Jfevia.ProductivityShell.SolutionModel</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
     <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
     <AssemblyOriginatorKeyFile>..\Key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
+    <ProjectReference Include="..\Jfevia.ProductivityShell.Configuration\Jfevia.ProductivityShell.Configuration.csproj" />
+    <ProjectReference Include="..\Jfevia.ProductivityShell.ProjectModel\Jfevia.ProductivityShell.ProjectModel.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="ConfigurationChangedEventArgs.cs" />
-    <Compile Include="ConfigurationLayer.cs" />
-    <Compile Include="ParsedConfiguration.cs" />
-    <Compile Include="ProjectEventArgs.cs" />
-    <Compile Include="RenameProjectEventArgs.cs" />
-    <Compile Include="SolutionEventArgs.cs" />
-    <Compile Include="ProfileEventArgs.cs" />
-    <Compile Include="CurrentStartupProjectsEventArgs.cs" />
-    <Compile Include="ParseConfigurationEventArgs.cs" />
-    <Compile Include="Solution.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SolutionBuildConfiguration.cs" />
-    <Compile Include="ConfigurationEventArgs.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Jfevia.ProductivityShell.Configuration\Jfevia.ProductivityShell.Configuration.csproj">
-      <Project>{3734b946-0ad9-40b6-8327-f0dc21553eb2}</Project>
-      <Name>Jfevia.ProductivityShell.Configuration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Jfevia.ProductivityShell.ProjectModel\Jfevia.ProductivityShell.ProjectModel.csproj">
-      <Project>{89c8bc31-9cd0-46a0-b4f4-839818e2c438}</Project>
-      <Name>Jfevia.ProductivityShell.ProjectModel</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\Key.snk">
-      <Link>Key.snk</Link>
-    </None>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
 </Project>

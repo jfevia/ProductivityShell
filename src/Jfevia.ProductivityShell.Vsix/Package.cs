@@ -1,4 +1,6 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
+using System.Threading;
 using Jfevia.ProductivityShell.Vsix.Commands.Environment;
 using Jfevia.ProductivityShell.Vsix.Commands.Package;
 using Jfevia.ProductivityShell.Vsix.Commands.Project;
@@ -10,6 +12,7 @@ using Jfevia.ProductivityShell.Vsix.DialogPages;
 using Jfevia.ProductivityShell.Vsix.Shell;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Task = System.Threading.Tasks.Task;
 
 namespace Jfevia.ProductivityShell.Vsix
 {
@@ -19,7 +22,7 @@ namespace Jfevia.ProductivityShell.Vsix
     [Guid(PackageGuids.PackageString)]
     [ProvideAutoLoad(UIContextGuids80.NoSolution)]
     [ProvideAutoLoad(UIContextGuids80.SolutionExists)]
-    [PackageRegistration(UseManagedResourcesOnly = true)]
+    [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     public sealed partial class Package : PackageBase
     {
@@ -33,14 +36,6 @@ namespace Jfevia.ProductivityShell.Vsix
             Instance = this;
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-
-            _shellProxy.SolutionProxy.UnadviseSolutionEvents();
-            _shellProxy.UnadviseSelectionEvents();
-        }
-
         /// <summary>
         ///     Gets the instance.
         /// </summary>
@@ -49,42 +44,66 @@ namespace Jfevia.ProductivityShell.Vsix
         /// </value>
         public static Package Instance { get; private set; }
 
-        /// <inheritdoc />
         /// <summary>
-        ///     Initializes this instance.
+        ///     Releases unmanaged and - optionally - managed resources.
         /// </summary>
-        protected override void Initialize()
+        /// <param name="disposing">
+        ///     <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only
+        ///     unmanaged resources.
+        /// </param>
+        protected override void Dispose(bool disposing)
         {
-            base.Initialize();
+            base.Dispose(disposing);
+
+            Instance.JoinableTaskFactory.Run(() => _shellProxy.SolutionProxy.UnadviseSolutionEventsAsync(this));
+            Instance.JoinableTaskFactory.Run(() => _shellProxy.UnadviseSelectionEventsAsync(this));
+        }
+
+        /// <summary>
+        ///     The async initialization portion of the package initialization process. This method is invoked from a background
+        ///     thread.
+        /// </summary>
+        /// <param name="cancellationToken">
+        ///     A cancellation token to monitor for initialization cancellation, which can occur when
+        ///     VS is shutting down.
+        /// </param>
+        /// <param name="progress"></param>
+        /// <returns>
+        ///     A task representing the async work of package initialization, or an already completed task if there is none. Do not
+        ///     return null from this method.
+        /// </returns>
+        protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
+        {
+            await base.InitializeAsync(cancellationToken, progress);
 
             _shellProxy = new ShellProxy(this);
-            _shellProxy.AdviseDebuggingEvents(this);
-            _shellProxy.AdviseSelectionEvents(this);
-            _shellProxy.SolutionProxy.AdviseSolutionEvents(this);
+            await _shellProxy.AdviseDebuggingEventsAsync(this);
+            await _shellProxy.AdviseSelectionEventsAsync(this);
+            await _shellProxy.SolutionProxy.AdviseSolutionEventsAsync(this);
 
             // Shell
-            RestartNormalCommand.Initialize(this);
-            RestartElevatedCommand.Initialize(this);
+            await RestartNormalCommand.InitializeAsync(this);
+            await RestartElevatedCommand.InitializeAsync(this);
 
             // Environment
-            PathVariablesCommand.Initialize(this);
+            await PathVariablesCommand.InitializeAsync(this);
 
             // Project
-            OpenOutputFolderCommand.Initialize(this);
-            ShowOutputFileInExplorerCommand.Initialize(this);
-            ReloadCommand.Initialize(this);
+            await OpenOutputFolderCommand.InitializeAsync(this);
+            await ShowOutputFileInExplorerCommand.InitializeAsync(this);
+            await ReloadCommand.InitializeAsync(this);
 
             // Project Item
-            ShowInExplorerCommand.Initialize(this);
+            await ShowInExplorerCommand.InitializeAsync(this);
 
             // Refactoring
-            MoveToSettingsCommand.Initialize(this);
+            await MoveToSettingsCommand.InitializeAsync(this);
 
             // Tools
-            ReplaceGuidPlaceholdersCommand.Initialize(this);
+            await ReplaceGuidPlaceholdersCommand.InitializeAsync(this);
 
             // Package
-            ShowOptionPageCommand.Initialize(this);
+            await ShowOptionPageCommand.InitializeAsync(this);
         }
     }
 }

@@ -167,11 +167,10 @@ namespace Jfevia.ProductivityShell.Vsix
         /// </returns>
         public int OnAfterOpenProject(IVsHierarchy pHierarchy, int fAdded)
         {
-            _shellProxy.OnOpenedProject(pHierarchy, fAdded == 1);
+            Instance.JoinableTaskFactory.Run(() => _shellProxy.OnOpenedProjectAsync(pHierarchy, fAdded == 1));
             return VSConstants.S_OK;
         }
 
-        /// <inheritdoc />
         /// <summary>
         ///     Notifies listening clients that the solution has been opened.
         /// </summary>
@@ -187,7 +186,7 @@ namespace Jfevia.ProductivityShell.Vsix
         public int OnAfterOpenSolution(object pUnkReserved, int fNewSolution)
         {
             if (!_projectsLoadInBatches)
-                _shellProxy.OnOpenedSolution();
+                Instance.JoinableTaskFactory.Run(() => _shellProxy.OnOpenedSolutionAsync());
 
             return VSConstants.S_OK;
         }
@@ -226,7 +225,7 @@ namespace Jfevia.ProductivityShell.Vsix
         /// </returns>
         public int OnBeforeCloseSolution(object pUnkReserved)
         {
-            _shellProxy.OnClosingSolution();
+            Instance.JoinableTaskFactory.Run(() => _shellProxy.OnClosingSolutionAsync());
             return VSConstants.S_OK;
         }
 
@@ -407,7 +406,7 @@ namespace Jfevia.ProductivityShell.Vsix
         /// </returns>
         public int OnAfterBackgroundSolutionLoadComplete()
         {
-            _shellProxy.OnOpenedSolution();
+            Instance.JoinableTaskFactory.Run(() => _shellProxy.OnOpenedSolutionAsync());
             return VSConstants.S_OK;
         }
 

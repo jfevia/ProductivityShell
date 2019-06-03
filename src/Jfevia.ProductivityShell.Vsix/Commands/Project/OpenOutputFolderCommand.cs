@@ -4,6 +4,7 @@ using Jfevia.ProductivityShell.Vsix.Extensions;
 using Jfevia.ProductivityShell.Vsix.Shell;
 using Microsoft.VisualStudio.Shell;
 using Process = System.Diagnostics.Process;
+using Task = System.Threading.Tasks.Task;
 
 namespace Jfevia.ProductivityShell.Vsix.Commands.Project
 {
@@ -11,7 +12,8 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Project
     {
         /// <inheritdoc />
         /// <summary>
-        ///     Initializes a new instance of the <see cref="T:Jfevia.ProductivityShell.Vsix.Commands.Project.OpenOutputFolderCommand" /> class.
+        ///     Initializes a new instance of the
+        ///     <see cref="T:Jfevia.ProductivityShell.Vsix.Commands.Project.OpenOutputFolderCommand" /> class.
         /// </summary>
         /// <param name="package">The package.</param>
         private OpenOutputFolderCommand(PackageBase package)
@@ -23,9 +25,10 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Project
         ///     Initializes the specified package.
         /// </summary>
         /// <param name="package">The package.</param>
-        public static void Initialize(PackageBase package)
+        public static async Task InitializeAsync(PackageBase package)
         {
             Instance = new OpenOutputFolderCommand(package);
+            await Instance.InitializeAsync();
         }
 
         /// <inheritdoc />
@@ -33,7 +36,7 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Project
         ///     Called when [execute].
         /// </summary>
         /// <param name="command">The command.</param>
-        protected override void OnExecute(OleMenuCommand command)
+        protected override async Task OnExecuteAsync(OleMenuCommand command)
         {
             if (Package.Dte.SelectedItems.Count == 0)
                 return;
@@ -58,7 +61,31 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Project
             }
 
             foreach (var path in paths)
-                Process.Start(path);
+                await Task.Run(() => Process.Start(path));
+        }
+
+        /// <summary>
+        ///     Called when [before query status].
+        /// </summary>
+        /// <param name="command">The command.</param>
+        /// <returns>
+        ///     The task.
+        /// </returns>
+        protected override async Task OnBeforeQueryStatusAsync(OleMenuCommand command)
+        {
+            await Task.Yield();
+        }
+
+        /// <summary>
+        ///     Called when [change].
+        /// </summary>
+        /// <param name="command">The command.</param>
+        /// <returns>
+        ///     The task.
+        /// </returns>
+        protected override async Task OnChangeAsync(OleMenuCommand command)
+        {
+            await Task.Yield();
         }
     }
 }

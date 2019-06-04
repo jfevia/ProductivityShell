@@ -61,12 +61,12 @@ namespace Jfevia.ProductivityShell.Vsix.Commands
         ///     Before the query status handler.
         /// </summary>
         /// <param name="sender">The sender.</param>
-        private void BeforeQueryStatusHandler(object sender)
+        private async void BeforeQueryStatusHandler(object sender)
         {
             if (!(sender is OleMenuCommand command))
                 return;
 
-            OnBeforeQueryStatusAsync(command);
+            await OnBeforeQueryStatusAsync(command);
         }
 
         /// <summary>
@@ -94,24 +94,24 @@ namespace Jfevia.ProductivityShell.Vsix.Commands
         ///     Executes the handler.
         /// </summary>
         /// <param name="sender">The sender.</param>
-        private void ExecuteHandler(object sender)
+        private async void ExecuteHandler(object sender)
         {
             if (!(sender is OleMenuCommand command))
                 return;
 
-            OnExecuteAsync(command);
+            await OnExecuteAsync(command);
         }
 
         /// <summary>
         ///     Changes the handler.
         /// </summary>
         /// <param name="sender">The sender.</param>
-        private void ChangeHandler(object sender)
+        private async void ChangeHandler(object sender)
         {
             if (!(sender is OleMenuCommand command))
                 return;
 
-            OnChangeAsync(command);
+            await OnChangeAsync(command);
         }
     }
 }

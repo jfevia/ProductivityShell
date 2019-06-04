@@ -11,7 +11,6 @@ using Jfevia.ProductivityShell.Vsix.Commands.Tools;
 using Jfevia.ProductivityShell.Vsix.DialogPages;
 using Jfevia.ProductivityShell.Vsix.Shell;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 using Task = System.Threading.Tasks.Task;
 
 namespace Jfevia.ProductivityShell.Vsix
@@ -20,8 +19,6 @@ namespace Jfevia.ProductivityShell.Vsix
     [ProvideOptionPage(typeof(GeneralDialogPage), PackageConstants.ProductName, PackageConstants.GeneralPage, 0, 0, false)]
     [ProvideOptionPage(typeof(ToolsDialogPage), PackageConstants.ProductName, PackageConstants.ToolsPage, 0, 0, false)]
     [Guid(PackageGuids.PackageString)]
-    [ProvideAutoLoad(UIContextGuids80.NoSolution)]
-    [ProvideAutoLoad(UIContextGuids80.SolutionExists)]
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     public sealed partial class Package : PackageBase

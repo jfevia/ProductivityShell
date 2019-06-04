@@ -62,7 +62,7 @@ namespace Jfevia.ProductivityShell.Vsix
         public int OnElementValueChanged(uint elementId, object varValueOld, object varValueNew)
         {
             if (elementId == (uint) VSConstants.VSSELELEMID.SEID_StartupProject)
-                _shellProxy.OnStartupProjectChanged();
+                Instance.JoinableTaskFactory.Run(() => _shellProxy.OnStartupProjectChangedAsync());
 
             return VSConstants.S_OK;
         }
@@ -145,7 +145,7 @@ namespace Jfevia.ProductivityShell.Vsix
         /// </returns>
         public int OnAfterLoadProject(IVsHierarchy pStubHierarchy, IVsHierarchy pRealHierarchy)
         {
-            _shellProxy.OnProjectLoaded();
+            Instance.JoinableTaskFactory.Run(() => _shellProxy.OnProjectLoadedAsync());
             return VSConstants.S_OK;
         }
 
@@ -367,7 +367,7 @@ namespace Jfevia.ProductivityShell.Vsix
         /// </returns>
         public int OnAfterRenameProject(IVsHierarchy pHierarchy)
         {
-            _shellProxy.OnRenamedProject(pHierarchy);
+            Instance.JoinableTaskFactory.Run(() => _shellProxy.OnRenamedProjectAsync(pHierarchy));
             return VSConstants.S_OK;
         }
 

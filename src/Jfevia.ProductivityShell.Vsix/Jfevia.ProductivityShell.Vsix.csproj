@@ -58,7 +58,7 @@
     <Compile Include="Commands\Refactor\MoveToSettingsCommand.cs" />
     <Compile Include="Commands\ProjectItem\ShowInExplorerCommand.cs" />
     <Compile Include="Commands\Project\ShowOutputFileInExplorerCommand.cs" />
-    <Compile Include="Commands\Project\ProjecItemEqualityComparer.cs" />
+    <Compile Include="Commands\Project\ProjectItemEqualityComparer.cs" />
     <Compile Include="Commands\Project\ReloadCommand.cs" />
     <Compile Include="Commands\Project\OpenOutputFolderCommand.cs" />
     <Compile Include="Commands\Shell\RestartElevatedCommand.cs" />

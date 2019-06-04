@@ -102,20 +102,16 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         public event EventHandler<ProjectEventArgs> OpenedProject;
 
         /// <summary>
-        ///     Gets the machine configuration file path.
-        /// </summary>
-        /// <value>
-        ///     The machine configuration file path.
-        /// </value>
-        public string MachineConfigFilePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Jfevia", "ProductivityShell", "Shared", "vAny", $"{Path.GetFileName(Source.FullName)}{LocalExtension}");
-
-        /// <summary>
         ///     Gets the shared configuration file path.
         /// </summary>
         /// <value>
         ///     The shared configuration file path.
         /// </value>
-        public string SharedConfigFilePath => $"{Source.FullName}{LocalExtension}";
+        public async Task<string> GetSharedConfigFilePathAsync()
+        {
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+            return $"{Source.FullName}{LocalExtension}";
+        }
 
         /// <summary>
         ///     Gets the user configuration file path.
@@ -123,7 +119,11 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// <value>
         ///     The user configuration file path.
         /// </value>
-        public string UserConfigFilePath => $"{Source.FullName}{UserExtension}";
+        public async Task<string> GetUserConfigFilePathAsync()
+        {
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+            return $"{Source.FullName}{UserExtension}";
+        }
 
         /// <inheritdoc />
         /// <summary>
@@ -155,6 +155,19 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
             }
 
             _projectCache?.Dispose();
+        }
+
+        /// <summary>
+        ///     Gets the machine configuration file path.
+        /// </summary>
+        /// <value>
+        ///     The machine configuration file path.
+        /// </value>
+        public async Task<string> GetMachineConfigFilePathAsync()
+        {
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Jfevia", "ProductivityShell", "Shared", "vAny", $"{Path.GetFileName(Source.FullName)}{LocalExtension}");
         }
 
         /// <summary>
@@ -212,32 +225,33 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="CurrentStartupProjectsEventArgs" /> instance containing the event data.</param>
-        private void Solution_QueryCurrentStartupProjects(object sender, CurrentStartupProjectsEventArgs e)
+        private async void Solution_QueryCurrentStartupProjects(object sender, CurrentStartupProjectsEventArgs e)
         {
             e.StartupProjects.Clear();
 
-            foreach (var startupProject in GetCurrentStartupProjects())
+            foreach (var startupProject in await GetCurrentStartupProjectsAsync())
                 e.StartupProjects.Add(startupProject);
         }
 
         /// <summary>
         ///     Called when [startup project changed].
         /// </summary>
-        public void OnStartupProjectChanged()
+        public async Task OnStartupProjectChangedAsync()
         {
             var startupProjects = GetStartupProjects();
-            var currentStartupProjects = GetCurrentStartupProjects();
-            var configurationLayer = LoadConfigurationLayer();
-            var parsedConfiguration = ParseConfiguration(configurationLayer.ComputedConfig.Startup.Profiles, startupProjects, currentStartupProjects.ToArray());
-            OnStartupProfileChanged(parsedConfiguration.CurrentProfile);
+            var currentStartupProjects = await GetCurrentStartupProjectsAsync();
+            var configurationLayer = await LoadConfigurationLayerAsync();
+            var parsedConfiguration = await ParseConfigurationAsync(configurationLayer.ComputedConfig.Startup.Profiles, startupProjects, currentStartupProjects.ToArray());
+            await OnStartupProfileChangedAsync(parsedConfiguration.CurrentProfile);
         }
 
         /// <summary>
         ///     Gets the current startup projects.
         /// </summary>
         /// <returns>The current startup projects.</returns>
-        private IEnumerable<string> GetCurrentStartupProjects()
+        private async Task<IEnumerable<string>> GetCurrentStartupProjectsAsync()
         {
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
             if (Source.SolutionBuild.StartupProjects == null)
                 return Enumerable.Empty<string>();
 
@@ -248,11 +262,12 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         ///     Called when [startup profile changed].
         /// </summary>
         /// <param name="profile">The profile.</param>
-        public void OnStartupProfileChanged(Profile profile)
+        public async Task OnStartupProfileChangedAsync(Profile profile)
         {
             if (profile == null)
                 return;
 
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
             var startupProjects = profile.Projects.Select(s => _projectCache.TryGetProjectByName(s.Name, out var project) ? project : null).ToList();
             foreach (var startupProject in startupProjects.Where(s => s != null))
             {
@@ -332,9 +347,10 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="ProfileEventArgs" /> instance containing the event data.</param>
-        private void Solution_CurrentProfileChanged(object sender, ProfileEventArgs e)
+        private async void Solution_CurrentProfileChanged(object sender, ProfileEventArgs e)
         {
             var projects = e.StartupProjects.Cast<object>().ToArray();
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
             Source.SolutionBuild.StartupProjects = projects.Length == 1 ? projects[0] : projects;
             CurrentStartupProjectsChanged?.Invoke(this, e);
         }
@@ -344,9 +360,9 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="ParseConfigurationEventArgs" /> instance containing the event data.</param>
-        private void Solution_ParseConfiguration(object sender, ParseConfigurationEventArgs e)
+        private async void Solution_ParseConfiguration(object sender, ParseConfigurationEventArgs e)
         {
-            e.ParsedConfiguration = ParseConfiguration(e.Profiles, e.StartupProjects, e.SelectedStartupProjects);
+            e.ParsedConfiguration = await ParseConfigurationAsync(e.Profiles, e.StartupProjects, e.SelectedStartupProjects);
         }
 
         /// <summary>
@@ -356,7 +372,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// <param name="startupProjects">The startup projects.</param>
         /// <param name="currentStartupProjects">The current startup projects.</param>
         /// <returns>The parsed configuration.</returns>
-        private ParsedConfiguration ParseConfiguration(IEnumerable<Profile> profiles, IEnumerable<string> startupProjects, ICollection<string> currentStartupProjects)
+        private async Task<ParsedConfiguration> ParseConfigurationAsync(IEnumerable<Profile> profiles, IEnumerable<string> startupProjects, ICollection<string> currentStartupProjects)
         {
             var parsedConfiguration = new ParsedConfiguration();
 
@@ -374,6 +390,7 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
             }
 
             var currentProfile = new Profile();
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
             foreach (var startupProject in currentStartupProjects)
             {
                 var projectName = Path.GetFileNameWithoutExtension(startupProject);
@@ -437,21 +454,21 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="ConfigurationEventArgs" /> instance containing the event data.</param>
-        private void Solution_QueryConfiguration(object sender, ConfigurationEventArgs e)
+        private async void Solution_QueryConfiguration(object sender, ConfigurationEventArgs e)
         {
-            e.ConfigurationLayer = LoadConfigurationLayer();
+            e.ConfigurationLayer = await LoadConfigurationLayerAsync();
         }
 
         /// <summary>
         ///     Loads the configuration layer.
         /// </summary>
         /// <returns>The configuration layer.</returns>
-        private ConfigurationLayer LoadConfigurationLayer()
+        private async Task<ConfigurationLayer> LoadConfigurationLayerAsync()
         {
             var configurationLayer = new ConfigurationLayer();
-            configurationLayer.MachineFilePath = MachineConfigFilePath;
-            configurationLayer.SharedFilePath = SharedConfigFilePath;
-            configurationLayer.UserFilePath = UserConfigFilePath;
+            configurationLayer.MachineFilePath = await GetMachineConfigFilePathAsync();
+            configurationLayer.SharedFilePath = await GetSharedConfigFilePathAsync();
+            configurationLayer.UserFilePath = await GetUserConfigFilePathAsync();
 
             if (File.Exists(configurationLayer.MachineFilePath))
                 configurationLayer.MachineConfig = ConfigurationXmlSerializer.Deserialize(File.OpenRead(configurationLayer.MachineFilePath));
@@ -498,9 +515,9 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// </summary>
         public async Task OnOpenedSolutionAsync()
         {
-            _configurationFileTrackers.Add(new ConfigurationFileTracker(MachineConfigFilePath, await VsProxy.GetFileChangeAsync()));
-            _configurationFileTrackers.Add(new ConfigurationFileTracker(SharedConfigFilePath, await VsProxy.GetFileChangeAsync()));
-            _configurationFileTrackers.Add(new ConfigurationFileTracker(UserConfigFilePath, await VsProxy.GetFileChangeAsync()));
+            _configurationFileTrackers.Add(new ConfigurationFileTracker(await GetMachineConfigFilePathAsync(), await VsProxy.GetFileChangeAsync()));
+            _configurationFileTrackers.Add(new ConfigurationFileTracker(await GetSharedConfigFilePathAsync(), await VsProxy.GetFileChangeAsync()));
+            _configurationFileTrackers.Add(new ConfigurationFileTracker(await GetUserConfigFilePathAsync(), await VsProxy.GetFileChangeAsync()));
 
             foreach (var tracker in _configurationFileTrackers)
             {
@@ -574,10 +591,11 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// <summary>
         ///     Opens the configuration file.
         /// </summary>
-        public void OpenConfigurationFile()
+        public async Task OpenConfigurationFileAsync()
         {
-            SaveConfigurationLayer(ConfigurationLayer.Default, false);
-            VsProxy.Dte.ItemOperations.OpenFile(SharedConfigFilePath, Constants.vsViewKindCode);
+            await SaveConfigurationLayerAsync(ConfigurationLayer.Default, false);
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+            VsProxy.Dte.ItemOperations.OpenFile(await GetSharedConfigFilePathAsync(), Constants.vsViewKindCode);
         }
 
         /// <summary>
@@ -585,16 +603,16 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// </summary>
         /// <param name="configurationLayer">The configuration layer.</param>
         /// <param name="override">if set to <c>true</c> [@override].</param>
-        public void SaveConfigurationLayer(ConfigurationLayer configurationLayer, bool @override)
+        public async Task SaveConfigurationLayerAsync(ConfigurationLayer configurationLayer, bool @override)
         {
             if (configurationLayer == null)
                 throw new ArgumentNullException(nameof(configurationLayer));
 
             var configMap = new[]
             {
-                new {FilePath = MachineConfigFilePath, Configuration = configurationLayer.MachineConfig},
-                new {FilePath = SharedConfigFilePath, Configuration = configurationLayer.SharedConfig},
-                new {FilePath = UserConfigFilePath, Configuration = configurationLayer.UserConfig}
+                new {FilePath = await GetMachineConfigFilePathAsync(), Configuration = configurationLayer.MachineConfig},
+                new {FilePath = await GetSharedConfigFilePathAsync(), Configuration = configurationLayer.SharedConfig},
+                new {FilePath = await GetUserConfigFilePathAsync(), Configuration = configurationLayer.UserConfig}
             };
 
             foreach (var config in configMap)
@@ -659,20 +677,21 @@ namespace Jfevia.ProductivityShell.Vsix.Solutions
         /// <summary>
         ///     Called when [project loaded].
         /// </summary>
-        public void OnProjectLoaded()
+        public async Task OnProjectLoadedAsync()
         {
-            OnStartupProjectChanged();
+            await OnStartupProjectChangedAsync();
         }
 
         /// <summary>
         ///     Called when [renamed project].
         /// </summary>
         /// <param name="hierarchy">The hierarchy.</param>
-        public void OnRenamedProject(IVsHierarchy hierarchy)
+        public async Task OnRenamedProjectAsync(IVsHierarchy hierarchy)
         {
             if (!_projectCache.TryGetProjectByHierarchy(hierarchy, out var project))
                 return;
 
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
             var oldName = project.Name;
             var newName = project.Source.Name;
 

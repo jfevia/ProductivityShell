@@ -58,6 +58,7 @@ namespace Jfevia.ProductivityShell.Vsix.Helpers
         /// <returns>The ProductivityShell output window pane, otherwise null.</returns>
         private static async Task<IVsOutputWindowPane> GetInternalPackageOutputWindowPaneAsync()
         {
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
             if (!(Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(SVsOutputWindow)) is IVsOutputWindow outputWindow))
                 return null;
 

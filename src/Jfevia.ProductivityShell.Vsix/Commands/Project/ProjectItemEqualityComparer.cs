@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.VisualStudio.Shell;
 
 namespace Jfevia.ProductivityShell.Vsix.Commands.Project
 {
-    internal class ProjecItemEqualityComparer : IEqualityComparer<EnvDTE.ProjectItem>
+    internal class ProjectItemEqualityComparer : IEqualityComparer<EnvDTE.ProjectItem>
     {
         /// <inheritdoc />
         /// <summary>
@@ -16,6 +17,7 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Project
         /// </returns>
         public bool Equals(EnvDTE.ProjectItem x, EnvDTE.ProjectItem y)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             return string.Equals(x.Properties.Item("FullPath")?.ToString(), y.Properties.Item("FullPath")?.ToString(),
                 StringComparison.OrdinalIgnoreCase);
         }
@@ -30,6 +32,7 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Project
         /// </returns>
         public int GetHashCode(EnvDTE.ProjectItem projectItem)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             return projectItem.Properties.Item("FullPath").GetHashCode();
         }
     }

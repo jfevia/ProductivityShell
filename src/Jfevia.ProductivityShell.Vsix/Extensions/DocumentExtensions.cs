@@ -15,6 +15,7 @@ namespace Jfevia.ProductivityShell.Vsix.Extensions
         /// <returns>The associated text document, otherwise null.</returns>
         internal static TextDocument GetTextDocument(this Document document)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             return document.Object("TextDocument") as TextDocument;
         }
 
@@ -25,6 +26,7 @@ namespace Jfevia.ProductivityShell.Vsix.Extensions
         /// <returns>True if the document is external, otherwise false.</returns>
         internal static async Task<bool> IsExternalAsync(this Document document)
         {
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
             var projectItem = document.ProjectItem;
 
             return projectItem == null || await projectItem.IsExternalAsync();

@@ -19,6 +19,7 @@ namespace Jfevia.ProductivityShell.Vsix.Extensions
         /// </exception>
         public static string GetOutputFolder(this Project project)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             var directoryName = Path.GetDirectoryName(project.FullName);
             if (directoryName == null)
                 throw new InvalidOperationException("Unable to find project directory");
@@ -38,6 +39,7 @@ namespace Jfevia.ProductivityShell.Vsix.Extensions
         /// <exception cref="InvalidOperationException">OutputFileName property is null or empty</exception>
         public static string GetOutputFilePath(this Project project)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             var outputFolder = GetOutputFolder(project);
             var property = project.Properties.Item("OutputFileName");
             if (string.IsNullOrWhiteSpace(property.Value?.ToString()))
@@ -54,6 +56,7 @@ namespace Jfevia.ProductivityShell.Vsix.Extensions
         /// <returns>The relative path.</returns>
         public static string GetRelativePath(this Project project, Solution solution)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             var solutionPath = $@"{Path.GetDirectoryName(solution.FullName)}\";
             return PathHelpers.GetPathRelativeTo(project.FullName, solutionPath);
         }

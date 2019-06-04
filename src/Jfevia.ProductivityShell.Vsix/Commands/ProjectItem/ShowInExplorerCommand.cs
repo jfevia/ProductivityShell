@@ -57,7 +57,7 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.ProjectItem
                 return;
 
             var paths = new HashSet<string>();
-            foreach (var selectedItem in UIHierarchyHelper.GetSelectedUIHierarchyItems(Package))
+            foreach (var selectedItem in await UIHierarchyHelper.GetSelectedUIHierarchyItemsAsync(Package))
             {
                 if (selectedItem.Object is EnvDTE.ProjectItem projectItem)
                     paths.Add(projectItem.Document?.FullName ??

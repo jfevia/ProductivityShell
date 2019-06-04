@@ -75,8 +75,8 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Tools
         /// </summary>
         private async Task ReplacePlaceholdersInSelectedItemsAsync()
         {
-            var projectItems = SolutionHelper.GetSelectedProjectItemsRecursively(Package)
-                .Distinct(new ProjecItemEqualityComparer()).ToList();
+            var projectItems = (await SolutionHelper.GetSelectedProjectItemsRecursivelyAsync(Package)).ToList();
+            projectItems = projectItems.Distinct(new ProjectItemEqualityComparer()).ToList();
             if (projectItems.Count <= 0)
             {
                 MessageBox.Show("No items were found", "GUID Placeholders");

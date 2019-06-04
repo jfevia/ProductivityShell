@@ -20,6 +20,7 @@ namespace Jfevia.ProductivityShell.Vsix.Extensions
         {
             try
             {
+                await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
                 return projectItem.FileNames[1];
             }
             catch (Exception ex)
@@ -38,6 +39,7 @@ namespace Jfevia.ProductivityShell.Vsix.Extensions
         {
             try
             {
+                await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
                 var parentProjectItem = projectItem.Collection?.Parent as ProjectItem;
                 return parentProjectItem;
             }
@@ -57,10 +59,22 @@ namespace Jfevia.ProductivityShell.Vsix.Extensions
         {
             try
             {
+                await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
                 if (projectItem.Collection == null || !await projectItem.IsPhysicalFileAsync())
                     return true;
 
-                return projectItem.Collection.OfType<ProjectItem>().All(x => x.Object != projectItem.Object);
+                foreach (var o in projectItem.Collection)
+                {
+                    if (!(o is ProjectItem x))
+                        continue;
+
+                    if (x.Object != projectItem.Object)
+                        continue;
+
+                    return false;
+                }
+
+                return true;
             }
             catch (Exception ex)
             {
@@ -78,6 +92,7 @@ namespace Jfevia.ProductivityShell.Vsix.Extensions
         {
             try
             {
+                await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
                 return string.Equals(projectItem.Kind, Constants.vsProjectItemKindPhysicalFile, StringComparison.OrdinalIgnoreCase);
             }
             catch (Exception ex)

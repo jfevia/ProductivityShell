@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using EnvDTE;
 using EnvDTE80;
 using Jfevia.ProductivityShell.Vsix.Shell;
@@ -17,19 +18,21 @@ namespace Jfevia.ProductivityShell.Vsix.Helpers
         ///     selections to change.
         /// </summary>
         /// <param name="parentItem">The parent item to collapse from.</param>
-        internal static void CollapseRecursively(UIHierarchyItem parentItem)
+        internal static async Task CollapseRecursivelyAsync(UIHierarchyItem parentItem)
         {
             if (parentItem == null)
                 throw new ArgumentNullException(nameof(parentItem));
+
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
 
             if (!parentItem.UIHierarchyItems.Expanded)
                 return;
 
             // Recurse to all children first.
             foreach (UIHierarchyItem childItem in parentItem.UIHierarchyItems)
-                CollapseRecursively(childItem);
+                await CollapseRecursivelyAsync(childItem);
 
-            if (ShouldCollapseItem(parentItem))
+            if (await ShouldCollapseItemAsync(parentItem))
             {
                 // Attempt the direct collapse first.
                 parentItem.UIHierarchyItems.Expanded = false;
@@ -48,10 +51,11 @@ namespace Jfevia.ProductivityShell.Vsix.Helpers
         /// </summary>
         /// <param name="package">The hosting package.</param>
         /// <returns>The enumerable set of selected UI hierarchy items.</returns>
-        internal static IEnumerable<UIHierarchyItem> GetSelectedUIHierarchyItems(PackageBase package)
+        internal static async Task<IEnumerable<UIHierarchyItem>> GetSelectedUIHierarchyItemsAsync(PackageBase package)
         {
             var solutionExplorer = GetSolutionExplorer(package);
 
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
             return ((object[]) solutionExplorer.SelectedItems).Cast<UIHierarchyItem>().ToList();
         }
 
@@ -70,10 +74,11 @@ namespace Jfevia.ProductivityShell.Vsix.Helpers
         /// </summary>
         /// <param name="package">The hosting package.</param>
         /// <returns>The top level (solution) UI hierarchy item, otherwise null.</returns>
-        internal static UIHierarchyItem GetTopUIHierarchyItem(PackageBase package)
+        internal static async Task<UIHierarchyItem> GetTopUIHierarchyItemAsync(PackageBase package)
         {
             var solutionExplorer = GetSolutionExplorer(package);
 
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
             return solutionExplorer.UIHierarchyItems.Count > 0 ? solutionExplorer.UIHierarchyItems.Item(1) : null;
         }
 
@@ -82,12 +87,19 @@ namespace Jfevia.ProductivityShell.Vsix.Helpers
         /// </summary>
         /// <param name="parentItem">The parent item.</param>
         /// <returns>True if there are expanded children, false otherwise.</returns>
-        internal static bool HasExpandedChildren(UIHierarchyItem parentItem)
+        internal static async Task<bool> HasExpandedChildrenAsync(UIHierarchyItem parentItem)
         {
             if (parentItem == null)
                 throw new ArgumentNullException(nameof(parentItem));
 
-            return parentItem.UIHierarchyItems.Cast<UIHierarchyItem>().Any(childItem => childItem.UIHierarchyItems.Expanded || HasExpandedChildren(childItem));
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+            foreach (UIHierarchyItem childItem in parentItem.UIHierarchyItems)
+            {
+                if (childItem.UIHierarchyItems.Expanded || await HasExpandedChildrenAsync(childItem))
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -95,8 +107,10 @@ namespace Jfevia.ProductivityShell.Vsix.Helpers
         /// </summary>
         /// <param name="parentItem">The parent item.</param>
         /// <returns>True if the item should be collapsed, otherwise false.</returns>
-        private static bool ShouldCollapseItem(UIHierarchyItem parentItem)
+        private static async Task<bool> ShouldCollapseItemAsync(UIHierarchyItem parentItem)
         {
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+
             // Make sure not to collapse the solution, causes odd behavior.
             if (parentItem.Object is Solution)
                 return false;
@@ -104,15 +118,24 @@ namespace Jfevia.ProductivityShell.Vsix.Helpers
             // Conditionally skip collapsing the only project in a solution.
             // Note: Visual Studio automatically creates a second invisible project called
             //       "Miscellaneous files".
-            if (parentItem.Object is Project)
-            {
-                var solution = parentItem.DTE.Solution;
+            if (!(parentItem.Object is Project))
+                return true;
 
-                if (solution != null && solution.Projects.OfType<Project>().All(x => x == parentItem.Object || x.Name == "Miscellaneous Files"))
-                    return false;
+            var solution = parentItem.DTE.Solution;
+            var hasCollapsibleItem = false;
+            foreach (var project in solution.Projects)
+            {
+                if (!(project is Project s))
+                    continue;
+
+                if (s == parentItem.Object || s.Name == "Miscellaneous Files")
+                    continue;
+
+                hasCollapsibleItem = true;
+                break;
             }
 
-            return true;
+            return hasCollapsibleItem;
         }
     }
 }

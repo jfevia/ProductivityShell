@@ -38,6 +38,8 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Project
         /// <param name="command">The command.</param>
         protected override async Task OnExecuteAsync(OleMenuCommand command)
         {
+            await ProductivityShell.Vsix.Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+
             if (Package.Dte.SelectedItems.Count == 0)
                 return;
 

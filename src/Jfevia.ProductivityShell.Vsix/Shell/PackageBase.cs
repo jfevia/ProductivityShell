@@ -55,6 +55,7 @@ namespace Jfevia.ProductivityShell.Vsix.Shell
         {
             get
             {
+                ThreadHelper.ThrowIfNotOnUIThread();
                 var outputPanes = Dte?.ToolWindows.OutputWindow.OutputWindowPanes;
 
                 try
@@ -77,6 +78,7 @@ namespace Jfevia.ProductivityShell.Vsix.Shell
 
         public bool ActivateOutputWindow()
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             Dte?.ToolWindows.OutputWindow.Parent.Activate();
             return true;
         }

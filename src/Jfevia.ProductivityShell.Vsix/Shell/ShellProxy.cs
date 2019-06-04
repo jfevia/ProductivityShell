@@ -233,9 +233,9 @@ namespace Jfevia.ProductivityShell.Vsix.Shell
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
-        private void StartupProfileService_RequestedShowConfiguration(object sender, EventArgs e)
+        private async void StartupProfileService_RequestedShowConfiguration(object sender, EventArgs e)
         {
-            SolutionProxy.OpenConfigurationFile();
+            await SolutionProxy.OpenConfigurationFileAsync();
         }
 
         /// <summary>
@@ -243,9 +243,9 @@ namespace Jfevia.ProductivityShell.Vsix.Shell
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="StartupProfileChangedEventArgs" /> instance containing the event data.</param>
-        private void StartupProfileService_SelectedStartupProfileChanged(object sender, StartupProfileChangedEventArgs e)
+        private async void StartupProfileService_SelectedStartupProfileChanged(object sender, StartupProfileChangedEventArgs e)
         {
-            SolutionProxy.OnStartupProfileChanged(e.Profile);
+            await SolutionProxy.OnStartupProfileChangedAsync(e.Profile);
         }
 
         /// <summary>
@@ -404,26 +404,26 @@ namespace Jfevia.ProductivityShell.Vsix.Shell
         /// <summary>
         ///     Called when [startup project changed].
         /// </summary>
-        public void OnStartupProjectChanged()
+        public async Task OnStartupProjectChangedAsync()
         {
-            SolutionProxy.OnStartupProjectChanged();
+            await SolutionProxy.OnStartupProjectChangedAsync();
         }
 
         /// <summary>
         ///     Called when [project loaded].
         /// </summary>
-        public void OnProjectLoaded()
+        public async Task OnProjectLoadedAsync()
         {
-            SolutionProxy.OnProjectLoaded();
+            await SolutionProxy.OnProjectLoadedAsync();
         }
 
         /// <summary>
         ///     Called when [renamed project].
         /// </summary>
         /// <param name="hierarchy">The hierarchy.</param>
-        public void OnRenamedProject(IVsHierarchy hierarchy)
+        public async Task OnRenamedProjectAsync(IVsHierarchy hierarchy)
         {
-            SolutionProxy.OnRenamedProject(hierarchy);
+            await SolutionProxy.OnRenamedProjectAsync(hierarchy);
         }
     }
 }

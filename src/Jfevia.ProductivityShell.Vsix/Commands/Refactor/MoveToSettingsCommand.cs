@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using EnvDTE;
 using Jfevia.ProductivityShell.Vsix.AppConfig;
 using Jfevia.ProductivityShell.Vsix.Extensions;
@@ -102,6 +104,8 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Refactor
             if (Package.Dte.ActiveDocument == null)
                 return;
 
+            await ProductivityShell.Vsix.Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+
             var extension = Path.GetExtension(Package.Dte.ActiveDocument.FullName);
             if (!CanMove(extension))
                 return;
@@ -122,7 +126,7 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Refactor
 
             _textSelection = textSelection;
             _projectPath = projectPath;
-            _settingsFiles = new List<EnvDTE.ProjectItem>(GetSettingsProjectItems(project));
+            _settingsFiles = new List<EnvDTE.ProjectItem>(await GetSettingsProjectItemsAsync(project));
             _extension = extension;
 
             command.Enabled = true;
@@ -135,10 +139,18 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Refactor
         /// </summary>
         /// <param name="project">The project.</param>
         /// <returns>The project items for settings.</returns>
-        private static IEnumerable<EnvDTE.ProjectItem> GetSettingsProjectItems(EnvDTE.Project project)
+        private static async Task<IEnumerable<EnvDTE.ProjectItem>> GetSettingsProjectItemsAsync(EnvDTE.Project project)
         {
-            return SolutionHelper.GetItemsRecursively<EnvDTE.ProjectItem>(project)
-                .Where(s => s.Name.EndsWith(SettingsFileExtension));
+            var projectItems = await SolutionHelper.GetItemsRecursivelyAsync<EnvDTE.ProjectItem>(project);
+            var items = new List<EnvDTE.ProjectItem>();
+            foreach (var projectItem in projectItems)
+            {
+                await ProductivityShell.Vsix.Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+                if (projectItem.Name.EndsWith(SettingsFileExtension))
+                    items.Add(projectItem);
+            }
+
+            return items;
         }
 
         /// <summary>
@@ -147,6 +159,8 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Refactor
         /// <param name="command">The command.</param>
         protected override async Task OnExecuteAsync(OleMenuCommand command)
         {
+            await ProductivityShell.Vsix.Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+
             var window = new MoveToSettingsWindow();
             window.SettingsName = "NewSettings";
             window.Value = _textSelection.Text;
@@ -157,7 +171,7 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Refactor
             window.Scopes = new ObservableCollection<SettingScope>(_scopes);
             window.SelectedScope = _scopes.FirstOrDefault();
 
-            var settingsFiles = new List<SettingsFile>(GetDetectedSettingsFiles());
+            var settingsFiles = new List<SettingsFile>(await GetDetectedSettingsFilesAsync());
             window.Settings = new ObservableCollection<SettingsFile>(settingsFiles);
             window.SelectedSettings = settingsFiles.FirstOrDefault();
 
@@ -209,6 +223,8 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Refactor
             SettingsFileGenerator.Write(file, settingsContainer);
             await AppConfigFileGenerator.WriteAsync(settingsContainer);
 
+            await ProductivityShell.Vsix.Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+
             var startEditPoint = _textSelection.TopPoint.CreateEditPoint();
             var endEditPoint = _textSelection.BottomPoint.CreateEditPoint();
 
@@ -220,8 +236,11 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Refactor
         ///     Gets the detected settings files.
         /// </summary>
         /// <returns>The detected settings files.</returns>
-        private IEnumerable<SettingsFile> GetDetectedSettingsFiles()
+        private async Task<IEnumerable<SettingsFile>> GetDetectedSettingsFilesAsync()
         {
+            var items = new List<SettingsFile>();
+            await ProductivityShell.Vsix.Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+
             foreach (var settingsFile in _settingsFiles)
             {
                 var language = settingsFile.ContainingProject.CodeModel.Language.ToLanguage();
@@ -231,11 +250,14 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Refactor
                     var filePath = settingsFile.FileNames[index];
                     var relativePath = filePath.Replace(_projectPath, $"<{settingsFile.ContainingProject.Name}>");
                     var directoryName = Path.GetDirectoryName(filePath);
+
+                    Debug.Assert(directoryName != null);
+
                     var fileName = Path.GetFileNameWithoutExtension(filePath);
                     var designerFileName = $"{fileName}.Designer{defaultExtension}";
                     var designerFilePath = Path.Combine(directoryName, designerFileName);
 
-                    yield return new SettingsFile
+                    items.Add(new SettingsFile
                     {
                         FullPath = filePath,
                         RelativePath = relativePath,
@@ -244,9 +266,11 @@ namespace Jfevia.ProductivityShell.Vsix.Commands.Refactor
                         DesignerFileName = designerFileName,
                         DesignerFilePath = designerFilePath,
                         Language = language
-                    };
+                    });
                 }
             }
+
+            return items;
         }
 
         /// <summary>

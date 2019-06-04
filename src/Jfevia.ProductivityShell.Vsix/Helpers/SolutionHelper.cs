@@ -20,13 +20,13 @@ namespace Jfevia.ProductivityShell.Vsix.Helpers
         /// <typeparam name="T">The type of item to retrieve.</typeparam>
         /// <param name="solution">The solution.</param>
         /// <returns>The enumerable set of all items.</returns>
-        internal static IEnumerable<T> GetAllItemsInSolution<T>(Solution solution)
+        internal static async Task<IEnumerable<T>> GetAllItemsInSolutionAsync<T>(Solution solution)
             where T : class
         {
             var allProjects = new List<T>();
 
             if (solution != null)
-                allProjects.AddRange(GetItemsRecursively<T>(solution));
+                allProjects.AddRange(await GetItemsRecursivelyAsync<T>(solution));
 
             return allProjects;
         }
@@ -38,7 +38,7 @@ namespace Jfevia.ProductivityShell.Vsix.Helpers
         /// <typeparam name="T">The type of item to retrieve.</typeparam>
         /// <param name="parentItem">The parent item.</param>
         /// <returns>The enumerable set of items within the parent item, may be empty.</returns>
-        internal static IEnumerable<T> GetItemsRecursively<T>(object parentItem)
+        internal static async Task<IEnumerable<T>> GetItemsRecursivelyAsync<T>(object parentItem)
             where T : class
         {
             if (parentItem == null)
@@ -52,11 +52,11 @@ namespace Jfevia.ProductivityShell.Vsix.Helpers
                 projectItems.Add(desiredType);
 
             // Get all children based on the type of parent item.
-            var children = GetChildren(parentItem);
+            var children = await GetChildrenAsync(parentItem);
 
             // Then recurse through all children.
             foreach (var childItem in children)
-                projectItems.AddRange(GetItemsRecursively<T>(childItem));
+                projectItems.AddRange(await GetItemsRecursivelyAsync<T>(childItem));
 
             return projectItems;
         }
@@ -90,13 +90,17 @@ namespace Jfevia.ProductivityShell.Vsix.Helpers
         /// </summary>
         /// <param name="package">The hosting package.</param>
         /// <returns>The enumerable set of selected project items.</returns>
-        internal static IEnumerable<ProjectItem> GetSelectedProjectItemsRecursively(PackageBase package)
+        internal static async Task<IEnumerable<ProjectItem>> GetSelectedProjectItemsRecursivelyAsync(PackageBase package)
         {
             var selectedProjectItems = new List<ProjectItem>();
-            var selectedUiHierarchyItems = UIHierarchyHelper.GetSelectedUIHierarchyItems(package);
+            var selectedUiHierarchyItems = await UIHierarchyHelper.GetSelectedUIHierarchyItemsAsync(package);
 
-            foreach (var item in selectedUiHierarchyItems.Select(uiHierarchyItem => uiHierarchyItem.Object))
-                selectedProjectItems.AddRange(GetItemsRecursively<ProjectItem>(item));
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+            foreach (var item in selectedUiHierarchyItems)
+            {
+                var items = await GetItemsRecursivelyAsync<ProjectItem>(item.Object);
+                selectedProjectItems.AddRange(items);
+            }
 
             return selectedProjectItems;
         }
@@ -107,13 +111,19 @@ namespace Jfevia.ProductivityShell.Vsix.Helpers
         /// <param name="package">The hosting package.</param>
         /// <param name="projectItem">The project item to match.</param>
         /// <returns>The enumerable set of similar project items.</returns>
-        internal static IEnumerable<ProjectItem> GetSimilarProjectItems(PackageBase package, ProjectItem projectItem)
+        internal static async Task<IEnumerable<ProjectItem>> GetSimilarProjectItemsAsync(PackageBase package, ProjectItem projectItem)
         {
-            var allItems = GetAllItemsInSolution<ProjectItem>(package.Dte.Solution);
+            var allItems = await GetAllItemsInSolutionAsync<ProjectItem>(package.Dte.Solution);
+            var items = new List<ProjectItem>();
 
-            return allItems.Where(x =>
-                x.Name == projectItem.Name && x.Kind == projectItem.Kind &&
-                x.Document.FullName == projectItem.Document.FullName);
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+            foreach (var item in allItems)
+            {
+                if (item.Name == projectItem.Name && item.Kind == projectItem.Kind && item.Document.FullName == projectItem.Document.FullName)
+                    items.Add(item);
+            }
+
+            return items;
         }
 
         /// <summary>
@@ -121,8 +131,10 @@ namespace Jfevia.ProductivityShell.Vsix.Helpers
         /// </summary>
         /// <param name="parentItem">The parent item.</param>
         /// <returns>An enumerable set of children, may be empty.</returns>
-        private static IEnumerable<object> GetChildren(object parentItem)
+        private static async Task<IEnumerable<object>> GetChildrenAsync(object parentItem)
         {
+            await Package.Instance.JoinableTaskFactory.SwitchToMainThreadAsync();
+
             // First check if the item is a solution.
             var solution = parentItem as Solution;
             if (solution?.Projects != null)

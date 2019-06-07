@@ -2,6 +2,8 @@
 
 Productivity tools for Visual Studio.
 
+## This extension has been discontinued as of 08 Jun 2019.
+
 ## Features
 
 ### Configuration
